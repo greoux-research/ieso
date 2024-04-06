@@ -1,0 +1,276 @@
+{
+    "demand": {
+        "electricity": {
+            "iden": "electricity",
+            "profile": "profiles/user/dmnd.csv",
+            "profile_upper_limit": 1,
+            "total": 50e+6,
+            "supply_sources": [],
+            "var_cost_ns": 20000,
+            "var_emis_ns": 880,
+            "l_ns": [
+                0,
+                1000e+3
+            ],
+            "output_ns": [],
+            "price": [],
+            "price_average": -1
+        },
+        "x": [
+            {
+                "iden": "heat",
+                "profile": "",
+                "profile_upper_limit": 1,
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "var_emis_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "price": [],
+                "price_average": -1
+            },
+            {
+                "iden": "hydrogen",
+                "profile": "",
+                "profile_upper_limit": 1,
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "var_emis_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "price": [],
+                "price_average": -1
+            },
+            {
+                "iden": "water",
+                "profile": "",
+                "profile_upper_limit": 1,
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "var_emis_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "price": [],
+                "price_average": -1
+            }
+        ]
+    },
+    "p2x": [],
+    "generator": [
+        {
+            "iden": "nucl",
+            "profile": "",
+            "profile_upper_limit": 0.85,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 456466,
+            "var_cost_prod": 11.5,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "coal",
+            "profile": "",
+            "profile_upper_limit": 0.85,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 222392,
+            "var_cost_prod": 26.84,
+            "var_emis_prod": 880,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "ccgt",
+            "profile": "",
+            "profile_upper_limit": 0.85,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 98749,
+            "var_cost_prod": 56.44,
+            "var_emis_prod": 365,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "ocgt",
+            "profile": "",
+            "profile_upper_limit": 0.85,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 75182,
+            "var_cost_prod": 96.11,
+            "var_emis_prod": 523,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "solr",
+            "profile": "profiles/user/solr.csv",
+            "profile_upper_limit": 0.85,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 70046,
+            "var_cost_prod": 3e-6,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "wind",
+            "profile": "profiles/user/wind.csv",
+            "profile_upper_limit": 0.9,
+            "type": "elec",
+            "optimisable": true,
+            "fix_cost_prod": 133553,
+            "var_cost_prod": 6e-6,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "hror",
+            "profile": "profiles/user/hror.csv",
+            "profile_upper_limit": 1,
+            "type": "elec",
+            "optimisable": false,
+            "fix_cost_prod": 0,
+            "var_cost_prod": 9e-6,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": 1e+3,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        }
+    ],
+    "flex": [
+        {
+            "iden": "bstr",
+            "profile": "",
+            "profile_upper_limit": 1,
+            "type": "strg",
+            "optimisable": true,
+            "fix_cost_strg": 27248,
+            "hours_of_storage": 4,
+            "round_trip_efficiency": 0.85,
+            "l_strg": [
+                0,
+                400e+3
+            ],
+            "c_strg": -1,
+            "e_strg": [],
+            "e_char": [],
+            "e_disc": []
+        },
+        {
+            "iden": "hstr",
+            "profile": "",
+            "profile_upper_limit": 1,
+            "type": "strg",
+            "optimisable": false,
+            "fix_cost_strg": 0,
+            "hours_of_storage": 730,
+            "round_trip_efficiency": 0.85,
+            "l_strg": [
+                0,
+                73000e+3
+            ],
+            "c_strg": 730e+3,
+            "e_strg": [],
+            "e_char": [],
+            "e_disc": []
+        },
+        {
+            "iden": "hdam",
+            "profile": "profiles/user/hdam.csv",
+            "profile_upper_limit": 1,
+            "type": "hdam",
+            "optimisable": false,
+            "fix_cost_strg": 0,
+            "hours_of_storage": 730,
+            "round_trip_efficiency": 1,
+            "l_strg": [
+                0,
+                73000e+3
+            ],
+            "c_strg": 730e+3,
+            "e_strg": [],
+            "e_char": [],
+            "e_disc": []
+        }
+    ],
+    "solver": {
+        "stat_succ": -1,
+        "stat_time": 0,
+        "stat_capa": 0,
+        "stat_outp": 0,
+        "stat_cons": 0,
+        "stat_cost": -1,
+        "stat_emis": -1
+    }
+}
