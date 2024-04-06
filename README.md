@@ -17,6 +17,6 @@ Gréoux Research. IESO: a linear optimiser-based integrated energy system modell
 
 # Changelog
 
-April 7, 2024:
+April 6, 2024:
 
 - Uploaded to GitHub.
