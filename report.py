@@ -172,7 +172,7 @@ t.add_section('Demand')
 
 # --- demand > electricity
 
-dmd = s['demand']['electricity']
+dmd = s['demand']['e']
 
 t.add_text('Demand for ' + dmd['iden'].capitalize() + ':')
 
@@ -795,7 +795,7 @@ if s['solver']['stat_succ'] == 1:
 
     if len(dmd['output_ns']) > 0:
 
-        dmd = s['demand']['electricity']
+        dmd = s['demand']['e']
 
         for i in range(0, Y2H):
 
@@ -824,7 +824,7 @@ if s['solver']['stat_succ'] == 1:
 
     # ---
 
-    dmd = s['demand']['electricity']
+    dmd = s['demand']['e']
 
     if len(dmd['price']) > 0:
 

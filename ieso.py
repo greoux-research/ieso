@@ -406,7 +406,7 @@ for flx in s['flex']:
 
 # --- electricity: non-served
 
-dmd = s['demand']['electricity']
+dmd = s['demand']['e']
 
 dmd['output_ns'] = []
 
@@ -501,7 +501,7 @@ for dmd in s['demand']['x']:
 
 if len(sys.argv) >= 3:
 
-    dmd = s['demand']['electricity']
+    dmd = s['demand']['e']
 
     emis_cap = float(sys.argv[2])
 
@@ -568,7 +568,7 @@ for flx in s['flex']:
 
         Objective.SetCoefficient(flx['c_strg'], flx['fix_cost_strg'])
 
-dmd = s['demand']['electricity']
+dmd = s['demand']['e']
 
 for i in range(0, Y2H):
 
@@ -897,7 +897,7 @@ if Solver.Solve() == pywraplp.Solver.OPTIMAL:
 
     # ---
 
-    dmd = s['demand']['electricity']
+    dmd = s['demand']['e']
 
     if dmd['total'] <= 0:
 
@@ -1069,7 +1069,7 @@ if Solver.Solve() == pywraplp.Solver.OPTIMAL:
 
     # ---
 
-    dmd = s['demand']['electricity']
+    dmd = s['demand']['e']
 
     if len(dmd['output_ns']) > 0:
 

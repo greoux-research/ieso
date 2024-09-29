@@ -1,6 +1,6 @@
 {
     "demand": {
-        "electricity": {
+        "e": {
             "iden": "electricity",
             "profile": "profiles/california/dmnd.csv",
             "profile_upper_limit": 1,
