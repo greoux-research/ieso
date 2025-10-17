@@ -1,0 +1,275 @@
+{
+    "demand": {
+        "e": {
+            "iden": "electricity",
+            "profile": "profiles/florida/dmnd.csv",
+            "total": 50e+6,
+            "supply_sources": [],
+            "var_cost_ns": 20000,
+            "l_ns": [
+                0,
+                1000e+3
+            ],
+            "output_ns": [],
+            "shadow_prices": {
+                "demand_match": [],
+                "carbon_cap": -1,
+                "reliability_cap": -1
+            },
+            "kpis": {
+                "cost": -1,
+                "emis": -1,
+                "reli": -1
+            }
+        },
+        "x": [
+            {
+                "iden": "heat",
+                "profile": "",
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            },
+            {
+                "iden": "hydrogen",
+                "profile": "",
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            },
+            {
+                "iden": "water",
+                "profile": "",
+                "total": 365e+6,
+                "supply_sources": [
+                    "p2x-med"
+                ],
+                "var_cost_ns": 1000,
+                "l_ns": [
+                    0,
+                    1e+9
+                ],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            }
+        ]
+    },
+    "p2x": [
+        {
+            "iden": "p2x-med",
+            "profile": "",
+            "capacity_factor": 0.850,
+            "type": "elec + ther",
+            "temperature": 80,
+            "supply_sources": [
+                "nucl",
+                "coal",
+                "ccgt"
+            ],
+            "fix_cost_strg": 0.22,
+            "l_strg": [
+                0,
+                2190e+6
+            ],
+            "c_strg": -1,
+            "x_strg": [],
+            "fix_cost_prod": 2185,
+            "var_cost_prod": 0.26,
+            "pow_use_elec_prod": 1.5e-3,
+            "pow_use_ther_prod": 50e-3,
+            "l_prod": [
+                0,
+                1e+6
+            ],
+            "c_prod": -1,
+            "x_prod": [],
+            "soc_ini": 1.0,
+            "x_supp": [],
+            "shadow_prices": {
+                "demand_match": []
+            }
+        }
+    ],
+    "generator": [
+        {
+            "iden": "nucl",
+            "profile": "",
+            "capacity_factor": 0.850,
+            "type": "elec + ther",
+            "fix_cost_prod": 456466,
+            "var_cost_prod": 11.5,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [
+                290,
+                70
+            ],
+            "condenser_p": 0.05,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "coal",
+            "profile": "",
+            "capacity_factor": 0.850,
+            "type": "elec + ther",
+            "fix_cost_prod": 222392,
+            "var_cost_prod": 26.84,
+            "var_emis_prod": 880,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [
+                564,
+                152
+            ],
+            "condenser_p": 0.05,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "ccgt",
+            "profile": "",
+            "capacity_factor": 0.850,
+            "type": "elec + ther",
+            "fix_cost_prod": 98749,
+            "var_cost_prod": 56.44,
+            "var_emis_prod": 365,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [
+                564,
+                152
+            ],
+            "condenser_p": 0.05,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "ocgt",
+            "profile": "",
+            "capacity_factor": 0.850,
+            "type": "elec",
+            "fix_cost_prod": 75182,
+            "var_cost_prod": 96.11,
+            "var_emis_prod": 523,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "solr",
+            "profile": "profiles/florida/solr.csv",
+            "capacity_factor": 0.200,
+            "type": "elec",
+            "fix_cost_prod": 70046,
+            "var_cost_prod": 3e-6,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "wind",
+            "profile": "profiles/florida/wind.csv",
+            "capacity_factor": 0.250,
+            "type": "elec",
+            "fix_cost_prod": 133553,
+            "var_cost_prod": 6e-6,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                100e+3
+            ],
+            "c_prod": -1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        }
+    ],
+    "flex": [
+        {
+            "iden": "bstr",
+            "fix_cost_strg": 27248,
+            "hours_of_storage": 4,
+            "round_trip_efficiency": 0.85,
+            "l_strg": [
+                0,
+                400e+3
+            ],
+            "c_strg": -1,
+            "e_strg": [],
+            "soc_ini": 0.5,
+            "e_char": [],
+            "e_disc": []
+        }
+    ],
+    "solver": {
+        "stat_succ": -1,
+        "stat_time": 0,
+        "stat_capa": 0,
+        "stat_outp": 0,
+        "stat_cons": 0
+    }
+}
