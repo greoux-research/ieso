@@ -1,12 +1,11 @@
 
-# IESO v25.10
+# IESO v26.05
 
 IESO (*Integrated Energy Systems Optimiser*) is a linear optimiser-based energy system modelling environment designed to support initial investigations such as options evaluation and trend analysis.
 
-- [Modelling Approach](https://greoux.re/explore/ieso-modelling-approach/)
-- [Setup Guide](https://greoux.re/explore/ieso-setup-guide/)
-- [IO File Structure](https://greoux.re/explore/ieso-io-file-structure/)
-- [VIESO](https://greoux.re/explore/vieso/) - A visual modelling environment for IESO
+- [Modelling Approach](docs/ieso-modelling-approach.md)
+- [Setup Guide](docs/ieso-setup-guide.md)
+- [IO File Structure](docs/ieso-io-file-structure.md)
 
 # Folder structure and contents
 
