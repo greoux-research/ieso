@@ -36,11 +36,8 @@ IESO allows the definition of different generator profiles, ranging from fully d
 In IESO, a generic power generation technology (Figure 1) is described by the variables listed in Table 1.
 
 <div align="center">
-
-![IESO Representation of a Generator](assets/generator.png)
-
-*Figure 1: IESO Representation of a Generator*
-
+<img src="assets/generator.png" width="160px" alt="IESO Representation of a Generator">
+<p><em>Figure 1: IESO Representation of a Generator</em></p>
 </div>
 
 | Symbol | Description | Unit |
@@ -68,11 +65,8 @@ Conversely, power sources that can be dispatched, such as coal power plants, com
 When operating in cogeneration mode, a thermal power plant generates heat, typically through steam extraction from the steam turbine's low-pressure section. IESO relies on a simplified representation of power conversion thermodynamics, illustrated in Figure 2, to capture the interrelationships between electricity and heat generation and their respective (variable) costs.
 
 <div align="center">
-
-![IESO Representation of Power Conversion Thermodynamics](assets/generator-thermo.png)
-
-*Figure 2: IESO Representation of Power Conversion Thermodynamics*
-
+<img src="assets/generator-thermo.png" width="380px" alt="IESO Representation of Power Conversion Thermodynamics">
+<p><em>Figure 2: IESO Representation of Power Conversion Thermodynamics</em></p>
 </div>
 
 In this representation, $\bar{h}_{T,in}$ denotes the specific enthalpy at the turbine's (T) inlet, $\bar{h}_{X,in}$ and $\bar{h}_{X,out}$ are the specific enthalpies at the inlet and outlet of the heat exchanger (X), and $\bar{h}_{C,in}$ is the specific enthalpy at the condenser's (C) inlet. The steam extracted from the turbine fully condenses in the heat exchanger (X), giving up its latent heat to the external process.
@@ -134,19 +128,13 @@ $$
 Figures 3 and 4 illustrate the variation of coefficients $a^{-1}$ and $b$ with steam extraction temperature for two power generation technologies: nuclear and fossil fuel-based power plants.
 
 <div align="center">
-
-![Coefficient a⁻¹ vs Steam Extraction Temperature](assets/a-vs-t.png)
-
-*Figure 3: Coefficient $a^{-1}$ vs Steam Extraction Temperature*
-
+<img src="assets/a-vs-t.png" width="480px" alt="Coefficient a⁻¹ vs Steam Extraction Temperature">
+<p><em>Figure 3: Coefficient $a^{-1}$ vs Steam Extraction Temperature</em></p>
 </div>
 
 <div align="center">
-
-![Coefficient b vs Steam Extraction Temperature](assets/b-vs-t.png)
-
-*Figure 4: Coefficient $b$ vs Steam Extraction Temperature*
-
+<img src="assets/b-vs-t.png" width="480px" alt="Coefficient b vs Steam Extraction Temperature">
+<p><em>Figure 4: Coefficient $b$ vs Steam Extraction Temperature</em></p>
 </div>
 
 > Figures 3 and 4 assume the following: (1) Condenser pressure: 0.05 bar for both technologies; (2) Steam condition at turbine inlet: 290°C | 70 bar (nuclear power plant) and 564°C | 152 bar (fossil fuel-based power plant); (3) The state of steam at the outlet of the turbine is determined applying an isentropic efficiency of 88%.
@@ -158,11 +146,8 @@ Figures 3 and 4 illustrate the variation of coefficients $a^{-1}$ and $b$ with s
 The IESO 'flexibility means' object (Figure 5) is used to represent electricity storage devices, such as battery energy storage systems (BESS) and pumped-storage hydroelectricity.
 
 <div align="center">
-
-![IESO Representation of Flexibility Means](assets/flexibility-means.png)
-
-*Figure 5: IESO Representation of Flexibility Means*
-
+<img src="assets/flexibility-means.png" width="200px" alt="IESO Representation of Flexibility Means">
+<p><em>Figure 5: IESO Representation of Flexibility Means</em></p>
 </div>
 
 The key characteristics of the object are described in the table below.
@@ -218,11 +203,8 @@ $$
 IESO defines a PtX process (Figure 6) as a system that harnesses energy, in the form of electricity and heat, to synthesize a product (X), store it on-site, and subsequently supply it to fulfill an external demand for product X, X referring to heat, hydrogen, or water.
 
 <div align="center">
-
-![IESO Representation of a PtX Process](assets/power-to-x.png)
-
-*Figure 6: IESO Representation of a PtX Process*
-
+<img src="assets/power-to-x.png" width="380px" alt="IESO Representation of a PtX Process">
+<p><em>Figure 6: IESO Representation of a PtX Process</em></p>
 </div>
 
 Heat is typically provided by a thermal power plant operating in cogeneration mode, hydrogen is produced by water electrolysis, and reverse osmosis desalination plants are used to supply water. Seawater can also be desalinated using Multi-Effect Distillation (MED) and Multi-Stage Flash (MSF) processes, which require both heat and electricity.

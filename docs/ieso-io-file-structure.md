@@ -116,9 +116,7 @@ Demand objects represent the final consumption of electricity and other commodit
 PtX processes convert electricity, and sometimes heat, into products such as hydrogen, water, or heat. Each process combines general attributes, a production unit, and a storage unit.
 
 <div align="center">
-
-![IESO Representation of a PtX Process](assets/power-to-x.png)
-
+<img src="assets/power-to-x.png" width="380px" alt="IESO Representation of a PtX Process">
 </div>
 
 **Electricity-consuming process (e.g., RO)**
@@ -217,9 +215,7 @@ PtX processes convert electricity, and sometimes heat, into products such as hyd
 Generators represent technologies that produce electricity, heat, or both. Dispatchable units (nuclear, coal, CCGT) may use only a capacity factor, while variable renewables (solar, wind) require hourly profiles.
 
 <div align="center">
-
-![IESO Representation of a Generator](assets/generator.png)
-
+<img src="assets/generator.png" width="160px" alt="IESO Representation of a Generator">
 </div>
 
 **Electricity-generating plant — variable (e.g., wind)**
@@ -320,9 +316,7 @@ Generators represent technologies that produce electricity, heat, or both. Dispa
 Flexibility means represent energy storage systems such as batteries or pumped hydro. They allow electricity to be shifted in time with round-trip efficiency losses.
 
 <div align="center">
-
-![IESO Representation of Flexibility Means](assets/flexibility-means.png)
-
+<img src="assets/flexibility-means.png" width="200px" alt="IESO Representation of Flexibility Means">
 </div>
 
 ```json
