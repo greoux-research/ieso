@@ -129,12 +129,12 @@ Figures 3 and 4 illustrate the variation of coefficients $a^{-1}$ and $b$ with s
 
 <div align="center">
 <img src="assets/a-vs-t.png" width="480px" alt="Coefficient a⁻¹ vs Steam Extraction Temperature">
-<p><em>Figure 3: Coefficient $a^{-1}$ vs Steam Extraction Temperature</em></p>
+<p><em>Figure 3: Coefficient a⁻¹ vs Steam Extraction Temperature</em></p>
 </div>
 
 <div align="center">
 <img src="assets/b-vs-t.png" width="480px" alt="Coefficient b vs Steam Extraction Temperature">
-<p><em>Figure 4: Coefficient $b$ vs Steam Extraction Temperature</em></p>
+<p><em>Figure 4: Coefficient b vs Steam Extraction Temperature</em></p>
 </div>
 
 > Figures 3 and 4 assume the following: (1) Condenser pressure: 0.05 bar for both technologies; (2) Steam condition at turbine inlet: 290°C | 70 bar (nuclear power plant) and 564°C | 152 bar (fossil fuel-based power plant); (3) The state of steam at the outlet of the turbine is determined applying an isentropic efficiency of 88%.
