@@ -77,9 +77,9 @@ $$
 e = \dot{m}_{T,in} \times (h_{T,in} - h_{C,in}) - \dot{m}_{X,in} \times (h_{X,in} - h_{C,in}) \quad (2)
 $$
 
-$\dot{m}$ refers to the mass flow rate, and $h$ refers to the specific enthalpy at different points of the circuit.
+$`\dot{m}`$ refers to the mass flow rate, and $h$ refers to the specific enthalpy at different points of the circuit.
 
-The first term on the right-hand side of Equation 2, $\dot{m}_{T,in} \times (h_{T,in} - h_{C,in})$, represents the electricity output of the plant in the absence of steam extraction ($e_\text{max}$). The second term, $\dot{m}_{X,in} \times (h_{X,in} - h_{C,in})$, is directly proportional to the flow rate of steam ($\dot{m}_{X,in}$) being extracted and quantifies the electricity generation that is forgone due to supplying heat ($h$) to the external process.
+The first term on the right-hand side of Equation 2, $`\dot{m}_{T,in} \times (h_{T,in} - h_{C,in})`$, represents the electricity output of the plant in the absence of steam extraction ($e_\text{max}$). The second term, $`\dot{m}_{X,in} \times (h_{X,in} - h_{C,in})`$, is directly proportional to the flow rate of steam ($`\dot{m}_{X,in}`$) being extracted and quantifies the electricity generation that is forgone due to supplying heat ($h$) to the external process.
 
 The heat transferred to the external process via the exchanger (X) is given by:
 
@@ -87,16 +87,16 @@ $$
 h = \dot{m}_{X,in} \times (h_{X,in} - h_{X,out}) \quad (3)
 $$
 
-$h$ has an upper limit ($h_\text{max}$) that it cannot surpass. This limit, reached when $\dot{m}_{X,in} = \dot{m}_{T,in}$, is a function of $e_\text{max}$:
+$h$ has an upper limit ($h_\text{max}$) that it cannot surpass. This limit, reached when $`\dot{m}_{X,in} = \dot{m}_{T,in}`$, is a function of $e_\text{max}$:
 
 $$
-h_\text{max} = e_\text{max} \times (h_{X,in} - h_{X,out}) \,/\, (h_{T,in} - h_{C,in}) \quad (4)
+h_\text{max} = e_\text{max} \times (h_{X,in} - h_{X,out}) / (h_{T,in} - h_{C,in}) \quad (4)
 $$
 
 By expressing the missed electricity production in terms of $h$, Equation 2 can be reformulated as follows:
 
 $$
-e = e_\text{max} - h \times (h_{X,in} - h_{C,in}) \,/\, (h_{X,in} - h_{X,out}) \quad (5)
+e = e_\text{max} - h \times (h_{X,in} - h_{C,in}) / (h_{X,in} - h_{X,out}) \quad (5)
 $$
 
 The simplified thermodynamic model described above suggests that when the thermal plant operates in cogeneration mode, the hourly flows of electricity and heat that can be produced are subject to the following constraints:
@@ -112,11 +112,11 @@ $$
 The coefficients $a$ and $b$ are directly related to two key characteristics of the power conversion system: the turbine's inlet and outlet conditions. They also depend on the steam's latent heat at the extraction point:
 
 $$
-a = (h_{X,in} - h_{C,in}) \,/\, (h_{X,in} - h_{X,out}) \quad (8)
+a = (h_{X,in} - h_{C,in}) / (h_{X,in} - h_{X,out}) \quad (8)
 $$
 
 $$
-b = (h_{X,in} - h_{X,out}) \,/\, (h_{T,in} - h_{C,in}) \quad (9)
+b = (h_{X,in} - h_{X,out}) / (h_{T,in} - h_{C,in}) \quad (9)
 $$
 
 By establishing a relationship between the missed power generation and the thermal energy supplied to the external process, $a$ also provides a basis for estimating the variable costs associated with heat production ($k_{\text{var},h}$):
@@ -173,13 +173,13 @@ $$
 The storage capacity also dictates the limits on how much energy can be charged ($e_\text{char}$) or discharged ($e_\text{disc}$) at any given time:
 
 $$
-0 \le e_\text{char},\, e_\text{disc} \le c_\text{strg} \,/\, n_\text{strg} \quad (12)
+0 \le e_\text{char},\, e_\text{disc} \le c_\text{strg} / n_\text{strg} \quad (12)
 $$
 
 The amount of energy being stored ($e_\text{strg}$) fluctuates over time, depending on the rates of energy entering ($e_\text{char}$) and exiting ($e_\text{disc}$) the 'storage tank':
 
 $$
-e_\text{strg}(i) = e_\text{strg}(i-1) + \sqrt{r_\text{strg}} \times e_\text{char}(i) - e_\text{disc}(i) \,/\, \sqrt{r_\text{strg}} \quad (13)
+e_\text{strg}(i) = e_\text{strg}(i-1) + \sqrt{r_\text{strg}} \times e_\text{char}(i) - e_\text{disc}(i) / \sqrt{r_\text{strg}} \quad (13)
 $$
 
 $i$ denotes the hour of the year, and $i-1$ represents the hour that immediately precedes hour $i$.
@@ -187,11 +187,11 @@ $i$ denotes the hour of the year, and $i-1$ represents the hour that immediately
 The 'storage tank' is considered to be half-full† at the start of the year, which translates into the following two constraints:
 
 $$
-e_\text{strg}(1) = c_\text{strg} \,/\, 2 + \sqrt{r_\text{strg}} \times e_\text{char}(1) - e_\text{disc}(1) \,/\, \sqrt{r_\text{strg}} \quad (14)
+e_\text{strg}(1) = c_\text{strg} / 2 + \sqrt{r_\text{strg}} \times e_\text{char}(1) - e_\text{disc}(1) / \sqrt{r_\text{strg}} \quad (14)
 $$
 
 $$
-e_\text{strg}(8760) = c_\text{strg} \,/\, 2 \quad (15)
+e_\text{strg}(8760) = c_\text{strg} / 2 \quad (15)
 $$
 
 † Note: IESO allows the initial state of charge to be set by the user.
@@ -251,11 +251,11 @@ x_\text{strg}(i) = x_\text{strg}(i-1) + x_\text{prod}(i) - x_\text{supp}(i) \qua
 $$
 
 $$
-x_\text{strg}(1) = c_\text{strg} \,/\, 2 + x_\text{prod}(1) - x_\text{supp}(1) \quad (19)
+x_\text{strg}(1) = c_\text{strg} / 2 + x_\text{prod}(1) - x_\text{supp}(1) \quad (19)
 $$
 
 $$
-x_\text{strg}(8760) = c_\text{strg} \,/\, 2 \quad (20)
+x_\text{strg}(8760) = c_\text{strg} / 2 \quad (20)
 $$
 
 ---
