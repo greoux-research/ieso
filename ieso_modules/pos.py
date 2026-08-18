@@ -94,9 +94,21 @@ def process(glop, s, opts, stat, emis_con, nspo_con):
 
         flx['e_disc'] = rows
 
+        # --- flx['e_spil']
+
+        if flx.get('inflow_total', 0) > 0:
+
+            rows = []
+
+            for i in range(0, u.Y2H):
+
+                rows.append(flx['e_spil'][i].solution_value())
+
+            flx['e_spil'] = rows
+
         # --- checks
 
-        if (flx['c_strg'] > 0) and u.Verbose:
+        if (flx['c_strg'] > 0) and (np.sum(flx['e_char']) > 0) and u.Verbose:
 
             _rte = np.sum(flx['e_disc']) / np.sum(flx['e_char'])
 

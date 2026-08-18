@@ -343,11 +343,32 @@ Flexibility means represent energy storage systems such as batteries or pumped h
 - `l_strg` — lower and upper bounds (MWh)
 - `c_strg` — storage capacity (MWh). Will be optimised by the solver if set to -1
 
+##### Natural inflow (optional)
+
+Reservoir hydro is represented by a flexibility means that is replenished by an exogenous
+inflow — rainfall, snowmelt, glacier melt — rather than by charging from the grid.
+
+- `inflow_total` — annual inflow energy (MWh). Absent or 0 means no inflow, and the object behaves as a conventional storage device
+- `inflow_profile` — hourly shape of the inflow. May be provided as (1) a CSV file path, (2) an array of 8760 values, or (3) empty for a flat profile. Scaled so that its sum equals `inflow_total`
+- `charge_allowed` — set to `false` to forbid charging from the grid (default `true`). A dam fed only by its catchment should set this to `false`, so that it cannot act as free pumped storage
+
+With inflow present, the storage balance of Equation 13 gains two terms:
+
+$$
+e_\text{strg}(i) = e_\text{strg}(i-1) + e_\text{infl}(i) - e_\text{spil}(i) + \sqrt{r_\text{strg}} \times e_\text{char}(i) - e_\text{disc}(i) / \sqrt{r_\text{strg}}
+$$
+
+Inflow is not subject to the round-trip penalty, since water arriving in a reservoir has not
+been pumped there. The spill variable $e_\text{spil}$ is free and allows water to be released
+without generating; without it, inflow arriving at a full reservoir would make the problem
+infeasible rather than spill, as a real dam does.
+
 ##### Outputs
 
 - `e_strg` — energy stored (MWh)
 - `e_char` — charging power (MW)
 - `e_disc` — discharging power (MW)
+- `e_spil` — spilled inflow (MWh). Present only when `inflow_total` > 0
 
 ---
 

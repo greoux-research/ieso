@@ -28,6 +28,24 @@ def define(glop, s, opts, stat):
 
             stat['capa'] += 1
 
+        # natural inflow (reservoir hydro): exogenous energy entering the store
+
+        inflow_total = flx.get('inflow_total', 0)
+
+        has_inflow = inflow_total > 0
+
+        if has_inflow:
+
+            inflow = u.dm_h(flx.get('inflow_profile', ''), inflow_total)
+
+            flx['e_spil'] = []
+
+        # a store fed by natural inflow only (e.g. a dam) cannot be charged from the grid
+
+        charge_allowed = flx.get('charge_allowed', True)
+
+        char_ulim = ulim if charge_allowed else 0
+
         # *_e_char_[i], *_e_strg_[i], *_e_disc_[i]
 
         for i in range(0, u.Y2H):
@@ -35,7 +53,7 @@ def define(glop, s, opts, stat):
             # Charge rate
 
             name = flx['iden'] + '_e_char_' + str(i)
-            flx['e_char'].append(glop.NumVar(llim, ulim, name))
+            flx['e_char'].append(glop.NumVar(llim, char_ulim, name))
 
             stat['outp'] += 1
 
@@ -50,6 +68,15 @@ def define(glop, s, opts, stat):
             flx['e_disc'].append(glop.NumVar(llim, ulim, name))
 
             stat['outp'] += 2
+
+            if has_inflow:
+
+                # Spilled inflow (water released without generating)
+
+                name = flx['iden'] + '_e_spil_' + str(i)
+                flx['e_spil'].append(glop.NumVar(0, ulim, name))
+
+                stat['outp'] += 1
 
         # set of constraints: electricity stored, charged or discharged is limited by capacity
 
@@ -69,11 +96,23 @@ def define(glop, s, opts, stat):
 
             if i == 0:
 
-                glop.Add(flx['e_strg'][i] == flx['soc_ini'] * flx['c_strg'] + flx['e_char'][i] * math.sqrt(flx['round_trip_efficiency']) - flx['e_disc'][i] / math.sqrt(flx['round_trip_efficiency']))
+                _prev = flx['soc_ini'] * flx['c_strg']
 
             else:
 
-                glop.Add(flx['e_strg'][i] == flx['e_strg'][i - 1] + flx['e_char'][i] * math.sqrt(flx['round_trip_efficiency']) - flx['e_disc'][i] / math.sqrt(flx['round_trip_efficiency']))
+                _prev = flx['e_strg'][i - 1]
+
+            _flow = flx['e_char'][i] * math.sqrt(flx['round_trip_efficiency']) - flx['e_disc'][i] / math.sqrt(flx['round_trip_efficiency'])
+
+            if has_inflow:
+
+                # inflow enters the store directly: it is not subject to the round-trip penalty
+
+                glop.Add(flx['e_strg'][i] == _prev + inflow[i] - flx['e_spil'][i] + _flow)
+
+            else:
+
+                glop.Add(flx['e_strg'][i] == _prev + _flow)
 
             stat['cons'] += 1
 
