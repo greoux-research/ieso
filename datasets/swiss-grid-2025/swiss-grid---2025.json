@@ -1,0 +1,352 @@
+{
+    "demand": {
+        "e": {
+            "iden": "electricity",
+            "profile": "datasets/swiss-grid-2025/dmnd.csv",
+            "total": 85280000.0,
+            "supply_sources": [],
+            "var_cost_ns": 10000,
+            "l_ns": [
+                0,
+                8500000.0
+            ],
+            "output_ns": [],
+            "shadow_prices": {
+                "demand_match": [],
+                "carbon_cap": -1,
+                "reliability_cap": -1
+            },
+            "kpis": {
+                "cost": -1,
+                "emis": -1,
+                "reli": -1
+            }
+        },
+        "x": [
+            {
+                "iden": "heat",
+                "profile": "",
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            },
+            {
+                "iden": "hydrogen",
+                "profile": "",
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            },
+            {
+                "iden": "water",
+                "profile": "",
+                "total": 0,
+                "supply_sources": [],
+                "var_cost_ns": 0,
+                "l_ns": [],
+                "output_ns": [],
+                "shadow_prices": {
+                    "demand_match": []
+                },
+                "kpis": {
+                    "cost": -1,
+                    "emis": -1,
+                    "reli": -1
+                }
+            }
+        ]
+    },
+    "p2x": [],
+    "generator": [
+        {
+            "iden": "nucl",
+            "profile": "datasets/swiss-grid-2025/nucl.csv",
+            "capacity_factor": 0.706,
+            "type": "elec",
+            "fix_cost_prod": 142874,
+            "var_cost_prod": 9.33,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                2980
+            ],
+            "c_prod": 2979.1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "rovr",
+            "profile": "datasets/swiss-grid-2025/rovr.csv",
+            "capacity_factor": 0.4507,
+            "type": "elec",
+            "fix_cost_prod": 196201,
+            "var_cost_prod": 0.0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                3675
+            ],
+            "c_prod": 3674.1,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "solr",
+            "profile": "datasets/swiss-grid-2025/solr.csv",
+            "capacity_factor": 0.1466,
+            "type": "elec",
+            "fix_cost_prod": 68466,
+            "var_cost_prod": 0.0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                4018
+            ],
+            "c_prod": 4017.8,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "wind",
+            "profile": "datasets/swiss-grid-2025/wind.csv",
+            "capacity_factor": 0.2278,
+            "type": "elec",
+            "fix_cost_prod": 178152,
+            "var_cost_prod": 0.0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                77
+            ],
+            "c_prod": 76.3,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "hpmp",
+            "profile": "datasets/swiss-grid-2025/hpmp.csv",
+            "capacity_factor": 0.2165,
+            "type": "elec",
+            "fix_cost_prod": 155841,
+            "var_cost_prod": 0.0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                4225
+            ],
+            "c_prod": 4224.6,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "dist",
+            "profile": "",
+            "capacity_factor": 0.9,
+            "type": "elec",
+            "fix_cost_prod": 118414,
+            "var_cost_prod": 3.92,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                711
+            ],
+            "c_prod": 710.0,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-1",
+            "profile": "datasets/swiss-grid-2025/impo-1.csv",
+            "capacity_factor": 0.1668,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 37.8,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-2",
+            "profile": "datasets/swiss-grid-2025/impo-2.csv",
+            "capacity_factor": 0.1667,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 96.5,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-3",
+            "profile": "datasets/swiss-grid-2025/impo-3.csv",
+            "capacity_factor": 0.1671,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 109.6,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-4",
+            "profile": "datasets/swiss-grid-2025/impo-4.csv",
+            "capacity_factor": 0.1674,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 121.2,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-5",
+            "profile": "datasets/swiss-grid-2025/impo-5.csv",
+            "capacity_factor": 0.1655,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 137.0,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        },
+        {
+            "iden": "impo-6",
+            "profile": "datasets/swiss-grid-2025/impo-6.csv",
+            "capacity_factor": 0.1666,
+            "type": "elec",
+            "fix_cost_prod": 0,
+            "var_cost_prod": 169.2,
+            "var_emis_prod": 200,
+            "l_prod": [
+                0,
+                8900
+            ],
+            "c_prod": 8900,
+            "e_prod": [],
+            "h_prod": [],
+            "turbine_t_p": [],
+            "condenser_p": 0,
+            "a": 0,
+            "b": 0
+        }
+    ],
+    "flex": [
+        {
+            "iden": "hdam",
+            "fix_cost_strg": 177.6,
+            "hours_of_storage": 2553.3,
+            "round_trip_efficiency": 1.0,
+            "l_strg": [
+                0,
+                8850000.0
+            ],
+            "c_strg": 8850000.0,
+            "e_strg": [],
+            "soc_ini": 0.6,
+            "soc_min": 0,
+            "soc_max": 1,
+            "e_char": [],
+            "e_disc": [],
+            "charge_allowed": false,
+            "inflow_profile": "datasets/swiss-grid-2025/inflow.csv",
+            "inflow_total": 9850000.0,
+            "e_spil": []
+        }
+    ],
+    "solver": {
+        "stat_succ": -1,
+        "stat_time": -1,
+        "stat_capa": -1,
+        "stat_outp": -1,
+        "stat_cons": -1
+    }
+}
