@@ -9,7 +9,7 @@ The dataset has **not** been cross-checked against the NEA scenarios. Read *Data
 before drawing any conclusion from a run.
 
 ```bash
-python ieso.py datasets/swiss-grid/swiss-grid---2050.json
+python ieso.py datasets/swiss-grid-2050/swiss-grid---2050.json
 ```
 
 About 10 seconds, 184 000 variables, 201 000 constraints.
@@ -33,13 +33,64 @@ NEA 7631. The existing fleet is fixed; solar, wind and batteries are built by th
 | New gas (CCGT) | `ccgt` | **disabled** (`l_prod: [0, 0]`) | game lever |
 | Imports | `impo-1/2/3` | 8 900 MW, price-banded | NTC from NEA 7631 Table 4.5 |
 
-Costs come from Table 3.6 of NEA 7631: annualised investment plus fixed O&M into
-`fix_cost_prod`, variable O&M plus fuel plus waste into `var_cost_prod`. Carbon is
+Costs come from three sources, one per technology family:
+
+| Technology | Source |
+|---|---|
+| Solar PV, onshore wind, batteries | **IRENA**, *24/7 Renewables: The Economics of Firm Solar and Wind*, Annexes B–D — Europe 2025, real 2025 USD |
+| New nuclear, new gas (CCGT) | **Lazard**, *Levelized Cost of Energy+* v19.0 (July 2026), p. 28 — midpoints of the low–high range |
+| Existing nuclear, hydro, waste and CHP | **OECD NEA** report No. 7631, Table 3.6 |
+
+In every case annualised investment plus fixed O&M go into `fix_cost_prod`, and variable O&M
+plus fuel plus waste into `var_cost_prod`. Carbon is
 deliberately **not** priced into `var_cost_prod` — it sits in `var_emis_prod`, so the
 `carbon-constraint` option acts as a cap without double-counting.
 
 The two disabled technologies are present so the file documents every lever the session
 needs. Raising `l_prod[1]` to 3 200 enables new nuclear; to 2 000 enables gas.
+
+### Renewable and battery costs
+
+| | CAPEX (Europe, 2025) | O&M | Annualised | `fix_cost` |
+|---|---|---|---|---|
+| Solar PV | 683 USD/kW | 2%/yr | 54 806 | **68 466** USD/MW/yr |
+| Onshore wind | 1 616 USD/kW | 3%/yr | 129 672 | **178 152** USD/MW/yr |
+| Battery, 4 h LFP | 172 USD/kWh | 2.5%/yr | 13 802 | **18 102** USD/MWh/yr |
+
+Annualised at a real WACC of **5.0%** over a **20-year** economic life, giving a capital
+recovery factor of 0.080243. Both come from Annex D of the firming study; the 5% WACC
+happens to match the discount rate NEA 7631 applies to every technology, so the two cost
+sources are at least consistent on financing.
+
+The 20-year life is the study's assumption for co-located systems, where the LFP battery is
+the limiting component. Applied here to standalone solar and wind it is conservative — NEA
+7631 assumes 25 years for both, which would lower their annualised cost by roughly 9%.
+
+Against the NEA figures previously used, this moves solar down 29%, wind up 25% and
+batteries up 30%. The direction is not uniform because the firming study prices Europe
+specifically, where wind and battery costs carry labour, permitting and localisation
+premiums that a global average hides.
+
+### New-build nuclear and gas costs
+
+| | CAPEX | Fixed O&M | Var O&M | Heat rate | Fuel | Life |
+|---|---|---|---|---|---|---|
+| New nuclear (`nunw`) | 14 935 USD/kW | 147 USD/kW-yr | 4.78 USD/MWh | 10 450 Btu/kWh | 0.85 USD/MMBtu | 70 yr |
+| New gas (`ccgt`) | 1 775 USD/kW | 17.75 USD/kW-yr | 3.88 USD/MWh | 6 513 Btu/kWh | 3.45 USD/MMBtu | 30 yr |
+
+Giving `fix_cost_prod` of **919 127** and **133 216** USD/MW/yr, and `var_cost_prod` of
+**13.66** and **26.34** USD/MWh. CCGT emissions are recomputed from the Lazard heat rate at
+**385 kg CO₂/MWh**, up from 337.
+
+Annualised at the same 5% real rate as everything else rather than at Lazard's own 60/40
+debt-equity structure at 8%/12%. A common discount rate across technologies is the point of
+the exercise — NEA 7631 makes the same argument for applying one rate to all — but it does
+mean these are Lazard's technology costs, not Lazard's headline LCOE values.
+
+Lazard's nuclear figure is **new build**, benchmarked on Vogtle 3 and 4. It is deliberately
+*not* applied to `nucl`, which represents long-term operation of Gösgen and Leibstadt — a
+refurbishment, for which NEA 7631's 550 USD/kW is the right concept. Lazard publishes no
+directly comparable long-term-operation figure.
 
 # Profiles
 
@@ -186,20 +237,31 @@ ENTSO-E gives 14.5 TWh for 2025; NEA 7631 gives 17.7 TWh for 2019. That is eithe
 or a difference in which plants ENTSO-E covers. Run-of-river is a fifth of Swiss supply, so
 3 TWh is material.
 
-**5. PV capital cost is 2020-vintage.**
-Table 3.6 uses 1 000 USD/kW overnight, giving an implied LCOE of 84.3 USD/MWh. Utility-scale
-PV has fallen substantially since. This directly causes the result in the next section.
+**5. Gas fuel price is American.**
+Lazard assumes 3.45 USD/MMBtu, a US Henry Hub price. European gas has traded at several
+times that. The consequence is stark: CCGT's variable cost falls from 88.80 USD/MWh under the
+NEA European assumption to **26.34** under Lazard. Enabling the gas lever in a test run then
+builds the full 2 000 MW, generates 14.86 TWh and *lowers* system cost from 74.01 to
+65.89 USD/MWh while raising emissions to 84.9 kg/MWh. In a session where participants choose
+whether to allow gas, that makes gas a costless-looking win for reasons that have nothing to
+do with Switzerland. **Substituting a European gas price is the single highest-value fix in
+this dataset.**
 
-**6. Round-trip efficiencies are assumed.** 0.80 pumped, 0.85 battery. NEA 7631 publishes
+**6. Cost vintages and geographies are mixed.**
+Renewables and batteries are Europe 2025 real USD; nuclear and gas are US 2026 figures;
+hydro, existing nuclear and thermal remain on IEA/NEA 2020. Nothing is deflated to a common
+base year, and two of the three sources price a different continent.
+
+**7. Round-trip efficiencies are assumed.** 0.80 pumped, 0.85 battery. NEA 7631 publishes
 neither; the POSY template ships 0.8 for hydro storage, which looks illustrative.
 
-**7. Pumped storage energy capacity is assumed.** 28 640 MWh, i.e. 8 hours at 3 580 MW. The
+**8. Pumped storage energy capacity is assumed.** 28 640 MWh, i.e. 8 hours at 3 580 MW. The
 report gives the power rating but not the volume.
 
-**8. Reservoir initial state of charge is assumed.** `soc_ini: 0.60`. IESO forces the year to
+**9. Reservoir initial state of charge is assumed.** `soc_ini: 0.60`. IESO forces the year to
 close at the same level, so the guess binds twice.
 
-**9. Reservoir inflow provenance unconfirmed.** `inflow.csv` comes from the POSY template
+**10. Reservoir inflow provenance unconfirmed.** `inflow.csv` comes from the POSY template
 workbook and matches Annex A at 18.4 TWh on 8.8 GW, but the author has not confirmed it is
 the real Swiss series.
 
@@ -207,37 +269,53 @@ the real Swiss series.
 
 | | |
 |---|---|
-| Cost | 74.75 USD/MWh |
-| Emissions | 55.4 kg CO₂/MWh — see gap 2 |
+| Cost | 74.01 USD/MWh |
+| Emissions | 22.4 kg CO₂/MWh — see gap 2 |
 | Reliability | 1.00000 |
-| Wind built | 5 000 MW (at its bound) |
-| Solar built | **0 MW** |
-| Imports | 23.5 TWh (27.7% of demand) |
-| Shadow price | mean 101.5, p95 153.2 USD/MWh |
+| Solar built | **13 252 MW** |
+| Wind built | 4 756 MW |
+| Batteries built | 0 MWh |
+| Imports | 9.5 TWh (11.2% of demand) |
+| Shadow price | mean 92.1, p95 153.2 USD/MWh |
 
-Two results need understanding before they are shown to anyone.
+Applying the firming study's Europe 2025 costs changed the answer substantially. Against the
+previous run on NEA 7631 costs:
 
-**Solar builds nothing.** Its implied LCOE of 84.3 USD/MWh exceeds the 67.1 USD/MWh cheap
-import tranche, and that tranche is available in summer daylight — exactly when Swiss PV
-generates. The optimiser is right on these inputs, but the inputs contain two distortions
-pointing the same way: 2020-vintage PV capex (gap 5) and 2025 import prices standing in for
-2050 (gap 1). Real Swiss PV deployment is also driven by policy and energy security rather
-than merit order. Do not present this as a finding.
+| | NEA 7631 costs | Firming study costs |
+|---|---|---|
+| Solar | 0 MW | **13 252 MW** |
+| Wind | 5 000 MW (at bound) | 4 756 MW |
+| Imports | 23.5 TWh | **9.5 TWh** |
+| Emissions | 55.4 kg/MWh | **22.4 kg/MWh** |
+| Cost | 74.75 USD/MWh | 74.01 USD/MWh |
 
-**Wind hits its bound.** Wind at 77.7 USD/MWh beats PV, so it fills the 5 GW cap. NEA 7631
-anticipates this exactly — it notes an unconstrained optimisation would favour wind, and
-imposes a 90/10 solar-to-wind split for land-use and policy reasons. No such constraint is
-applied here.
+**Solar now builds, and the reason is legible.** Its implied fixed-cost LCOE falls from
+84.3 to 60.1 USD/MWh, which puts it below the cheapest import tranche at 67.1. Wind moves
+the other way, from 77.7 to 96.8, and consequently stops sitting at its 5 GW bound — the
+optimiser now chooses 4 756 MW rather than being capped. The mix is no longer determined by
+where the bounds were set.
 
-Encouragingly, pumped storage now cycles 3.0 TWh, against 0.04 TWh when imports were flat
-annual blocks. The seasonal price spread gives it something real to arbitrage.
+For orientation, NEA 7631's LTO scenario at full interconnection builds 11.15 GW of solar
+and 0.68 GW of wind. Solar here lands at 13.25 GW, in the same territory. Wind is far higher
+because NEA imposes a 90/10 solar-to-wind split for land-use and policy reasons and this
+dataset imposes nothing.
+
+**Imports fall by 60%**, which drags emissions down with them — 22.4 kg/MWh is still
+entirely an artefact of the invented 200 kg/MWh import intensity, now applied to 9.5 TWh
+rather than 23.5 TWh. Gap 2 has become smaller without becoming better founded.
+
+**Batteries still build nothing.** At 18 102 USD/MWh/yr they lose to the 3 580 MW of existing
+pumped storage, which now cycles 3.75 TWh. That is a defensible result rather than an
+artefact: Switzerland already owns a great deal of storage.
 
 # Next (v1)
 
 - Replace 2025 prices with a 2050 decarbonised-neighbour price scenario
+- Replace the US gas price with a European one (gap 5)
+- Refresh hydro and existing-nuclear costs so all technologies share a vintage
+- Apply a minimum reservoir level (`soc_min`), following the 2025 calibration finding
 - Source or defend a carbon intensity for imports
 - Obtain or reconstruct a 2050 demand shape
-- Refresh PV and battery capital costs to current values
 - Resolve the run-of-river energy discrepancy
 - Decide whether to impose a solar/wind split, or defend the unconstrained result
 - Reproduce the NEA scenario capacities as a validation target
@@ -252,7 +330,13 @@ Reservoir inflow extracted from **POSY**, the NEA power system model —
 [git.oecd-nea.org/posy/posy](https://git.oecd-nea.org/posy/posy) — MIT licence,
 © 2023 OECD Nuclear Energy Agency.
 
-Cost and capacity assumptions derived from **OECD NEA report No. 7631**,
+Solar, wind and battery costs from **IRENA**, *24/7 Renewables: The Economics of Firm Solar
+and Wind*, Annexes B–D (Europe, 2025, real 2025 USD).
+
+New-build nuclear and gas costs from **Lazard**, *Levelized Cost of Energy+* v19.0
+(July 2026), p. 28.
+
+Remaining cost and capacity assumptions derived from **OECD NEA report No. 7631**,
 [*Achieving Net Zero Carbon Emissions in Switzerland in 2050: Low Carbon Scenarios and their
 System Costs*](https://www.oecd-nea.org/jcms/pl_74877/achieving-net-zero-carbon-emissions-in-switzerland-in-2050-low-carbon-scenarios-and-their-system-costs?details=true),
 OECD 2022.

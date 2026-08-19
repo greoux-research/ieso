@@ -2,7 +2,7 @@
     "demand": {
         "e": {
             "iden": "electricity",
-            "profile": "datasets/swiss-grid/dmnd.csv",
+            "profile": "datasets/swiss-grid-2050/dmnd.csv",
             "total": 85000000.0,
             "supply_sources": [],
             "var_cost_ns": 10000,
@@ -100,7 +100,7 @@
         },
         {
             "iden": "rovr",
-            "profile": "datasets/swiss-grid/rovr.csv",
+            "profile": "datasets/swiss-grid-2050/rovr.csv",
             "capacity_factor": 0.395,
             "type": "elec",
             "fix_cost_prod": 196201,
@@ -140,10 +140,10 @@
         },
         {
             "iden": "solr",
-            "profile": "datasets/swiss-grid/solr.csv",
+            "profile": "datasets/swiss-grid-2050/solr.csv",
             "capacity_factor": 0.13,
             "type": "elec",
-            "fix_cost_prod": 95952,
+            "fix_cost_prod": 68466,
             "var_cost_prod": 0,
             "var_emis_prod": 0,
             "l_prod": [
@@ -160,10 +160,10 @@
         },
         {
             "iden": "wind",
-            "profile": "datasets/swiss-grid/wind.csv",
+            "profile": "datasets/swiss-grid-2050/wind.csv",
             "capacity_factor": 0.21,
             "type": "elec",
-            "fix_cost_prod": 142852,
+            "fix_cost_prod": 178152,
             "var_cost_prod": 0,
             "var_emis_prod": 0,
             "l_prod": [
@@ -183,8 +183,8 @@
             "profile": "",
             "capacity_factor": 0.85,
             "type": "elec",
-            "fix_cost_prod": 353812,
-            "var_cost_prod": 9.33,
+            "fix_cost_prod": 919127,
+            "var_cost_prod": 13.66,
             "var_emis_prod": 0,
             "l_prod": [
                 0,
@@ -203,9 +203,9 @@
             "profile": "",
             "capacity_factor": 0.85,
             "type": "elec",
-            "fix_cost_prod": 84245,
-            "var_cost_prod": 88.8,
-            "var_emis_prod": 337,
+            "fix_cost_prod": 133216,
+            "var_cost_prod": 26.34,
+            "var_emis_prod": 385,
             "l_prod": [
                 0,
                 0
@@ -220,7 +220,7 @@
         },
         {
             "iden": "impo-1",
-            "profile": "datasets/swiss-grid/impo-1.csv",
+            "profile": "datasets/swiss-grid-2050/impo-1.csv",
             "capacity_factor": 0.3334,
             "type": "elec",
             "fix_cost_prod": 0,
@@ -240,7 +240,7 @@
         },
         {
             "iden": "impo-2",
-            "profile": "datasets/swiss-grid/impo-2.csv",
+            "profile": "datasets/swiss-grid-2050/impo-2.csv",
             "capacity_factor": 0.3345,
             "type": "elec",
             "fix_cost_prod": 0,
@@ -260,7 +260,7 @@
         },
         {
             "iden": "impo-3",
-            "profile": "datasets/swiss-grid/impo-3.csv",
+            "profile": "datasets/swiss-grid-2050/impo-3.csv",
             "capacity_factor": 0.3321,
             "type": "elec",
             "fix_cost_prod": 0,
@@ -292,10 +292,12 @@
             "c_strg": 8850000.0,
             "e_strg": [],
             "soc_ini": 0.6,
+            "soc_min": 0,
+            "soc_max": 1,
             "e_char": [],
             "e_disc": [],
             "charge_allowed": false,
-            "inflow_profile": "datasets/swiss-grid/inflow.csv",
+            "inflow_profile": "datasets/swiss-grid-2050/inflow.csv",
             "inflow_total": 18400000.0,
             "e_spil": []
         },
@@ -311,12 +313,14 @@
             "c_strg": 28640,
             "e_strg": [],
             "soc_ini": 0.5,
+            "soc_min": 0,
+            "soc_max": 1,
             "e_char": [],
             "e_disc": []
         },
         {
             "iden": "bstr",
-            "fix_cost_strg": 13908,
+            "fix_cost_strg": 18102,
             "hours_of_storage": 4,
             "round_trip_efficiency": 0.85,
             "l_strg": [
@@ -326,6 +330,8 @@
             "c_strg": -1,
             "e_strg": [],
             "soc_ini": 0.5,
+            "soc_min": 0,
+            "soc_max": 1,
             "e_char": [],
             "e_disc": []
         }
