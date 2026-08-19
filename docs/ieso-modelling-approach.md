@@ -161,6 +161,7 @@ The key characteristics of the object are described in the table below.
 | $n_\text{strg}$ | Hours of storage at maximum discharge | Hour |
 | $r_\text{strg}$ | Round-trip efficiency | % |
 | $k_\text{fix}$ | Fixed storage costs | \$ per MWh per Year |
+| $\text{soc}_\text{min}$, $\text{soc}_\text{max}$ | Minimum and maximum state of charge | % of $c_\text{strg}$ |
 
 *Table 2: Flexibility Means' Variables*
 
@@ -168,6 +169,14 @@ The defining characteristic of an energy storage system is its storage capacity 
 
 $$
 0 \le e_\text{strg} \le c_\text{strg} \quad (11)
+$$
+
+Where operation is restricted to a band of the reservoir — by dead storage, a minimum
+operating level, a regulatory reserve, or head room kept for flood control — Equation 11
+tightens to:
+
+$$
+\text{soc}_\text{min} \times c_\text{strg} \le e_\text{strg} \le \text{soc}_\text{max} \times c_\text{strg} \quad (11')
 $$
 
 The storage capacity also dictates the limits on how much energy can be charged ($e_\text{char}$) or discharged ($e_\text{disc}$) at any given time:

@@ -7,6 +7,8 @@ from ieso_modules import fcn as u
 
 import math
 
+import sys
+
 
 def define(glop, s, opts, stat):
 
@@ -39,6 +41,28 @@ def define(glop, s, opts, stat):
             inflow = u.dm_h(flx.get('inflow_profile', ''), inflow_total)
 
             flx['e_spil'] = []
+
+        # state of charge limits (fractions of c_strg)
+
+        soc_min = flx.get('soc_min', 0.0)
+
+        soc_max = flx.get('soc_max', 1.0)
+
+        if not (0.0 <= soc_min <= soc_max <= 1.0):
+
+            if u.Verbose:
+
+                print('\'' + flx['iden'] + '\': soc_min and soc_max must satisfy 0 <= soc_min <= soc_max <= 1')
+
+            sys.exit(1)
+
+        if not (soc_min <= flx['soc_ini'] <= soc_max):
+
+            if u.Verbose:
+
+                print('\'' + flx['iden'] + '\': soc_ini must lie between soc_min and soc_max')
+
+            sys.exit(1)
 
         # a store fed by natural inflow only (e.g. a dam) cannot be charged from the grid
 
@@ -82,7 +106,19 @@ def define(glop, s, opts, stat):
 
         for i in range(0, u.Y2H):
 
-            glop.Add(flx['e_strg'][i] <= flx['c_strg'])
+            if soc_max < 1.0:
+
+                glop.Add(flx['e_strg'][i] <= soc_max * flx['c_strg'])
+
+            else:
+
+                glop.Add(flx['e_strg'][i] <= flx['c_strg'])
+
+            if soc_min > 0.0:
+
+                glop.Add(flx['e_strg'][i] >= soc_min * flx['c_strg'])
+
+                stat['cons'] += 1
 
             glop.Add(flx['e_char'][i] <= flx['c_strg'] / flx['hours_of_storage'])
 

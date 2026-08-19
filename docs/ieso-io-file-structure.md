@@ -329,6 +329,8 @@ Flexibility means represent energy storage systems such as batteries or pumped h
     "c_strg": -1,
     "e_strg": [],
     "soc_ini": 0.5,
+    "soc_min": 0,
+    "soc_max": 1,
     "e_char": [],
     "e_disc": []
 }
@@ -340,6 +342,8 @@ Flexibility means represent energy storage systems such as batteries or pumped h
 - `hours_of_storage` — storage duration at maximum discharge
 - `round_trip_efficiency` — round-trip efficiency (in [0, 1])
 - `soc_ini` — initial state of charge (fraction of `c_strg`)
+- `soc_min` — minimum state of charge (fraction of `c_strg`, default 0). Use it to represent dead storage, minimum operating levels, or a regulatory reserve such as the Swiss *Wasserkraftreserve*
+- `soc_max` — maximum state of charge (fraction of `c_strg`, default 1). Use it to hold back head room, for instance for flood control
 - `l_strg` — lower and upper bounds (MWh)
 - `c_strg` — storage capacity (MWh). Will be optimised by the solver if set to -1
 
@@ -351,6 +355,15 @@ inflow — rainfall, snowmelt, glacier melt — rather than by charging from the
 - `inflow_total` — annual inflow energy (MWh). Absent or 0 means no inflow, and the object behaves as a conventional storage device
 - `inflow_profile` — hourly shape of the inflow. May be provided as (1) a CSV file path, (2) an array of 8760 values, or (3) empty for a flat profile. Scaled so that its sum equals `inflow_total`
 - `charge_allowed` — set to `false` to forbid charging from the grid (default `true`). A dam fed only by its catchment should set this to `false`, so that it cannot act as free pumped storage
+
+`soc_ini` must lie between `soc_min` and `soc_max`, and the storage level is held within
+those bounds at every hour:
+
+$$
+\text{soc}_\text{min} \times c_\text{strg} \le e_\text{strg}(i) \le \text{soc}_\text{max} \times c_\text{strg}
+$$
+
+Leaving both at their defaults reproduces Equation 11 exactly.
 
 With inflow present, the storage balance of Equation 13 gains two terms:
 

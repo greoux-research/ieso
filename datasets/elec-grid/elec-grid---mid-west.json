@@ -3,12 +3,12 @@
         "e": {
             "iden": "electricity",
             "profile": "profiles/mid-west/dmnd.csv",
-            "total": 50e+6,
+            "total": 50000000.0,
             "supply_sources": [],
             "var_cost_ns": 20000,
             "l_ns": [
                 0,
-                1000e+3
+                1000000.0
             ],
             "output_ns": [],
             "shadow_prices": {
@@ -81,14 +81,14 @@
         {
             "iden": "nucl",
             "profile": "",
-            "capacity_factor": 0.850,
+            "capacity_factor": 0.85,
             "type": "elec",
             "fix_cost_prod": 456466,
             "var_cost_prod": 11.5,
             "var_emis_prod": 0,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -101,14 +101,14 @@
         {
             "iden": "coal",
             "profile": "",
-            "capacity_factor": 0.850,
+            "capacity_factor": 0.85,
             "type": "elec",
             "fix_cost_prod": 222392,
             "var_cost_prod": 26.84,
             "var_emis_prod": 880,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -121,14 +121,14 @@
         {
             "iden": "ccgt",
             "profile": "",
-            "capacity_factor": 0.850,
+            "capacity_factor": 0.85,
             "type": "elec",
             "fix_cost_prod": 98749,
             "var_cost_prod": 56.44,
             "var_emis_prod": 365,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -141,14 +141,14 @@
         {
             "iden": "ocgt",
             "profile": "",
-            "capacity_factor": 0.850,
+            "capacity_factor": 0.85,
             "type": "elec",
             "fix_cost_prod": 75182,
             "var_cost_prod": 96.11,
             "var_emis_prod": 523,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -161,14 +161,14 @@
         {
             "iden": "solr",
             "profile": "profiles/mid-west/solr.csv",
-            "capacity_factor": 0.180,
+            "capacity_factor": 0.18,
             "type": "elec",
             "fix_cost_prod": 70046,
-            "var_cost_prod": 3e-6,
+            "var_cost_prod": 3e-06,
             "var_emis_prod": 0,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -184,11 +184,11 @@
             "capacity_factor": 0.415,
             "type": "elec",
             "fix_cost_prod": 133553,
-            "var_cost_prod": 6e-6,
+            "var_cost_prod": 6e-06,
             "var_emis_prod": 0,
             "l_prod": [
                 0,
-                100e+3
+                100000.0
             ],
             "c_prod": -1,
             "e_prod": [],
@@ -207,11 +207,13 @@
             "round_trip_efficiency": 0.85,
             "l_strg": [
                 0,
-                400e+3
+                400000.0
             ],
             "c_strg": -1,
             "e_strg": [],
             "soc_ini": 0.5,
+            "soc_min": 0,
+            "soc_max": 1,
             "e_char": [],
             "e_disc": []
         }
