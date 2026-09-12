@@ -143,9 +143,12 @@ R4 row change alone and re-solving `elec-grid` with both options returns a resul
 **identical** to the baseline. Every other change in this stage is therefore
 inert on the optimisation, and the vertex shift is attributable to R4.
 
-Making the two rows one-sided leaves the feasible set unchanged — total emissions
-are already non-negative wherever `var_emis_prod` is, and each hourly unmet-demand
-variable is already bounded below by `l_ns[0]` — but it changes the matrix the
+Making the two rows one-sided leaves the feasible set unchanged **for these
+inputs**: total emissions are non-negative wherever every `var_emis_prod` is, and
+each hourly unmet-demand variable is already bounded below by `l_ns[0]`, which is
+zero throughout the bundled data. It is not a re-representation in general — for
+a system containing a removal technology the change admits net-negative
+emissions, which the old row forbade. What it changes here is the matrix the
 simplex sees, so the solver settles on a different vertex of the same optimal
 face. The primal economics are unchanged:
 
@@ -234,9 +237,16 @@ exactly cost-neutral — which the cost column confirms to the last digit.
 The nameplate row was first added in every hour rather than only where it can
 bind, enlarging the problem by 52 560 rows on `elec-grid` and 113 880 on
 `power-to-water-med` — a 60% larger matrix on MED. Four of the eight cases then
-failed to solve. The status was **abnormal (numerical trouble)**, not infeasible
-and not unbounded: the model was structurally sound and the redundant rows had
-degraded its conditioning.
+failed to solve.
+
+What was observed: the solver returned **`ABNORMAL`**; and restricting the
+additional rows to the hours where `cf > 1` restored optimal solves on every
+case, at a constraint count identical to the one before the row was introduced.
+
+This suggests numerical sensitivity to redundant constraints. No conditioning
+measurement was taken, and `ABNORMAL` on its own establishes neither the
+feasibility nor the structural correctness of the model — it reports that the
+solver could not complete, not why.
 
 Two things follow.
 
@@ -309,3 +319,91 @@ application of it. In particular it says nothing about whether the bundled cost
 assumptions are current — they are inherited illustrative examples — nor about
 the 2024 published results, which were produced by code that is not in this
 repository and whose applicability remains an open question.
+
+---
+
+# Follow-up pass — corrections to the verification tooling
+
+An independent review of the corrected tree found four defects, all in what
+verifies the model rather than in the model itself, and two in this record.
+Everything below was reproduced before being fixed.
+
+## The comparator reported agreement it had not checked
+
+Four ways a difference could pass, each demonstrated against a counterexample:
+
+| Defect | Demonstration |
+|---|---|
+| Empty or missing series bypassed comparison | A generator's entire dispatch series deleted — `IDENTICAL`, exit 0 |
+| Product demands paired with `zip`, ignoring missing entries | Every product-demand result deleted — `IDENTICAL`, exit 0 |
+| `NaN` propagates through `max()` and compares False against any threshold | `[NaN, 20, 99999]` against `[10, 20, 30]` — `IDENTICAL`, exit 0 |
+| Cogeneration coefficients not compared | `a`, `b` changed from 0.25 / 1.5 to 0.8 / 3.0 — `IDENTICAL`, exit 0 |
+
+Absence is now a difference. Entity and commodity sets are compared explicitly,
+required fields are checked for presence, series are compared by length and
+content even when empty, non-finite values in either file are reported rather
+than silently passed, and `a`, `b` and `type` are compared — required once a
+unit is thermally coupled, since two results agreeing on dispatch but not on
+those describe different machines.
+
+Emptiness is reported only where content is required: `h_prod` on a unit that is
+not a cogeneration plant, and `e_spil` on a store with no inflow, are
+legitimately empty.
+
+**The eight saved results were re-compared under the strengthened comparator and
+still agree.** Neither defect was concealing a difference — but each was capable
+of it, which is why the evidence was weaker than it appeared.
+
+## A failed solve exited zero
+
+An intentionally infeasible case recorded `stat_status: infeasible` and exited 0,
+so `tools/run_cases.sh` recorded `rc=0` and could not aggregate failures.
+`ieso.py` now exits non-zero on an unsuccessful solve; the runner counts
+failures, records the status of each case, and propagates a non-zero exit. The
+result file is still written — that question remains open — but a caller no
+longer has to parse it to learn what happened.
+
+## Provenance labelled the code rather than identifying it
+
+The stamp recorded the constant `26.09` and nothing else about the source, so two
+trees carrying the same string and different code were indistinguishable. It now
+records the Git revision and whether the tree still matches it, together with a
+digest over `ieso.py`, every module, and `thermo/sim.bin` — untracked, and the
+thing that sets the cogeneration coefficients directly.
+
+## A flag asserted more than was observed
+
+`degenerate` equated "binding with a zero dual" with degeneracy, and the
+documentation claimed the marginal value was not uniquely determined. A cap set
+exactly where the solution would have landed anyway binds and is worth nothing
+without being degenerate. Renamed `binding_zero_dual`, and described as the
+observation it is.
+
+## Two corrections to this record
+
+The claim that only the capacity-bound work changes the feasible set was too
+broad: making the carbon row one-sided admits net-negative emissions, which the
+two-sided row forbade. That is a change of feasible set for any system
+containing a removal technology, and the re-representation claim holds only for
+inputs whose emission factors are all non-negative.
+
+The account of the `ABNORMAL` failures inferred more than the evidence carries,
+and has been rewritten to separate the observation from the explanation.
+
+## Closing two verification gaps
+
+A fixed-capacity reconciliation test now asserts
+`system cost + shortage penalties = objective + pinned fixed charges`
+on a case that pins one generator and optimises another.
+
+Effective availability is reported per generator: the requested capacity factor,
+the peak of the rescaled profile, the hours above nameplate, and the availability
+remaining once output is held to the installed capacity. On `swiss-grid-2025`
+this makes the clip visible rather than absorbed — `rovr` 0.4507 requested
+against 0.450700 effective, `impo-4` 0.1674 against 0.167352.
+
+## Verification
+
+73 tests pass, including the command line's own exit codes on a full-horizon
+input. All eight bundled configurations solve optimally and are identical to the
+preceding stage under the strengthened comparator.
