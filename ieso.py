@@ -134,3 +134,12 @@ for k, v in opts.items():
 with open(json_outp, 'w') as f:
 
     json.dump(s, f, indent=4)
+
+
+# --- --- --- --- --- --- --- --- --- Exit status
+
+# A run that did not reach an optimal solution exits non-zero, so a script
+# calling IESO can tell the difference without parsing the result. The file is
+# still written; the status inside it says why.
+
+sys.exit(0 if success else 1)

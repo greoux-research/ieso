@@ -16,14 +16,25 @@ OUT="${1:-$REPO/runs/$(date -u +%Y%m%dT%H%M%SZ)}"
 mkdir -p "$OUT"
 cd "$REPO" || exit 1
 
+FAILURES=0
+
 run () {  # run <label> <input.json> [name=value ...]
   local label=$1 src=$2; shift 2
   cp "$src" "$OUT/$label.json"
-  local t0 rc t1
+  local t0 rc t1 status
   t0=$(date +%s)
   python3 ieso.py "$OUT/$label.json" "$@" > "$OUT/$label.log" 2>&1
   rc=$?; t1=$(date +%s)
-  printf '%-10s rc=%d %4ds opts=[%s]\n' "$label" "$rc" "$((t1-t0))" "$*" | tee -a "$OUT/_summary.txt"
+  # IESO exits non-zero when the solve did not reach an optimal solution.
+  [ "$rc" -ne 0 ] && FAILURES=$((FAILURES+1))
+  status=$(python3 - "$OUT/$label" <<'PY' 2>/dev/null || echo unknown
+import glob, json, sys
+files = sorted(glob.glob(sys.argv[1] + '.ieso*.json'))
+print(json.load(open(files[-1]))['solver'].get('stat_status', 'unknown') if files else 'no output')
+PY
+)
+  printf '%-10s rc=%d %-10s %4ds opts=[%s]\n' \
+    "$label" "$rc" "$status" "$((t1-t0))" "$*" | tee -a "$OUT/_summary.txt"
 }
 
 : > "$OUT/_summary.txt"
@@ -44,5 +55,12 @@ run med-base  datasets/elec-grid+power-to-water-med/elec-grid+power-to-water-med
 run med-cn    datasets/elec-grid+power-to-water-med/elec-grid+power-to-water-med---florida.json $O
 run swiss2025 datasets/swiss-grid-2025/swiss-grid---2025.json
 run swiss2050 datasets/swiss-grid-2050/swiss-grid---2050.json
-echo "DONE" >> "$OUT/_summary.txt"
+if [ "$FAILURES" -eq 0 ]; then
+  echo "DONE" >> "$OUT/_summary.txt"
+else
+  echo "DONE with $FAILURES unsuccessful solve(s)" >> "$OUT/_summary.txt"
+fi
 echo "results in $OUT"
+
+# Non-zero if any case failed, so a caller need not read the summary.
+exit $(( FAILURES > 0 ? 1 : 0 ))
