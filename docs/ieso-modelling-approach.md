@@ -58,6 +58,22 @@ $$
 0 \le e \le f \times c \quad (1)
 $$
 
+Here $f$ is the hourly availability. Where an hourly profile is supplied, it
+contributes its *shape* only: it is divided by its own maximum and rescaled so
+that its mean equals the stated capacity factor. The level is therefore set by
+the capacity factor, and the profile's own average is discarded.
+
+One consequence needs stating, because it decides whether Equation 1 is
+sufficient on its own. If the requested capacity factor exceeds the profile's
+own mean/max ratio, the rescaled series passes one in its peak hours, and $f
+\times c$ then permits output above the installed capacity. Output is held to
+nameplate by an explicit limit, imposed only in the hours where $f > 1$ — below
+that, Equation 1 is the tighter of the two and already implies it:
+
+$$
+e \le c \quad (1\text{b})
+$$
+
 The output of renewable energy sources is time- and weather-dependent. As a result, the associated capacity factor is relatively low, typically comprised between 15% (for solar photovoltaic) and 45% (for offshore wind). In order to accurately model the intermittent nature of these sources, IESO requires an hourly output profile (in the form of a CSV file) to be specified.
 
 Conversely, power sources that can be dispatched, such as coal power plants, combined cycle gas turbines (CCGTs), and nuclear power reactors, are usually available between 80% and 90% of the time. Furthermore, these technologies can operate in cogeneration mode and produce heat ($h$), in addition to electricity ($e$), which can lead to better asset utilisation efficiency.
@@ -108,6 +124,32 @@ $$
 $$
 0 \le h \le b \times f \times c \quad (7)
 $$
+
+As for Equation 1, where the availability factor passes one these are
+supplemented by their nameplate counterparts:
+
+$$
+e + a \times h \le c \quad (6\text{b})
+$$
+
+$$
+h \le b \times c \quad (7\text{b})
+$$
+
+Note that $c$ is the *electrical* capacity, which is why the heat limit carries
+the coefficient $b$. Since $b$ commonly exceeds one — about 1.97 for a nuclear
+unit and 1.57 for a fossil-fired one at an extraction temperature of 80°C — a
+limit of the form $h \le c$ would understate the heat available by roughly half
+and would not correspond to any physical constraint.
+
+A generator can supply heat to **one** process only. Each thermally coupled
+process carries its own heat balance against the same $h$ variables, so two
+processes drawing on one generator would each be satisfied by the same heat,
+spending it twice; and the extraction temperature that sets $a$ and $b$ is taken
+from a single process. Apportioning heat between several consumers, particularly
+at different temperatures, would require a formulation this model does not have,
+so such configurations are refused rather than approximated. One process drawing
+on several generators is supported, as are independent thermal groups.
 
 The coefficients $a$ and $b$ are directly related to two key characteristics of the power conversion system: the turbine's inlet and outlet conditions. They also depend on the steam's latent heat at the extraction point:
 
@@ -281,6 +323,14 @@ Variables are subject to two types of constraints:
 - The second set expresses the imperative of supplying electricity, hydrogen, water, and heat in sufficient quantities to meet the demands for these commodities.
 
 In linear optimisation problems, the constraints limit the feasible region in which the objective function is optimised.
+
+Throughout, the bounds declared in the input (`l_prod`, `l_strg`) govern the
+*installed capacity* only. Hourly quantities are non-negative and are limited by
+the relations above: availability and nameplate for output, the storage capacity
+and state-of-charge limits for inventory, and the duration limit for charge and
+discharge power. A minimum capacity therefore requires an asset to be built, not
+to be operated; and the delivery rate of a PtX product is not limited by the
+production capacity, since delivery draws on the store.
 
 The objective function of IESO is a cost function that fully accounts for fixed (capital and O&M) and variable (primarily fuel) expenditures. Minimising this function identifies the optimal investment mix and operating schedule of system components subject to the defined constraints.
 

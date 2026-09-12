@@ -257,3 +257,55 @@ conditioning problem.
 **Open question for the maintainer.** A failed solve still writes a result-shaped
 file. Whether `ieso.py` should decline to write one, or write it under a
 different name, is a design decision and has been left alone.
+
+---
+
+# Stage 4 verification — documentation, version and provenance
+
+All eight configurations were re-solved once more. Every case reaches an optimal
+solution and every result is **identical** to stage 3 apart from the new
+`provenance` block: the version change and the stamp alter nothing the solver
+sees.
+
+The release carries one identifier, `26.09`. The README previously said `26.05`
+and `fcn.py` said `25.10`, and neither described the code that produced the
+archived results.
+
+Each result now records the code version, the SHA-256 of the input and of every
+profile file it references, the options applied, the horizon and storage-closure
+convention, and the solver, OR-Tools, NumPy, Python and platform versions with a
+timestamp. Profiles are hashed because they sit outside the input file and
+determine the answer as directly as anything inside it. The stamp is written on
+the failure path too, so an unsuccessful run is traceable as well.
+
+---
+
+# Findings, patches, tests and observed effects
+
+| Finding | Patched in | Covered by | Observed effect |
+|---|---|---|---|
+| Process heat attributed once per eligible supplier rather than per unit dispatched | `pos_dmd.py` | `test_allocation.py` | MED water cost 1.3974 → 0.5344 \$/m³, emissions 12.966 → 4.958 kg/m³; allocation shares 1.0856 → 1.0 |
+| Allocation and battery diagnostics compared against `1e+9` | `pos_dmd.py`, `pos.py` | `test_allocation.py`, `test_reporting.py` | Guards now fire; the battery check verifies the storage balance rather than a ratio that holds only for a cyclic store with no inflow |
+| Cost KPI blends resource cost with shortage penalty and divides by demand | `pos_dmd.py` | `test_reporting.py` | `kpis.cost` retained unchanged; `accounts` and `system` blocks added; a system generating nothing now reports observable quantities instead of nothing |
+| Cap rows two-sided, so the reported dual described the wrong bound | `eqs_dmd_e.py` | `test_reporting.py` | `reliability_cap` −8106.79 → 0 where slack; net-negative emission targets became representable |
+| PtX heat duals purged unread | `pos.py` | `test_reporting.py` | Documented output now produced; empty for purely electric processes |
+| Arrays raised in `cf_h`/`dm_h`; validation differed by input form | `fcn.py` | `test_profiles.py` | Arrays accepted; one validator for list, array and CSV; failures name the entity |
+| Capacity bounds reused as hourly operating bounds | `eqs_gen.py`, `eqs_flx.py`, `eqs_p2x_1.py` | `test_capacity_bounds.py` | Minimum capacity no longer forces output, inventory or cycling; delivery no longer capped by production capacity; `rovr` held to nameplate, at \$12.71 on \$6.25 bn |
+| A generator's heat could satisfy several processes independently | `chk.py` | `test_topology.py` | Unsupported topologies refused before the problem is built |
+| A non-optimal solve was indistinguishable from any other failure | `opt.py` | observed during stage 3 | `solver.stat_status` names the reason |
+| Documentation disagreed with behaviour; version labels disagreed | README, three guides, `fcn.py`, `ieso.py` | — | Reconciled; release identified as 26.09; results stamped |
+
+---
+
+# What this establishes, and what it does not
+
+Fifty tests pass offline in a few seconds, using short horizons and expected
+values worked out by hand rather than taken from the implementation under
+correction. All eight bundled configurations solve optimally, and every
+difference from the preserved baseline is accounted for above.
+
+This establishes the behaviour of the software. It does not validate any
+application of it. In particular it says nothing about whether the bundled cost
+assumptions are current — they are inherited illustrative examples — nor about
+the 2024 published results, which were produced by code that is not in this
+repository and whose applicability remains an open question.

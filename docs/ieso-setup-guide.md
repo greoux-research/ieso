@@ -6,7 +6,9 @@ This article provides a guide on how to set up and run the [Integrated Energy Sy
 
 IESO's modelling approach is described in [this article](ieso-modelling-approach.md). Its IO file structure is documented [at this link](ieso-io-file-structure.md).
 
-IESO is implemented in Python 3 and doesn't require direct installation itself. However, it relies on external libraries — [OR-Tools](https://developers.google.com/optimization/install), [NumPy](https://numpy.org/install/), and [Matplotlib](https://matplotlib.org/stable/users/installing/index.html) — which need to be pre-installed.
+IESO is implemented in Python 3 and doesn't require direct installation itself. It relies on two external libraries, [OR-Tools](https://developers.google.com/optimization/install) and [NumPy](https://numpy.org/install/), which need to be pre-installed. [pytest](https://docs.pytest.org/) is needed only to run the test suite.
+
+The current release is verified on Python 3.14.4 with NumPy 2.5.2 and OR-Tools 9.15.6755. Earlier Python 3 versions are expected to work but are not exercised. The solver build matters: GLOP may settle on a different vertex of the same optimal face from one version to another, so a result is reproducible only against a recorded environment. Every result records its own — see `provenance` in the output.
 
 ---
 
@@ -38,7 +40,7 @@ source ieso/bin/activate
 4. Install IESO dependencies:
 
 ```bash
-pip install --upgrade ortools protobuf numpy matplotlib
+pip install --upgrade ortools numpy
 ```
 
 **Windows**
@@ -48,7 +50,7 @@ pip install --upgrade ortools protobuf numpy matplotlib
 2. Open the Anaconda prompt and create the IESO virtual environment:
 
 ```bash
-conda create --name ieso python=3.8
+conda create --name ieso python=3.12
 ```
 
 3. Activate the virtual environment:
@@ -60,7 +62,7 @@ conda activate ieso
 4. Install IESO dependencies:
 
 ```bash
-pip install --upgrade ortools protobuf numpy matplotlib
+pip install --upgrade ortools numpy
 ```
 
 ---
@@ -73,7 +75,9 @@ The initial step required to run an IESO simulation is to fetch the tool [from G
 
 #### Building the IESO-embedded thermodynamic calculations tool
 
-IESO includes a thermodynamic calculations tool within its `thermo` folder. This tool needs to be compiled before use:
+IESO includes a thermodynamic calculations tool within its `thermo` folder. It derives the cogeneration coefficients *a* and *b* from the turbine and condenser conditions, and is therefore needed **only for thermally coupled cases** — a process declared as `elec + ther`, such as MED or MSF desalination. Purely electric processes, including reverse osmosis and electrolysis, never call it, and neither does a system without a Power-to-X process.
+
+The compiled binary is not tracked in the repository, so it must be built before the first thermally coupled run:
 
 - On macOS or Ubuntu Linux systems: run the script `build.sh`.
 - On Windows systems: run the script `build.bat`.
@@ -107,12 +111,16 @@ sudo apt-get install build-essential
 
 #### Running an IESO simulation
 
-IESO is called with one or two arguments:
+IESO takes one mandatory argument and any number of options:
 
-1. The first argument (mandatory) is a [JSON](https://en.wikipedia.org/wiki/JSON) file (referred to as `input.json`) that describes the integrated energy system optimisation problem.
-2. The second argument (optional) specifies the carbon constraint.
+1. The first argument is a [JSON](https://en.wikipedia.org/wiki/JSON) file (referred to as `input.json`) describing the integrated energy system optimisation problem.
+2. Any further arguments are `name=value` options. Two are recognised:
+   - `carbon-constraint` — an emissions budget in kg CO₂eq per MWh of **primary annual electricity demand**. The budget is that figure multiplied by `demand.e.total`; it is not a limit on the emission intensity of generation, and the electricity consumed by Power-to-X processes does not enlarge it.
+   - `non-served-power-constraint` — an upper bound on annual unserved **electricity**, as a fraction of `demand.e.total`. `0.05` means 5%. It *permits* shortfall up to that share; it does not require any. There is no equivalent annual bound for the other commodities — see `l_ns` in the [IO file structure](ieso-io-file-structure.md).
 
-The output of IESO materialises as a JSON file named `input.ieso.json`, structured identically to `input.json` but inclusive of the simulation results.
+The output is written beside the input as `input.ieso.json`, with one `.name_value` segment appended for each option, and is structured identically to the input with the results filled in. **The output path is derived from the input path**, so running a case whose input sits in `datasets/` overwrites the result stored there. To keep runs separate, copy the input into a working directory first, or use `tools/run_cases.sh`, which does this for you.
+
+A run that does not reach an optimal solution still writes a file, with the input values echoed back, `solver.stat_succ` at 0 and `solver.stat_status` naming the reason. Check the status before reading a result.
 
 Before running IESO, the environment needs to be set up, as described by the examples below.
 
@@ -124,11 +132,34 @@ Open a Terminal window and run the following commands:
 source ieso/bin/activate
 cd /path/to/ieso
 python3 ieso.py input.json
-# to introduce a carbon constraint of 100 kg per MWh:
+# a carbon budget of 100 kg CO2eq per MWh of primary electricity demand:
 # python3 ieso.py input.json carbon-constraint=100
-# to limit the amount of non-served power to 5% of the total annual demand:
+# allow up to 5% of annual electricity demand to go unserved:
 # python3 ieso.py input.json non-served-power-constraint=0.05
+# options combine:
+# python3 ieso.py input.json carbon-constraint=50 non-served-power-constraint=0.05
 ```
+
+To re-solve the bundled example datasets without overwriting the results stored
+alongside them:
+
+```bash
+tools/run_cases.sh runs/mycheck
+tools/compare_outputs.py runs/mycheck/med-base.ieso.json \
+    datasets/elec-grid+power-to-water-med/elec-grid+power-to-water-med---florida.ieso.json
+```
+
+---
+
+#### Running the tests
+
+```bash
+pip install pytest
+python3 -m pytest tests/
+```
+
+The suite uses short horizons and expected values derived by hand, and touches
+no network. It takes a few seconds.
 
 **Windows**
 
