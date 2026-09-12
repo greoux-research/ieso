@@ -14,7 +14,7 @@ from ortools.linear_solver import pywraplp
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ieso_modules import eqs_dmd_e, eqs_dmd_x, eqs_flx, eqs_gen, eqs_p2x_1, eqs_p2x_2
+from ieso_modules import chk, eqs_dmd_e, eqs_dmd_x, eqs_flx, eqs_gen, eqs_p2x_1, eqs_p2x_2
 from ieso_modules import fcn as u
 from ieso_modules import obj, opt, pos
 
@@ -109,6 +109,7 @@ def solve(s, opts=None):
     objective = glop.Objective()
     objective.SetMinimization()
 
+    chk.define(glop, s, opts, stat)
     eqs_p2x_1.define(glop, s, opts, stat)
     eqs_gen.define(glop, s, opts, stat)
     eqs_p2x_2.define(glop, s, opts, stat)
