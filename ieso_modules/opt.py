@@ -3,19 +3,36 @@
 # Gréoux Research (2024). IESO: a linear optimiser-based integrated energy system modelling environment. https://github.com/greoux-research/ieso
 
 
-import time
-
 from ortools.linear_solver import pywraplp
+
+from ieso_modules import fcn as u
+
+
+# A solve that does not reach OPTIMAL fails for a reason, and the reasons call
+# for different responses: an infeasible model is a specification error, an
+# unbounded one is a missing constraint, and a solver that stopped early is a
+# limit to raise. Reporting only success or failure loses that distinction.
+
+STATUS = {
+    pywraplp.Solver.OPTIMAL: 'optimal',
+    pywraplp.Solver.FEASIBLE: 'feasible but not proven optimal',
+    pywraplp.Solver.INFEASIBLE: 'infeasible',
+    pywraplp.Solver.UNBOUNDED: 'unbounded',
+    pywraplp.Solver.ABNORMAL: 'abnormal (numerical trouble)',
+    pywraplp.Solver.NOT_SOLVED: 'not solved',
+}
 
 
 def run(glop, s, opts, stat):
 
     # --- --- --- --- --- --- --- --- --- Solve the linear optimisation problem
 
-    if glop.Solve() == pywraplp.Solver.OPTIMAL:
+    status = glop.Solve()
 
-        return True
+    stat['status'] = STATUS.get(status, 'unknown status ' + str(status))
 
-    else:
+    if status != pywraplp.Solver.OPTIMAL and u.Verbose:
 
-        return False
+        print('solver did not reach an optimal solution: ' + stat['status'])
+
+    return status == pywraplp.Solver.OPTIMAL

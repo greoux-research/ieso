@@ -5,7 +5,7 @@
 
 from ortools.linear_solver import pywraplp
 
-from ieso_modules import eqs_p2x_1, eqs_gen, eqs_p2x_2, eqs_flx, eqs_dmd_e, eqs_dmd_x, obj, opt, pos
+from ieso_modules import eqs_p2x_1, eqs_gen, eqs_p2x_2, eqs_flx, eqs_dmd_e, eqs_dmd_x, chk, obj, opt, pos
 
 from ieso_modules import fcn as u
 
@@ -79,6 +79,7 @@ glop_objf.SetMinimization()
 
 # --- --- --- --- --- --- --- --- --- Define equations and constraints
 
+chk.define(glop, s, opts, stat)
 eqs_p2x_1.define(glop, s, opts, stat)
 eqs_gen.define(glop, s, opts, stat)
 eqs_p2x_2.define(glop, s, opts, stat)
@@ -116,6 +117,7 @@ else:
 
 # --- --- --- --- --- --- --- --- --- Finish line
 
+s['solver']['stat_status'] = stat.get('status', 'unknown')
 s['solver']['stat_time'] = stat['time']
 s['solver']['stat_capa'] = stat['capa']
 s['solver']['stat_outp'] = stat['outp']
