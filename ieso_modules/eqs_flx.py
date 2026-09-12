@@ -38,7 +38,7 @@ def define(glop, s, opts, stat):
 
         if has_inflow:
 
-            inflow = u.dm_h(flx.get('inflow_profile', ''), inflow_total)
+            inflow = u.dm_h(flx.get('inflow_profile', ''), inflow_total, flx['iden'] + ' inflow')
 
             flx['e_spil'] = []
 

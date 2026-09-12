@@ -30,7 +30,7 @@ def define(glop, s, opts, stat):
 
             # --- x: supply demand equilibrium
 
-            dm = u.dm_h(dmd['profile'], dmd['total'])
+            dm = u.dm_h(dmd['profile'], dmd['total'], 'demand.x[' + dmd['iden'] + ']')
 
             dmd['__meet_dmnd'] = []
 

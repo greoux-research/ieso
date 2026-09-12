@@ -69,7 +69,7 @@ def define(glop, s, opts, stat):
 
         # set of constraints: production and storage is limited by capacity
 
-        cf = u.cf_h(p2x['profile'], p2x['capacity_factor'])
+        cf = u.cf_h(p2x['profile'], p2x['capacity_factor'], p2x['iden'])
 
         for i in range(0, u.Y2H):
 

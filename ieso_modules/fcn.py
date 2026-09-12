@@ -17,6 +17,11 @@ Verbose = True
 Y2H = 8760
 Strg_end_eq_ini = True
 
+# Tolerances for the post-processing accounting checks. Absolute terms guard
+# quantities near zero; relative terms scale with the magnitude being checked.
+Balance_atol = 1e-6
+Balance_rtol = 1e-9
+
 
 def get_json(json_file):
 
@@ -37,6 +42,94 @@ def get_json(json_file):
             print('Could not load \'' + json_file + '\'')
 
         sys.exit(1)
+
+
+def as_profile(profile, who):
+
+    """
+    Validate and return an hourly profile as a 1-D float array, or None when a
+    flat profile is requested (the empty string).
+
+    Accepts a CSV path, a list or a NumPy array, and applies the same checks to
+    all three: one dimension, exactly Y2H entries, every value finite and
+    non-negative, and a strictly positive sum. A profile failing any of these
+    has no defined normalisation, so it is rejected here with a reason rather
+    than propagated into the optimisation.
+    """
+
+    global ieso_version, Verbose, Y2H, Strg_end_eq_ini
+
+    import os
+
+    # Test the type before comparing with '': a NumPy array compared against a
+    # string returns an array, and using that as a truth value raises.
+
+    if isinstance(profile, str):
+
+        if profile == '':
+
+            return None
+
+        if not os.path.isfile(profile):
+
+            fail(who, 'profile file not found: \'' + profile + '\'')
+
+        try:
+
+            data = np.loadtxt(profile, dtype=float)
+
+        except Exception:
+
+            fail(who, 'could not read profile \'' + profile + '\'')
+
+    elif isinstance(profile, (list, np.ndarray)):
+
+        try:
+
+            data = np.asarray(profile, dtype=float)
+
+        except Exception:
+
+            fail(who, 'profile is not numeric')
+
+    else:
+
+        fail(who, 'profile must be a file path, a list or an array')
+
+    data = np.atleast_1d(data)
+
+    if data.ndim != 1:
+
+        fail(who, 'profile must be one-dimensional, got ' + str(data.ndim) + ' dimensions')
+
+    if len(data) != Y2H:
+
+        fail(who, 'profile must have ' + str(Y2H) + ' entries, got ' + str(len(data)))
+
+    if not np.all(np.isfinite(data)):
+
+        fail(who, 'profile contains non-finite values')
+
+    if np.any(data < 0):
+
+        fail(who, 'profile contains negative values')
+
+    if not np.sum(data) > 0:
+
+        fail(who, 'profile sums to zero, so it cannot be normalised')
+
+    return data
+
+
+def fail(who, message):
+
+    global ieso_version, Verbose, Y2H, Strg_end_eq_ini
+
+    if Verbose:
+
+        print('\'' + str(who) + '\': ' + message)
+
+    sys.exit(1)
 
 
 def load(csv_path):
@@ -81,7 +174,7 @@ def normalize(hpro, cp):
     return npro
 
 
-def dm_h(profile, total):
+def dm_h(profile, total, who='dm_h'):
 
     """
     Build an hourly demand series (output) such that its sum equals 'total'.
@@ -104,69 +197,15 @@ def dm_h(profile, total):
 
     global ieso_version, Verbose, Y2H, Strg_end_eq_ini
 
-    import numpy as np
-    import sys
-    import os
+    data = as_profile(profile, who)
 
-    output = []
-
-    if profile == '':
-
-        # Case 1: Empty string - flat profile
+    if data is None:
 
         output = np.full(Y2H, total / Y2H).tolist()
 
-    elif isinstance(profile, (list, np.ndarray)):
-
-        # Case 2: Profile provided directly as numerical array
-
-        data = np.array(profile, dtype=float)
-
-        if len(data) != Y2H:
-
-            print(f"Error: Expected profile length {Y2H}, got {len(data)}")
-
-            sys.exit(1)
-
-        if np.any(data < 0):
-
-            print("Error: Profile contains negative values.")
-
-            sys.exit(1)
-
-        data_sum = np.sum(data)
-
-        if data_sum == 0:
-
-            print("Error: Profile sum is zero.")
-
-            sys.exit(1)
-
-        output = ((total / data_sum) * data).tolist()
-
-    elif isinstance(profile, str) and os.path.isfile(profile):
-
-        # Case 3: Profile is a path to CSV file
-
-        data, negative_entries, oops = load(profile)
-
-        if negative_entries or oops:
-
-            if Verbose:
-
-                print("Error loading '" + profile + "'")
-
-            sys.exit(1)
-
-        data_sum = np.sum(data)
-
-        output = ((total / data_sum) * data).tolist()
-
     else:
 
-        print("Error: Invalid 'profile' input. Must be a file path, list, or array.")
-
-        sys.exit(1)
+        output = ((total / np.sum(data)) * data).tolist()
 
     output = np.array(output, dtype=float).tolist()
 
@@ -177,88 +216,29 @@ def dm_h(profile, total):
     return output
 
 
-def cf_h(profile, capacity_factor):
+def cf_h(profile, capacity_factor, who='cf_h'):
 
     """
-    Build an hourly generation series (output) normalised to target 'capacity_factor'.
-    sum(output) / Y2H = capacity_factor
+    Build an hourly availability series normalised to target 'capacity_factor'.
+    mean(output) = capacity_factor
 
-    Parameters
-    ----------
-    profile : str | list | np.ndarray
-        - If a string: path to a CSV file containing a single-column hourly profile with Y2H rows.
-        - If a list or NumPy array: array of Y2H numerical values (new feature).
-        - If empty string: a flat profile is used.
-    capacity_factor : float
-        Target capacity factor (0–1).
-
-    Returns
-    -------
-    output : list of floats
-        Normalised hourly capacity profile scaled so that average(output) = capacity_factor.
+    The supplied profile contributes its shape only: it is divided by its own
+    maximum and then rescaled so that its mean equals capacity_factor. The level
+    is therefore set by capacity_factor, not by the profile. A profile whose own
+    mean/max ratio is below capacity_factor will consequently peak above one.
     """
 
     global ieso_version, Verbose, Y2H, Strg_end_eq_ini
 
-    import numpy as np
-    import sys
-    import os
+    data = as_profile(profile, who)
 
-    output = []
-
-    if profile == '':
-
-        # Case 1: Empty string - flat profile
+    if data is None:
 
         output = np.full(Y2H, capacity_factor).tolist()
 
-    elif isinstance(profile, (list, np.ndarray)):
-
-        # Case 2: Direct numerical array input
-
-        data = np.array(profile, dtype=float)
-
-        if len(data) != Y2H:
-
-            print(f"Error: Expected profile length {Y2H}, got {len(data)}")
-
-            sys.exit(1)
-
-        if np.any(data < 0):
-
-            print("Error: Profile contains negative values.")
-
-            sys.exit(1)
-
-        if np.sum(data) == 0:
-
-            print("Error: Profile sum is zero.")
-
-            sys.exit(1)
-
-        output = normalize(data, capacity_factor)
-
-    elif isinstance(profile, str) and os.path.isfile(profile):
-
-        # Case 3: Profile from CSV file
-
-        data, negative_entries, oops = load(profile)
-
-        if negative_entries or oops:
-
-            if Verbose:
-
-                print("Error loading '" + profile + "'")
-
-            sys.exit(1)
-
-        output = normalize(data, capacity_factor)
-
     else:
 
-        print("Error: Invalid 'profile' input. Must be a file path, list, or array.")
-
-        sys.exit(1)
+        output = normalize(data, capacity_factor)
 
     output = np.array(output, dtype=float).tolist()
 

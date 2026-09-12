@@ -41,7 +41,7 @@ def define(glop, s, opts, stat):
 
         # set of constraints: generation is limited by capacity
 
-        cf = u.cf_h(gen['profile'], gen['capacity_factor'])
+        cf = u.cf_h(gen['profile'], gen['capacity_factor'], gen['iden'])
 
         for i in range(0, u.Y2H):
 
