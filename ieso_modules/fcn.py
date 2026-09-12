@@ -156,6 +156,90 @@ def file_digest(path):
     return h.hexdigest()
 
 
+def source_state():
+
+    """
+    Identify the code that is actually running.
+
+    A version constant is a label, not an identifier: two trees can carry the
+    same string and different source. Three things are recorded instead, and
+    they are complementary. The Git revision says which commit, when the tree is
+    a checkout. The dirty flag says whether it still matches that commit. The
+    source digest covers the modules that build and solve the problem, so an
+    installation without Git is still identified, and it includes the compiled
+    thermodynamic binary, which is untracked and sets the cogeneration
+    coefficients directly.
+    """
+
+    global ieso_version, Verbose, Y2H, Strg_end_eq_ini
+
+    import hashlib
+    import os
+    import subprocess
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    def git(*args):
+
+        try:
+
+            out = subprocess.run(('git', '-C', root) + args, stdout=subprocess.PIPE,
+                                 stderr=subprocess.DEVNULL, text=True, timeout=10)
+
+            return out.stdout.strip() if out.returncode == 0 else None
+
+        except Exception:
+
+            return None
+
+    revision = git('rev-parse', 'HEAD')
+
+    dirty = None
+
+    if revision is not None:
+
+        porcelain = git('status', '--porcelain')
+
+        dirty = bool(porcelain) if porcelain is not None else None
+
+    # Source digest: every module that participates in building or solving the
+    # problem, plus the thermodynamic binary, hashed in a fixed order.
+
+    sources = [os.path.join(root, 'ieso.py')]
+
+    modules = os.path.join(root, 'ieso_modules')
+
+    if os.path.isdir(modules):
+
+        sources += [os.path.join(modules, n) for n in sorted(os.listdir(modules))
+                    if n.endswith('.py')]
+
+    thermo_bin = os.path.join(root, 'thermo', 'sim.bin')
+
+    files = {}
+
+    digest = hashlib.sha256()
+
+    for path in sources + [thermo_bin]:
+
+        rel = os.path.relpath(path, root)
+
+        one = file_digest(path)
+
+        files[rel] = one
+
+        digest.update(rel.encode())
+
+        digest.update((one or 'absent').encode())
+
+    return {
+        'git_revision': revision,
+        'git_dirty': dirty,
+        'source_sha256': digest.hexdigest(),
+        'source_files_sha256': files,
+    }
+
+
 def provenance(json_file, opts, s):
 
     """
@@ -219,7 +303,7 @@ def provenance(json_file, opts, s):
 
         solver_version = 'unknown'
 
-    return {
+    stamp = {
         'ieso_version': ieso_version,
         'input': str(json_file),
         'input_sha256': file_digest(json_file),
@@ -234,6 +318,10 @@ def provenance(json_file, opts, s):
         'platform': platform.platform(),
         'run_utc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
     }
+
+    stamp.update(source_state())
+
+    return stamp
 
 
 def load(csv_path):

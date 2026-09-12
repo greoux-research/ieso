@@ -113,7 +113,7 @@ Demand objects represent the final consumption of electricity and other commodit
 - `output_ns` — hourly unmet demand
 - `shadow_prices["demand_match"]` — hourly shadow prices (\$/unit), i.e. the hourly marginal value of meeting one additional unit of demand. Corresponds to the dual variable of the demand-balance constraint, reflecting the system cost reduction associated with a 1-unit increase in demand satisfaction during that hour. Defined for both electricity and all other commodities X.
 - `shadow_prices["carbon_cap"]` — marginal value of relaxing the carbon cap by one unit (\$/unit), or `0` when the cap is not binding. Electricity demand only.
-- `shadow_prices["carbon_cap_detail"]` — what was observed, kept separate from the interpretation above: `raw_dual`, `cap`, `activity`, `slack`, `binding`, and `degenerate` (binding with a zero dual, where the marginal value is not uniquely determined).
+- `shadow_prices["carbon_cap_detail"]` — what was observed, kept separate from the interpretation above: `raw_dual`, `cap`, `activity`, `slack`, `binding`, and `binding_zero_dual`. The last records an observation and not a diagnosis: a binding row whose dual is zero may be degenerate, or its marginal value may genuinely be zero and unique — a cap set exactly where the solution would have landed anyway binds and is worth nothing. Telling those apart requires analysis IESO does not perform.
 - `shadow_prices["reliability_cap"]` — marginal value of relaxing the annual unmet-electricity cap by one unit (\$/unit), or `0` when that cap is not binding. Electricity demand only.
 - `shadow_prices["reliability_cap_detail"]` — as for the carbon cap.
 - `kpis["cost"]` — **compatibility field, retained with its original formula**: `(allocated resource cost + shortage penalty) / annual demand` (\$/unit). Two cautions. It adds the penalty charged on unserved demand to the money actually spent on supply, and it divides by demand rather than by the volume delivered — so it is not a cost per unit delivered. Prefer the `accounts` fields below.
@@ -327,6 +327,7 @@ Generators represent technologies that produce electricity, heat, or both. Dispa
 ##### Outputs
 
 - `e_prod` — hourly electricity production (MWh)
+- `availability` — what the profile asked for against what it delivered, so the effect of the nameplate limit is visible rather than absorbed into the result: `capacity_factor_requested`, `profile_peak` (the maximum of the rescaled series), `hours_above_nameplate`, and `capacity_factor_effective` (the mean availability remaining once output is held to the installed capacity). Where the peak is at or below one, the requested and effective figures agree.
 - `h_prod` — hourly heat production (MWh)
 
 ---
@@ -428,6 +429,8 @@ Written into every result, identifying what produced it.
 - `profiles_sha256` — each referenced profile file and its digest. Profiles are named by path rather than carried in the input, and they determine the answer as directly as anything inside it.
 - `options` — the `name=value` options applied to the run.
 - `hours`, `storage_closes_the_year` — the horizon, and whether storage is required to end the year where it began.
+- `git_revision`, `git_dirty` — the commit the tree is on, and whether it still matches it. Both are `null` outside a Git checkout.
+- `source_sha256`, `source_files_sha256` — a digest over `ieso.py`, every module in `ieso_modules/`, and the compiled `thermo/sim.bin`, with the per-file digests beside it. The version string is a label that two different trees can share; this identifies the code that actually ran, including the untracked binary that sets the cogeneration coefficients.
 - `solver`, `ortools` — the solver and its version. This matters: a different build may settle on a different vertex of the same optimal face, so two runs agreeing on cost can differ hour by hour.
 - `numpy`, `python`, `platform`, `run_utc` — the rest of the environment, and when the run happened.
 
@@ -439,7 +442,7 @@ The solver object provides diagnostics for each optimisation run: status, run ti
 
 ##### Outputs
 
-- `stat_succ` — 1 if the solve reached an optimal solution, 0 if it did not, -1 before the run.
+- `stat_succ` — 1 if the solve reached an optimal solution, 0 if it did not, -1 before the run. **IESO also exits non-zero when the solve was unsuccessful**, so a calling script need not read the result to find out.
 - `stat_status` — why, in words: `optimal`, `infeasible`, `unbounded`, `abnormal (numerical trouble)`, `not solved`. **A run that does not reach an optimal solution still writes an output file**, structured like any other, with the input values echoed back in place of results. Check this field before reading anything else.
 - `stat_time` — elapsed time (seconds)
 - `stat_capa` — number of capacity variables

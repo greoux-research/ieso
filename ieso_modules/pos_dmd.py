@@ -49,8 +49,8 @@ def cap_report(con, cap, activity):
 
     # A cap is a one-sided limit, and only a limit that binds has a marginal
     # value. Report what was observed (the raw dual, the activity, the slack)
-    # separately from the interpretation, and say so when the two disagree
-    # rather than presenting a number that looks like a marginal cost.
+    # separately from the interpretation, rather than presenting a number that
+    # looks like a marginal cost when it is not one.
 
     raw = con.dual_value()
 
@@ -66,7 +66,12 @@ def cap_report(con, cap, activity):
         "activity": activity,
         "slack": slack,
         "binding": bool(binding),
-        "degenerate": bool(binding and abs(raw) <= u.Balance_atol),
+        # Observation, not diagnosis. A binding row with a zero dual may be
+        # degenerate, or its marginal value may genuinely be zero and unique --
+        # a cap set exactly where the solution would have landed anyway binds
+        # and is worth nothing. Distinguishing the two needs analysis this does
+        # not perform, so the flag records only what was seen.
+        "binding_zero_dual": bool(binding and abs(raw) <= u.Balance_atol),
     }
 
 

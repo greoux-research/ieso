@@ -197,3 +197,66 @@ def test_carbon_cap_dual_is_reported_when_binding(horizon):
     sp = s['demand']['e']['shadow_prices']
     assert sp['carbon_cap_detail']['binding'] is True
     assert sp['carbon_cap'] > 0
+
+
+def test_system_cost_reconciles_with_the_solver_objective(horizon):
+    """system cost + shortage penalties = objective + fixed-capacity charges.
+
+    A constant cannot change the optimum, so the objective omits the fixed cost
+    of any asset whose capacity is pinned by the input; the reported system cost
+    includes it. Without this identity a correct accounting difference reads as
+    a regression.
+    """
+    hours = horizon(24)
+    s = system(
+        generators=[
+            generator('pinned', fix=1000.0, var=5.0, c_prod=40),   # fixed: cost is a constant
+            generator('sized', fix=10.0, var=80.0),                # optimised: cost is in the objective
+        ],
+        e_total=100.0 * hours,
+        e_kwargs={'var_cost_ns': 50.0})
+    ok, s = solve(s)
+    assert ok
+
+    pinned_fixed = sum(g['c_prod'] * g['fix_cost_prod']
+                       for g in s['generator'] if g['iden'] == 'pinned')
+    penalties = sum(d['accounts']['shortage_penalty']
+                    for d in [s['demand']['e']] + list(s['demand']['x'])
+                    if 'accounts' in d)
+
+    assert pinned_fixed > 0                                    # the case exercises it
+    assert s['system']['cost'] + penalties == pytest.approx(
+        s['solver']['_objective'] + pinned_fixed, rel=1e-9)
+
+
+def test_binding_zero_dual_is_an_observation_not_a_diagnosis(horizon):
+    """A cap set where the solution would have landed anyway binds and is
+    worth nothing; that is not evidence of degeneracy."""
+    hours = horizon(24)
+    s = system(generators=[generator('clean', var=10.0, emis=0.0)],
+               e_total=100.0 * hours)
+    ok, s = solve(s, {'carbon-constraint': 0.0})
+    assert ok
+    detail = s['demand']['e']['shadow_prices']['carbon_cap_detail']
+    assert 'binding_zero_dual' in detail
+    assert 'degenerate' not in detail
+
+
+def test_effective_availability_is_reported(horizon):
+    """Where the rescaled profile passes one, the nameplate limit removes
+    availability. The loss is reported rather than absorbed silently."""
+    hours = horizon(24)
+    shape = [1.0] * 12 + [0.5] * 12                    # mean/max = 0.75
+    s = system(generators=[generator('vre', fix=1.0, var=0.0, profile=shape,
+                                     cf=0.9, c_prod=100)],
+               e_total=1000.0 * hours)
+    ok, s = solve(s)
+    assert ok
+
+    a = s['generator'][0]['availability']
+    assert a['capacity_factor_requested'] == pytest.approx(0.9)
+    assert a['profile_peak'] == pytest.approx(1.2)
+    assert a['hours_above_nameplate'] == 12
+    # 12 h clipped to 1.0 and 12 h at 0.6 -> (12*1.0 + 12*0.6)/24 = 0.8
+    assert a['capacity_factor_effective'] == pytest.approx(0.8)
+    assert a['capacity_factor_effective'] < a['capacity_factor_requested']

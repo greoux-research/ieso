@@ -27,6 +27,28 @@ def process(glop, s, opts, stat, emis_con, nspo_con):
 
     for gen in s['generator']:
 
+        # --- gen['availability']
+        #
+        # A supplied profile is rescaled so its mean equals capacity_factor, so
+        # the series can pass one and the nameplate limit then holds output
+        # below what the availability relation alone would permit. Report the
+        # requested factor, the peak of the rescaled series and the availability
+        # actually left after the limit, so that difference is visible rather
+        # than absorbed silently into the result.
+
+        _cf = u.cf_h(gen['profile'], gen['capacity_factor'], gen['iden'])
+
+        _peak = max(_cf)
+
+        _effective = sum(min(v, 1.0) for v in _cf) / u.Y2H
+
+        gen['availability'] = {
+            'capacity_factor_requested': gen['capacity_factor'],
+            'profile_peak': _peak,
+            'capacity_factor_effective': _effective,
+            'hours_above_nameplate': sum(1 for v in _cf if v > 1.0),
+        }
+
         # --- gen['c_prod']
 
         if u.capaSetToBeOptimised(gen['c_prod']):
