@@ -95,3 +95,77 @@ tools/compare_outputs.py runs/check/med-base.ieso.json \
 `tools/run_cases.sh` copies each input into the run directory before solving, so
 the tracked results under `datasets/` are never overwritten. It replaces
 `re-run-all-datasets.sh`, which began by deleting them.
+
+---
+
+# Stage 2 verification — input handling and reporting
+
+All eight configurations were re-solved with the corrected code and compared
+with the stage 1 baseline under the same pinned environment.
+
+| Case | Result |
+|---|---|
+| `elec-grid` base | identical |
+| `power-to-hydrogen` base | identical |
+| `power-to-water-med` base | water cost and emission KPIs change (R1); everything else identical |
+| `swiss-grid-2025` base | identical |
+| `swiss-grid-2050` base | identical |
+| `elec-grid` carbon + reliability | alternative optimum |
+| `power-to-hydrogen` carbon + reliability | alternative optimum |
+| `power-to-water-med` carbon + reliability | alternative optimum, plus R1 and R4 reporting changes |
+
+## Intended reporting changes
+
+`power-to-water-med`, corrected heat attribution (R1):
+
+| | Base run | Carbon-capped run |
+|---|---|---|
+| water `kpis.cost` | 1.3974 → **0.5344** \$/m³ | 1.6384 → **0.6285** \$/m³ |
+| water `kpis.emis` | 12.966 → **4.958** kg/m³ | 0.9488 → **0.3639** kg/m³ |
+
+The allocation shares now sum to one; before the correction they summed to
+1.0856 on this system, because the process's whole heat requirement was added
+once for each of the three eligible suppliers rather than once for the heat
+actually dispatched.
+
+`reliability_cap` (R4) reports **0** in all three capped runs, where the annual
+unmet-electricity cap is slack by about 2.5 GWh. It previously reported
+−8 106.79 on `power-to-water-med`: the value of the row's *lower* bound, which
+the solution rested on precisely because demand was fully served. The carbon cap
+binds in all three runs and its value is unchanged — 0.1768, 0.0512 and 0.0829
+respectively.
+
+## The dispatch differences, and what causes them
+
+Only the three runs carrying `carbon-constraint` and `non-served-power-constraint`
+differ in dispatch. The cause was isolated rather than inferred: reverting the
+R4 row change alone and re-solving `elec-grid` with both options returns a result
+**identical** to the baseline. Every other change in this stage is therefore
+inert on the optimisation, and the vertex shift is attributable to R4.
+
+Making the two rows one-sided leaves the feasible set unchanged — total emissions
+are already non-negative wherever `var_emis_prod` is, and each hourly unmet-demand
+variable is already bounded below by `l_ns[0]` — but it changes the matrix the
+simplex sees, so the solver settles on a different vertex of the same optimal
+face. The primal economics are unchanged:
+
+| Case | Cost | Emissions | Shortage penalties | Capacities |
+|---|---|---|---|---|
+| `elec-grid` capped | 5.7e-15 | 9.5e-16 | 2.8e-12 | identical |
+| `power-to-hydrogen` capped | 3.2e-15 | 3.4e-14 | 1.7e-11 | identical |
+| `power-to-water-med` capped | 2.2e-16 | 2.5e-15 | 0 | identical |
+
+(relative differences; annual output per technology is also unchanged in every
+case — only its timing moves.)
+
+The row change is a correction, not only a re-representation. The lower bound of
+zero asserted that system emissions could not be negative, which makes any
+net-negative target infeasible by construction in a system containing a removal
+technology. `test_a_net_negative_emissions_target_is_representable` covers this.
+
+## Tests
+
+`python3 -m pytest tests/` — 34 tests, no network, a few seconds. They use short
+horizons via `fcn.Y2H` and drive the same module sequence as `ieso.py`, so
+nothing is restructured for testing. Expected values come from hand arithmetic
+and explicit balances, never from snapshots of the code under correction.

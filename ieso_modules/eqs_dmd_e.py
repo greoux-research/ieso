@@ -26,7 +26,7 @@ def define(glop, s, opts, stat):
 
     # --- --- --- --- --- --- --- --- --- Matching the demand for e
 
-    dm = u.dm_h(dmd['profile'], dmd['total'])
+    dm = u.dm_h(dmd['profile'], dmd['total'], 'demand.e')
 
     dmd['__meet_dmnd'] = []
 
@@ -67,7 +67,14 @@ def define(glop, s, opts, stat):
 
         totl_dmd = dmd['total']
 
-        emis_con = glop.Constraint(0, totl_dmd * emis_cap)
+        # Upper bound only. Total emissions are already non-negative wherever
+        # var_emis_prod is, so the lower bound of zero added nothing to the
+        # feasible set while making the row's dual ambiguous: with the row
+        # resting on that lower bound, the reported value describes the wrong
+        # side of the constraint. (It would also have forbidden net-negative
+        # emissions in a system containing a removal technology.)
+
+        emis_con = glop.Constraint(-glop.infinity(), totl_dmd * emis_cap)
 
         stat['cons'] += 1
 
@@ -90,7 +97,13 @@ def define(glop, s, opts, stat):
 
         totl_dmd = dmd['total']
 
-        nspo_con = glop.Constraint(0, totl_dmd * max_fraction)
+        # Upper bound only, for the same reason: each hourly non-served variable
+        # is already bounded below by l_ns[0], so the row's lower bound of zero
+        # was redundant. It was also the bound the row actually rested on
+        # whenever demand was fully served, which is precisely when the cap is
+        # slack and its marginal value is zero.
+
+        nspo_con = glop.Constraint(-glop.infinity(), totl_dmd * max_fraction)
 
         stat['cons'] += 1
 

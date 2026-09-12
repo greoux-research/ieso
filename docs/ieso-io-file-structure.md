@@ -97,17 +97,28 @@ Demand objects represent the final consumption of electricity and other commodit
 - `profile` — optional CSV with 8760 hourly values. May be provided as (1) a CSV file path, (2) an array of 8760 values, or (3) empty for a flat profile.
 - `supply_sources` — PtX processes supplying the X commodity (a list of `iden` of PtX processes is expected here)
 - `var_cost_ns` — penalty for unmet demand (\$/MWh, \$/kg, \$/m³)
-- `l_ns` — lower and upper bounds on annual unmet demand
+- `l_ns` — lower and upper bounds applied to **each hourly** unmet-demand variable, not to the annual total. `[0, 0]` therefore forces full service in every hour. There is no annual cap on unmet demand for an X commodity; the optional `non-served-power-constraint` run option caps annual unmet **electricity** only.
 
 ##### Outputs
 
 - `output_ns` — hourly unmet demand
 - `shadow_prices["demand_match"]` — hourly shadow prices (\$/unit), i.e. the hourly marginal value of meeting one additional unit of demand. Corresponds to the dual variable of the demand-balance constraint, reflecting the system cost reduction associated with a 1-unit increase in demand satisfaction during that hour. Defined for both electricity and all other commodities X.
-- `shadow_prices["carbon_cap"]` — carbon constraint shadow price (\$/unit). Measures the implicit cost of relaxing the system-wide carbon emission limit by one unit. Applies only to the primary electricity demand, since the emission constraint is global and directly linked to total electricity generation.
-- `shadow_prices["reliability_cap"]` — reliability constraint shadow price (\$/unit). Measures the marginal system cost of relaxing the reliability requirement by one unit of served electricity. Also applies only to the primary electricity demand, reflecting the upper constraint on non-served electricity.
-- `kpis["cost"]` — average cost per unit of delivered output (\$/unit). Derived from the total system cost (fixed + variable) incurred to meet all demands, allocated to each demand category in proportion to its electricity consumption.
-- `kpis["emis"]` — average emissions per unit of delivered output (kg CO₂eq/unit). Follows the same allocation principle as cost, i.e. emissions are distributed on the basis of electricity use.
-- `kpis["reli"]` — reliability factor (%). Expresses the system's ability to continuously meet the hourly demand for electricity or any other commodity X throughout the year. Quantifies the proportion of total demand that is effectively served.
+- `shadow_prices["carbon_cap"]` — marginal value of relaxing the carbon cap by one unit (\$/unit), or `0` when the cap is not binding. Electricity demand only.
+- `shadow_prices["carbon_cap_detail"]` — what was observed, kept separate from the interpretation above: `raw_dual`, `cap`, `activity`, `slack`, `binding`, and `degenerate` (binding with a zero dual, where the marginal value is not uniquely determined).
+- `shadow_prices["reliability_cap"]` — marginal value of relaxing the annual unmet-electricity cap by one unit (\$/unit), or `0` when that cap is not binding. Electricity demand only.
+- `shadow_prices["reliability_cap_detail"]` — as for the carbon cap.
+- `kpis["cost"]` — **compatibility field, retained with its original formula**: `(allocated resource cost + shortage penalty) / annual demand` (\$/unit). Two cautions. It adds the penalty charged on unserved demand to the money actually spent on supply, and it divides by demand rather than by the volume delivered — so it is not a cost per unit delivered. Prefer the `accounts` fields below.
+- `kpis["emis"]` — average emissions per unit of annual demand (kg CO₂eq/unit), on the same allocation.
+- `kpis["reli"]` — share of annual demand served. An annual energy ratio, not a security-of-supply metric and not a guarantee about any individual hour.
+- `accounts` — the quantities behind the cost KPI, reported separately:
+    - `allocation_share` — this commodity's share of total electricity-equivalent output, the basis on which system cost and emissions are allocated. `null` if the system produced no output, in which case there is nothing to allocate and the fields derived from it are `null` too.
+    - `resource_cost` — system cost allocated to this commodity (\$). Excludes shortage penalties.
+    - `shortage_penalty` — `unmet_demand × var_cost_ns` (\$). A modelled price on a shortfall, not expenditure on supply.
+    - `emissions` — emissions allocated to this commodity (kg CO₂eq).
+    - `demand`, `unmet_demand`, `served_demand` — annual volumes.
+    - `resource_cost_per_demand`, `resource_cost_per_served` — resource cost per unit demanded and per unit actually delivered (\$/unit). The second is `null` when nothing was delivered.
+
+The allocation of joint system cost in proportion to electricity-equivalent consumption is a **convention**, not a measurement. In a system where a PtX process is a large share of load it determines how cost divides between commodities, and it should be stated wherever these figures are reported.
 
 ---
 
@@ -206,7 +217,7 @@ PtX processes convert electricity, and sometimes heat, into products such as hyd
 - `x_prod` — hourly production (Q/hour)
 - `x_strg` — storage level (Q)
 - `x_supp` — hourly supply (Q/hour)
-- `shadow_prices["demand_match"]` — hourly shadow heat supply prices (\$/MWh). Applies to thermal processes only. These are thermally coupled to cogeneration units through heat extraction constraints.
+- `shadow_prices["demand_match"]` — hourly shadow heat supply prices (\$/MWh of heat), the dual of this process's heat balance. Applies to thermally coupled processes only; a purely electric process (reverse osmosis, electrolysis) has no heat constraint and the series is empty. This is the price of *heat into the process*, and is distinct from the delivery price of the product itself, which is `shadow_prices["demand_match"]` on the corresponding demand object.
 
 ---
 
@@ -396,3 +407,23 @@ The solver object provides diagnostics for each optimisation run: status, run ti
 - `stat_capa` — number of capacity variables
 - `stat_outp` — number of output variables
 - `stat_cons` — total number of constraints
+
+---
+
+#### System object
+
+Totals for the run as a whole, reported directly rather than through the
+commodity allocation.
+
+##### Outputs
+
+- `cost` — total system cost (\$): fixed capacity charges plus variable costs, for every generator, flexibility means and PtX process. Excludes shortage penalties.
+- `output` — total electricity-equivalent output (MWh), the denominator of every allocation share.
+- `emis` — total emissions (kg CO₂eq).
+- `allocated_share_total` — sum of the commodity allocation shares. Every unit of output belongs to exactly one demand, so this must equal 1; a departure means output is being counted twice or not at all.
+
+> **Note.** The objective minimised by the solver omits fixed capacity charges for
+> assets whose capacity is *fixed* by the input (`c_prod` or `c_strg` set rather
+> than `-1`), because a constant cannot change the optimum. `cost` above includes
+> them. When comparing the two, reconcile with
+> `system cost + shortage penalties = solver objective + fixed-capacity charges`.

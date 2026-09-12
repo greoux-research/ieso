@@ -8,6 +8,68 @@ import numpy as np
 from ieso_modules import fcn as u
 
 
+def accounts(prop, g_cost, g_emis, total, ns_sum, var_cost_ns):
+
+    # Explicit quantities behind the cost KPI, kept apart from one another.
+    #
+    # 'cost' blends two different things: the resource expenditure allocated to a
+    # commodity, and the penalty charged for demand that was never served. The
+    # second is a modelling price on a shortfall, not money spent on supply, and
+    # it is divided by demand rather than by the volume actually delivered. Both
+    # conventions are preserved for compatibility, and the components are
+    # reported separately so a reader need not unpick them.
+
+    # A system that generates nothing has no output to allocate, so the share is
+    # undefined rather than zero and everything derived from it is reported as
+    # null. The quantities that remain observable -- what was demanded, what was
+    # served, what the shortfall was charged -- are reported regardless.
+
+    resource_cost = None if prop is None else prop * g_cost
+
+    shortage_penalty = ns_sum * var_cost_ns
+
+    served = total - ns_sum
+
+    return {
+        "allocation_share": prop,
+        "resource_cost": resource_cost,
+        "shortage_penalty": shortage_penalty,
+        "emissions": None if prop is None else prop * g_emis,
+        "demand": total,
+        "unmet_demand": ns_sum,
+        "served_demand": served,
+        "resource_cost_per_demand":
+            None if resource_cost is None or total <= 0 else resource_cost / total,
+        "resource_cost_per_served":
+            None if resource_cost is None or served <= 0 else resource_cost / served,
+    }
+
+
+def cap_report(con, cap, activity):
+
+    # A cap is a one-sided limit, and only a limit that binds has a marginal
+    # value. Report what was observed (the raw dual, the activity, the slack)
+    # separately from the interpretation, and say so when the two disagree
+    # rather than presenting a number that looks like a marginal cost.
+
+    raw = con.dual_value()
+
+    slack = cap - activity
+
+    binding = slack <= u.Balance_atol + u.Balance_rtol * max(abs(cap), 1.0)
+
+    value = raw * -1.0 if binding else 0.0
+
+    return value, {
+        "raw_dual": raw,
+        "cap": cap,
+        "activity": activity,
+        "slack": slack,
+        "binding": bool(binding),
+        "degenerate": bool(binding and abs(raw) <= u.Balance_atol),
+    }
+
+
 def g_figs(s):
 
     # --- --- --- --- --- --- --- --- --- Global figures
@@ -169,16 +231,25 @@ def demand_props(s, opts, emis_con, nspo_con):
                     demand_actually_served += p2x['x_prod'][i].solution_value() * p2x['pow_use_elec_prod']
 
                 # heat
+                #
+                # Attribute the heat actually dispatched by each supplier, converted
+                # to electricity-equivalent by that supplier's own coefficient 'a'.
+                # Adding the process's whole heat requirement once per eligible
+                # supplier counts the same heat len(supply_sources) times over.
+                #
+                # This is exact only while a generator's heat serves a single
+                # process; shared-source topologies are rejected up front because
+                # the formulation cannot apportion heat between consumers.
 
                 if p2x['type'] == 'elec + ther' and len(p2x['supply_sources']) > 0:
 
                     for gen in s['generator']:
 
-                        if gen['iden'] in p2x['supply_sources']:
+                        if gen['iden'] in p2x['supply_sources'] and gen['type'] == 'elec + ther':
 
                             for i in range(0, u.Y2H):
 
-                                demand_actually_served += p2x['x_prod'][i].solution_value() * p2x['pow_use_ther_prod'] * gen['a']
+                                demand_actually_served += gen['h_prod'][i].solution_value() * gen['a']
 
         x_demand_actually_served[commodity] = demand_actually_served
 
@@ -226,29 +297,42 @@ def demand_props(s, opts, emis_con, nspo_con):
 
     if "carbon-constraint" in opts:
 
-        dmd['shadow_prices']['carbon_cap'] = emis_con.dual_value() * -1.0
+        _value, _detail = cap_report(emis_con, dmd['total'] * opts["carbon-constraint"], g_emis)
+
+        dmd['shadow_prices']['carbon_cap'] = _value
+        dmd['shadow_prices']['carbon_cap_detail'] = _detail
 
     if "non-served-power-constraint" in opts:
 
-        dmd['shadow_prices']['reliability_cap'] = nspo_con.dual_value() * -1.0
+        _value, _detail = cap_report(nspo_con,
+                                     dmd['total'] * opts["non-served-power-constraint"],
+                                     float(np.sum(dmd['output_ns'])))
+
+        dmd['shadow_prices']['reliability_cap'] = _value
+        dmd['shadow_prices']['reliability_cap_detail'] = _detail
 
     # --- dmd['kpis']
 
-    if dmd['total'] > 0 and g_outp > 0:
+    if dmd['total'] > 0:
 
-        _prop = e_demand_actually_served / g_outp
-        _cost_0 = _prop * g_cost / dmd['total']
-        _cost_1 = (_prop * g_cost + np.sum(dmd['output_ns']) * dmd['var_cost_ns']) / dmd['total']
-        _emis = _prop * g_emis / dmd['total']
-        _reli = np.sum(dmd['output_ns']) / dmd['total']
+        _ns_sum = float(np.sum(dmd['output_ns']))
+        _prop = e_demand_actually_served / g_outp if g_outp > 0 else None
 
-        dmd['kpis'] = {
-            "cost": _cost_1, # [_cost_0, _cost_1],
-            "emis": _emis,
-            "reli": 1.0 - _reli
-        }
+        dmd['accounts'] = accounts(_prop, g_cost, g_emis, dmd['total'], _ns_sum, dmd['var_cost_ns'])
 
-        _sum_prop += _prop
+        if g_outp > 0:
+
+            _cost_1 = (_prop * g_cost + _ns_sum * dmd['var_cost_ns']) / dmd['total']
+            _emis = _prop * g_emis / dmd['total']
+            _reli = _ns_sum / dmd['total']
+
+            dmd['kpis'] = {
+                "cost": _cost_1, # [_cost_0, _cost_1],
+                "emis": _emis,
+                "reli": 1.0 - _reli
+            }
+
+            _sum_prop += _prop
 
 
     # === === === === === === === === ===
@@ -291,13 +375,16 @@ def demand_props(s, opts, emis_con, nspo_con):
 
             # --- dmd['kpis']
 
+            _ns_sum = float(np.sum(dmd['output_ns']))
+            _prop = x_demand_actually_served[commodity] / g_outp if g_outp > 0 else None
+
+            dmd['accounts'] = accounts(_prop, g_cost, g_emis, dmd['total'], _ns_sum, dmd['var_cost_ns'])
+
             if g_outp > 0:
 
-                _prop = x_demand_actually_served[commodity] / g_outp
-                _cost_0 = _prop * g_cost / dmd['total']
-                _cost_1 = (_prop * g_cost + np.sum(dmd['output_ns']) * dmd['var_cost_ns']) / dmd['total']
+                _cost_1 = (_prop * g_cost + _ns_sum * dmd['var_cost_ns']) / dmd['total']
                 _emis = _prop * g_emis / dmd['total']
-                _reli = np.sum(dmd['output_ns']) / dmd['total']
+                _reli = _ns_sum / dmd['total']
 
                 dmd['kpis'] = {
                     "cost": _cost_1, # [_cost_0, _cost_1],
@@ -310,8 +397,22 @@ def demand_props(s, opts, emis_con, nspo_con):
 
     # === === === === === === === === ===
 
-    if u.Verbose:
+    # System totals, reported directly rather than through the allocation.
 
-        if abs(_sum_prop - 1) > 1e+9:
+    s['system'] = {
+        "cost": g_cost,
+        "output": g_outp,
+        "emis": g_emis,
+        "allocated_share_total": _sum_prop,
+    }
 
-            print('_sum_prop', _sum_prop)
+    # Every unit of electricity-equivalent output is allocated to exactly one
+    # demand, so the shares must sum to one. A residual means output is being
+    # counted more than once, or not at all — the condition this check exists to
+    # catch. The threshold it previously carried, 1e+9, could never be exceeded.
+
+    if abs(_sum_prop - 1) > u.Balance_atol + u.Balance_rtol * max(abs(_sum_prop), 1.0):
+
+        if u.Verbose:
+
+            print('allocation shares do not sum to one:', _sum_prop)

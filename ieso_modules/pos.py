@@ -3,6 +3,8 @@
 # Gréoux Research (2024). IESO: a linear optimiser-based integrated energy system modelling environment. https://github.com/greoux-research/ieso
 
 
+import math
+
 import numpy as np
 
 from ieso_modules import pos_dmd
@@ -107,14 +109,44 @@ def process(glop, s, opts, stat, emis_con, nspo_con):
             flx['e_spil'] = rows
 
         # --- checks
+        #
+        # Verify the storage balance itself, hour by hour:
+        #
+        #   e_strg[i] = e_strg[i-1] + sqrt(rte)*e_char[i] - e_disc[i]/sqrt(rte)
+        #                           + inflow[i] - e_spil[i]
+        #
+        # The ratio of total discharge to total charge equals the round-trip
+        # efficiency only for a store with no inflow whose inventory returns to
+        # its starting level; it is not an invariant of a reservoir, of a store
+        # left off-cycle, or of one that never charges. The balance is.
 
-        if (flx['c_strg'] > 0) and (np.sum(flx['e_char']) > 0) and u.Verbose:
+        if flx['c_strg'] > 0:
 
-            _rte = np.sum(flx['e_disc']) / np.sum(flx['e_char'])
+            _sqrt_rte = math.sqrt(flx['round_trip_efficiency'])
 
-            if abs(_rte - flx['round_trip_efficiency']) > 1e+9:
+            _has_inflow = flx.get('inflow_total', 0) > 0
 
-                print('_rte', flx['iden'], _rte)
+            _inflow = u.dm_h(flx.get('inflow_profile', ''), flx['inflow_total'], flx['iden'] + ' inflow') if _has_inflow else None
+
+            _resid = 0.0
+
+            for i in range(0, u.Y2H):
+
+                _prev = flx['soc_ini'] * flx['c_strg'] if i == 0 else flx['e_strg'][i - 1]
+
+                _expected = _prev + flx['e_char'][i] * _sqrt_rte - flx['e_disc'][i] / _sqrt_rte
+
+                if _has_inflow:
+
+                    _expected += _inflow[i] - flx['e_spil'][i]
+
+                _resid = max(_resid, abs(flx['e_strg'][i] - _expected))
+
+            if _resid > u.Balance_atol + u.Balance_rtol * flx['c_strg']:
+
+                if u.Verbose:
+
+                    print('storage balance residual', flx['iden'], _resid)
 
 
     # --- p2x
@@ -162,6 +194,26 @@ def process(glop, s, opts, stat, emis_con, nspo_con):
             rows.append(p2x['x_supp'][i].solution_value())
 
         p2x['x_supp'] = rows
+
+        # --- p2x['shadow_prices']['demand_match']
+        #
+        # Dual of the process heat balance: the marginal cost of one more unit of
+        # heat to this process, in $ per MWh of heat. Defined only for thermally
+        # coupled processes; a purely electric process has no such constraint and
+        # the series stays empty. This is not the water (or other product)
+        # delivery dual, which belongs to the demand object.
+
+        p2x['shadow_prices'] = p2x.get('shadow_prices', {})
+
+        rows = []
+
+        if '__meet_dmnd' in p2x:
+
+            for i in range(0, u.Y2H):
+
+                rows.append(p2x['__meet_dmnd'][i].dual_value())
+
+        p2x['shadow_prices']['demand_match'] = rows
 
 
     # --- purge non-serializable solver objects before dumping JSON
