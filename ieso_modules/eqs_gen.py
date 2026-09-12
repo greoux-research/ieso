@@ -34,8 +34,13 @@ def define(glop, s, opts, stat):
 
             # Electricity output
 
+            # Hourly output is non-negative and limited by the capacity and
+            # availability relations below. l_prod bounds the installed capacity,
+            # not the operating point: reusing it here turned a minimum plant
+            # size into a minimum output in every hour of the year.
+
             name = gen['iden'] + '_e_prod_' + str(i)
-            gen['e_prod'].append(glop.NumVar(llim, ulim, name))
+            gen['e_prod'].append(glop.NumVar(0, glop.infinity(), name))
 
             stat['outp'] += 1
 
@@ -48,6 +53,19 @@ def define(glop, s, opts, stat):
             glop.Add(gen['e_prod'][i] <= cf[i] * gen['c_prod'])
 
             stat['cons'] += 1
+
+            # Nameplate, added only in the hours that need it. A normalised
+            # profile may exceed one wherever the requested capacity_factor is
+            # above the profile's own mean/max ratio, and there the availability
+            # relation no longer holds output to the installed capacity. Where
+            # cf <= 1 it is the tighter of the two and already implies this, so
+            # adding the row everywhere would only enlarge the problem.
+
+            if cf[i] > 1.0:
+
+                glop.Add(gen['e_prod'][i] <= gen['c_prod'])
+
+                stat['cons'] += 1
 
         # if the generator is thermal
         # and if it is coupled to a thermal p2x
@@ -91,7 +109,7 @@ def define(glop, s, opts, stat):
                     # Heat output
 
                     name = gen['iden'] + '_h_prod_' + str(i)
-                    gen['h_prod'].append(glop.NumVar(llim, ulim, name))
+                    gen['h_prod'].append(glop.NumVar(0, glop.infinity(), name))
 
                     stat['outp'] += 1
 
@@ -105,6 +123,20 @@ def define(glop, s, opts, stat):
                                * gen['c_prod'] * gen['b'])
 
                     stat['cons'] += 2
+
+                    # Nameplate, in the same form as equations 6 and 7 with the
+                    # availability factor at one, and again only where cf > 1.
+                    # c_prod is the *electrical* capacity, so the heat limit
+                    # carries the coefficient b, which routinely exceeds one:
+                    # h <= c_prod would roughly halve the heat a nuclear unit
+                    # can supply.
+
+                    if cf[i] > 1.0:
+
+                        glop.Add(gen['e_prod'][i] + gen['h_prod'][i] * gen['a'] <= gen['c_prod'])
+                        glop.Add(gen['h_prod'][i] <= gen['c_prod'] * gen['b'])
+
+                        stat['cons'] += 2
 
             else:
 

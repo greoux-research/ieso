@@ -68,7 +68,7 @@ def define(glop, s, opts, stat):
 
         charge_allowed = flx.get('charge_allowed', True)
 
-        char_ulim = ulim if charge_allowed else 0
+        char_ulim = glop.infinity() if charge_allowed else 0
 
         # *_e_char_[i], *_e_strg_[i], *_e_disc_[i]
 
@@ -76,20 +76,29 @@ def define(glop, s, opts, stat):
 
             # Charge rate
 
+            # Charge, discharge and stored energy are non-negative and limited
+            # by the constraints below. l_strg bounds the installed *energy*
+            # capacity (MWh); applying it to the charge and discharge variables
+            # imposed an energy limit on a power quantity (MW), and its lower
+            # bound forced a minimum charge, discharge and inventory in every
+            # hour. The duration limit c_strg / hours_of_storage is what bounds
+            # power, and the state-of-charge constraints are what bound
+            # inventory.
+
             name = flx['iden'] + '_e_char_' + str(i)
-            flx['e_char'].append(glop.NumVar(llim, char_ulim, name))
+            flx['e_char'].append(glop.NumVar(0, char_ulim, name))
 
             stat['outp'] += 1
 
             # MWh of electricity being stored at a given hour
 
             name = flx['iden'] + '_e_strg_' + str(i)
-            flx['e_strg'].append(glop.NumVar(llim, ulim, name))
+            flx['e_strg'].append(glop.NumVar(0, glop.infinity(), name))
 
             # Discharge rate
 
             name = flx['iden'] + '_e_disc_' + str(i)
-            flx['e_disc'].append(glop.NumVar(llim, ulim, name))
+            flx['e_disc'].append(glop.NumVar(0, glop.infinity(), name))
 
             stat['outp'] += 2
 
@@ -98,7 +107,7 @@ def define(glop, s, opts, stat):
                 # Spilled inflow (water released without generating)
 
                 name = flx['iden'] + '_e_spil_' + str(i)
-                flx['e_spil'].append(glop.NumVar(0, ulim, name))
+                flx['e_spil'].append(glop.NumVar(0, glop.infinity(), name))
 
                 stat['outp'] += 1
 

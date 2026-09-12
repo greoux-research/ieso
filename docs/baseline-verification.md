@@ -169,3 +169,91 @@ technology. `test_a_net_negative_emissions_target_is_representable` covers this.
 horizons via `fcn.Y2H` and drive the same module sequence as `ieso.py`, so
 nothing is restructured for testing. Expected values come from hand arithmetic
 and explicit balances, never from snapshots of the code under correction.
+
+---
+
+# Stage 3 verification — capacity bounds and thermal topology
+
+This stage changes the feasible set deliberately. All eight configurations were
+re-solved and compared with stage 2, which isolates L1 and L2 from the earlier
+reporting work.
+
+## Constraint counts confirm where the nameplate limit applies
+
+| Case | Stage 2 | Stage 3 | Added |
+|---|---|---|---|
+| `elec-grid` base / capped | 96 361 / 96 363 | 96 361 / 96 363 | none |
+| `power-to-hydrogen` base / capped | 131 402 / 131 404 | 131 402 / 131 404 | none |
+| `power-to-water-med` base / capped | 192 722 / 192 724 | 192 722 / 192 724 | none |
+| `swiss-grid-2025` | 148 921 | 154 768 | 5 847 |
+| `swiss-grid-2050` | 201 483 | 207 322 | 5 839 |
+
+The nameplate row is added only in hours where the normalised profile exceeds
+one. Everywhere else `e <= cf * c` is the tighter relation and already implies
+`e <= c`, so no row is needed. No bundled dataset outside Switzerland has a
+profile that exceeds one.
+
+## What the nameplate limit changes
+
+`swiss-grid-2025`, generator `rovr`, hour 3782 — the only hour in that dataset
+where a normalised profile exceeds one for a unit that is dispatched to its
+limit:
+
+| | Stage 2 | Stage 3 |
+|---|---|---|
+| max `e_prod / c_prod` | 1.000 091 50 | 1.000 000 00 |
+| total system cost | 6 251 234 975.24 | 6 251 234 987.95 |
+
+Output above the installed capacity is no longer possible. The 0.336 MWh
+clipped is picked up by `impo-1`, and the whole correction costs **$12.71 on a
+$6.25 billion system** — a relative cost change of 2.0e-9.
+
+In `swiss-grid-2050` the reused `l_prod` bound was already clipping `impo-2` at
+8 900 MW in 118 hours, so the ratio was 1.0 before and after. What changed is
+that the limit is now deliberate rather than incidental.
+
+## Economics elsewhere are unchanged
+
+| Case | Cost | Emissions | Shortage penalties |
+|---|---|---|---|
+| `elec-grid` base / capped | 1.6e-16 / 4.0e-15 | 6.1e-16 / 3.8e-15 | 5.6e-15 / 3.6e-12 |
+| `power-to-hydrogen` base / capped | 0 / 9.8e-15 | 0 / 3.6e-14 | 6.8e-16 / 8.9e-11 |
+| `power-to-water-med` base / capped | 0 / 4.4e-16 | 1.1e-16 / 5.9e-15 | 0 / 0 |
+| `swiss-grid-2050` | 3.6e-15 | 1.9e-13 | 0 |
+
+(relative differences.) Dispatch moves in every case, because replacing variable
+bounds with constraints changes the matrix the simplex sees even where the
+feasible set is identical. Annual output per technology is unchanged except in
+`power-to-water-med` base, where coal and CCGT exchange 48 554 MWh of
+electricity against 393 866 MWh of heat. Both carry the same extraction
+coefficient a = 0.123277, and 393 866 x 0.123277 = 48 554, so the exchange is
+exactly cost-neutral — which the cost column confirms to the last digit.
+
+## A defect introduced and removed during this stage
+
+The nameplate row was first added in every hour rather than only where it can
+bind, enlarging the problem by 52 560 rows on `elec-grid` and 113 880 on
+`power-to-water-med` — a 60% larger matrix on MED. Four of the eight cases then
+failed to solve. The status was **abnormal (numerical trouble)**, not infeasible
+and not unbounded: the model was structurally sound and the redundant rows had
+degraded its conditioning.
+
+Two things follow.
+
+A constraint implied by another is not free at this scale. Redundant rows add
+degeneracy and cost the solve, so a limit should be imposed only where it can
+actually bind.
+
+And the failures were nearly invisible. `opt.run` returned a bare boolean, so a
+non-optimal solve wrote an output file with the same schema as a successful one,
+carrying the input values echoed back (`c_prod: -1`) and `stat_succ: 0` inside
+the solver block, with nothing in the log but the command line. Diagnosing it
+required changing the code. `opt.run` now distinguishes infeasible, unbounded,
+abnormal and not-solved, prints the reason, and records it as
+`solver.stat_status` — the distinction matters, because an infeasible model is a
+specification error, an unbounded one a missing constraint, and an abnormal one a
+conditioning problem.
+
+**Open question for the maintainer.** A failed solve still writes a result-shaped
+file. Whether `ieso.py` should decline to write one, or write it under a
+different name, is a design decision and has been left alone.

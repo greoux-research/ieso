@@ -32,8 +32,11 @@ def define(glop, s, opts, stat):
 
             # Amount of product X being stored at a given hour
 
+            # Inventory is non-negative and limited by c_strg below; l_strg
+            # bounds the installed storage capacity, not the hourly level.
+
             name = p2x['iden'] + '_x_strg_' + str(i)
-            p2x['x_strg'].append(glop.NumVar(llim, ulim, name))
+            p2x['x_strg'].append(glop.NumVar(0, glop.infinity(), name))
 
             stat['outp'] += 1
 
@@ -57,13 +60,21 @@ def define(glop, s, opts, stat):
 
             # Hourly production rate of product X
 
+            # Production is limited by the capacity and availability relations
+            # below. Delivery is not: it draws on the store, so it can exceed
+            # the production rate, which is the whole point of holding one.
+            # Both variables took their bounds from l_prod, so a bound set to
+            # express a siting limit also capped the delivery rate, and a
+            # positive lower bound forced a minimum production *and* a minimum
+            # delivery in every hour.
+
             name = p2x['iden'] + '_x_prod_' + str(i)
-            p2x['x_prod'].append(glop.NumVar(llim, ulim, name))
+            p2x['x_prod'].append(glop.NumVar(0, glop.infinity(), name))
 
             # Hourly supply rate of product X
 
             name = p2x['iden'] + '_x_supp_' + str(i)
-            p2x['x_supp'].append(glop.NumVar(llim, ulim, name))
+            p2x['x_supp'].append(glop.NumVar(0, glop.infinity(), name))
 
             stat['outp'] += 2
 
@@ -77,6 +88,14 @@ def define(glop, s, opts, stat):
             glop.Add(p2x['x_strg'][i] <= p2x['c_strg'])
 
             stat['cons'] += 2
+
+            # Nameplate, as for generators, and only where cf > 1.
+
+            if cf[i] > 1.0:
+
+                glop.Add(p2x['x_prod'][i] <= p2x['c_prod'])
+
+                stat['cons'] += 1
 
         # set of constraints: storage modelling
 
