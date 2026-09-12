@@ -1,2 +1,13 @@
 
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# thermo build artefacts (built with thermo/build.sh; see docs/ieso-setup-guide.md)
+thermo/*.o
+thermo/*.bin
+
+# scenario run evidence (regenerate with tools/run_cases.sh)
+runs/
