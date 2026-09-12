@@ -117,6 +117,8 @@ else:
 
 # --- --- --- --- --- --- --- --- --- Finish line
 
+s['provenance'] = u.provenance(json_file, opts, s)
+
 s['solver']['stat_status'] = stat.get('status', 'unknown')
 s['solver']['stat_time'] = stat['time']
 s['solver']['stat_capa'] = stat['capa']

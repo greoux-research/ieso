@@ -12,7 +12,7 @@ import json
 import sys
 
 
-ieso_version = '25.10'
+ieso_version = '26.09'
 Verbose = True
 Y2H = 8760
 Strg_end_eq_ini = True
@@ -130,6 +130,110 @@ def fail(who, message):
         print('\'' + str(who) + '\': ' + message)
 
     sys.exit(1)
+
+
+def file_digest(path):
+
+    # SHA-256 of a file, or None if it cannot be read.
+
+    global ieso_version, Verbose, Y2H, Strg_end_eq_ini
+
+    import hashlib
+    import os
+
+    if not (isinstance(path, str) and path and os.path.isfile(path)):
+
+        return None
+
+    h = hashlib.sha256()
+
+    with open(path, 'rb') as f:
+
+        for block in iter(lambda: f.read(1 << 16), b''):
+
+            h.update(block)
+
+    return h.hexdigest()
+
+
+def provenance(json_file, opts, s):
+
+    """
+    Identify what produced a result: the code, the inputs, the options and the
+    environment.
+
+    A result that cannot be traced to the code and data behind it cannot be
+    reproduced or superseded with confidence. Profiles are hashed alongside the
+    input file because they determine the answer just as directly, and they are
+    referenced by path rather than carried inside it.
+    """
+
+    global ieso_version, Verbose, Y2H, Strg_end_eq_ini
+
+    import datetime
+    import platform
+
+    profiles = {}
+
+    for group in ('generator', 'p2x'):
+
+        for item in s.get(group, []):
+
+            path = item.get('profile', '')
+
+            if isinstance(path, str) and path:
+
+                profiles[path] = file_digest(path)
+
+    for item in s.get('flex', []):
+
+        path = item.get('inflow_profile', '')
+
+        if isinstance(path, str) and path:
+
+            profiles[path] = file_digest(path)
+
+    for key in ('e',):
+
+        path = s['demand'][key].get('profile', '')
+
+        if isinstance(path, str) and path:
+
+            profiles[path] = file_digest(path)
+
+    for dmd in s['demand'].get('x', []):
+
+        path = dmd.get('profile', '')
+
+        if isinstance(path, str) and path:
+
+            profiles[path] = file_digest(path)
+
+    try:
+
+        import ortools.init.python.init as _ort
+
+        solver_version = _ort.OrToolsVersion.version_string()
+
+    except Exception:
+
+        solver_version = 'unknown'
+
+    return {
+        'ieso_version': ieso_version,
+        'input': str(json_file),
+        'input_sha256': file_digest(json_file),
+        'profiles_sha256': profiles,
+        'options': dict(opts),
+        'hours': Y2H,
+        'storage_closes_the_year': Strg_end_eq_ini,
+        'solver': 'GLOP',
+        'ortools': solver_version,
+        'numpy': np.__version__,
+        'python': platform.python_version(),
+        'platform': platform.platform(),
+        'run_utc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+    }
 
 
 def load(csv_path):
