@@ -1,6 +1,6 @@
 """The installed artifact: what it is, what it contains, how it behaves.
 
-Run against the ieso package installed in this Python. With IESO_ISOLATED=1
+Run against the ies_optimiser package installed in this Python. With IES_OPTIMISER_ISOLATED=1
 the environment itself is checked too: an installed wheel, no checkout, no
 Git, no compiler.
 """
@@ -16,12 +16,12 @@ from importlib import metadata
 
 import pytest
 
-import ieso
-from ieso import _install, fcn, schemas
+import ies_optimiser
+from ies_optimiser import _install, fcn, schemas
 
 from conftest import ISOLATED, console
 
-PACKAGE = os.path.dirname(os.path.abspath(ieso.__file__))
+PACKAGE = os.path.dirname(os.path.abspath(ies_optimiser.__file__))
 
 
 def run(args, cwd, **kw):
@@ -41,27 +41,27 @@ def snapshot(folder):
 
 # --- what is installed ---------------------------------------------------------------------
 
-@pytest.mark.skipif(not ISOLATED, reason='IESO_ISOLATED is not set')
+@pytest.mark.skipif(not ISOLATED, reason='IES_OPTIMISER_ISOLATED is not set')
 def test_the_installed_wheel_is_what_runs():
     install = _install.installation()
     assert install['kind'] == 'wheel' and install['checkout'] is None, install
-    direct = metadata.distribution('ieso').read_text('direct_url.json')
+    direct = metadata.distribution('ies-optimiser').read_text('direct_url.json')
     assert direct is None or not json.loads(direct).get('dir_info', {}).get('editable'), direct
     assert 'site-packages' in PACKAGE.replace('\\', '/').lower()
     assert 'PYTHONPATH' not in os.environ
-    assert not any(os.path.isfile(os.path.join(p or os.curdir, 'ieso', '__init__.py')) and
-                   os.path.abspath(os.path.join(p or os.curdir, 'ieso')) != PACKAGE for p in sys.path), sys.path
+    assert not any(os.path.isfile(os.path.join(p or os.curdir, 'ies_optimiser', '__init__.py')) and
+                   os.path.abspath(os.path.join(p or os.curdir, 'ies_optimiser')) != PACKAGE for p in sys.path), sys.path
 
 
-@pytest.mark.skipif(not ISOLATED, reason='IESO_ISOLATED is not set')
+@pytest.mark.skipif(not ISOLATED, reason='IES_OPTIMISER_ISOLATED is not set')
 def test_no_git_compiler_or_build_tool_is_reachable():
     tools = ['git', 'gcc', 'g++', 'cc', 'c++', 'clang', 'clang++', 'cl', 'cmake', 'ninja', 'make']
     assert [t for t in tools if shutil.which(t)] == []
 
 
 def test_version_and_metadata_agree():
-    assert ieso.__version__ == metadata.version('ieso')
-    requires = metadata.requires('ieso') or []
+    assert ies_optimiser.__version__ == metadata.version('ies-optimiser')
+    requires = metadata.requires('ies-optimiser') or []
     assert {r.split('>')[0].split('<')[0].split('=')[0].split(';')[0].strip() for r in requires
             if 'extra ==' not in r} == {'numpy', 'ortools', 'pydantic'}
 
@@ -75,7 +75,7 @@ def test_resources_are_installed():
             assert f.read() == schemas.generate(kind)          # shipped == generated from installed models
     exe = fcn.Thermo_bin
     assert os.path.dirname(exe) == os.path.join(PACKAGE, '_bin')
-    assert os.path.basename(exe) == ('ieso-thermo.exe' if sys.platform == 'win32' else 'ieso-thermo')
+    assert os.path.basename(exe) == ('ies-optimiser-thermo.exe' if sys.platform == 'win32' else 'ies-optimiser-thermo')
     assert os.path.isfile(exe) and os.access(exe, os.X_OK)
 
 
@@ -96,7 +96,7 @@ def guarded(file, mode='r', *a, **k):
 builtins.open = guarded
 from ortools.linear_solver import pywraplp
 pywraplp.Solver.CreateSolver = staticmethod(refuse('a solver creation'))
-import ieso, ieso.api, ieso.cli, ieso.models, ieso.results, ieso.schemas, ieso.__main__
+import ies_optimiser, ies_optimiser.api, ies_optimiser.cli, ies_optimiser.models, ies_optimiser.results, ies_optimiser.schemas, ies_optimiser.__main__
 sys.stdout.write('IMPORTED')
 """
     out = run([sys.executable, '-B', '-c', probe], tmp_path)
@@ -109,13 +109,13 @@ sys.stdout.write('IMPORTED')
 
 @pytest.mark.parametrize('how', ['console', 'module'])
 def test_entry_points(tmp_path, how):
-    cmd = [console()] if how == 'console' else [sys.executable, '-m', 'ieso']
+    cmd = [console()] if how == 'console' else [sys.executable, '-m', 'ies_optimiser']
     out = run(cmd + ['--help'], tmp_path)
-    assert out.returncode == 0 and 'ieso validate INPUT.json' in out.stdout
+    assert out.returncode == 0 and 'ies-optimiser validate INPUT.json' in out.stdout
     out = run(cmd + ['--version'], tmp_path)
-    assert out.returncode == 0 and out.stdout.strip() == 'ieso ' + ieso.__version__
+    assert out.returncode == 0 and out.stdout.strip() == 'ies-optimiser ' + ies_optimiser.__version__
     out = run(cmd + ['schema', 'input'], tmp_path)
-    assert out.returncode == 0 and json.loads(out.stdout)['x-ieso-format'] == {'kind': 'input', 'version': 1}
+    assert out.returncode == 0 and json.loads(out.stdout)['x-ies-optimiser-format'] == {'kind': 'input', 'version': 1}
     assert run(cmd, tmp_path).returncode == 1
     assert list(tmp_path.iterdir()) == []
 
@@ -166,12 +166,12 @@ def test_cli_solve_from_an_unrelated_directory_with_spaces(tmp_path, examples_co
     out = run([console(), str(case_dir / 'case.json')], elsewhere)
     assert out.returncode == 0, out.stderr
     written = sorted(set(os.listdir(case_dir)) - {p for p, _ in before_case})
-    assert written == ['case.ieso.json']
+    assert written == ['case.ies-optimiser.json']
     assert sorted(os.listdir(elsewhere)) == ['demand.csv', 'solar.csv']
     assert snapshot(PACKAGE) == before_package
-    with open(case_dir / 'case.ieso.json', encoding='utf-8') as f:
+    with open(case_dir / 'case.ies-optimiser.json', encoding='utf-8') as f:
         doc = json.load(f)
-    os.remove(case_dir / 'case.ieso.json')
+    os.remove(case_dir / 'case.ies-optimiser.json')
     pv = doc['provenance']
     assert doc['solver']['stat_status'] == 'optimal' and doc['system']['accounting_ok'] is True
     assert pv['profile_resolution'] == {'mode': 'input-directory', 'base': str(case_dir)}
@@ -212,7 +212,7 @@ def test_api_solves_are_immutable_and_independent(solved, examples_copy, expecte
     with open(path, encoding='utf-8') as f:
         case = json.load(f)
     before = copy.deepcopy(case)
-    again = ieso.solve(case, options=sc['options'], source=path)
+    again = ies_optimiser.solve(case, options=sc['options'], source=path)
     assert case == before
     first = solved[sc['name']]
     assert again.objective == first.objective
@@ -226,14 +226,14 @@ def test_api_solves_are_immutable_and_independent(solved, examples_copy, expecte
 def test_provenance_identifies_the_installed_code_and_executable(solved):
     doc = solved['power-to-x-thermal'].document
     pv = doc['provenance']
-    assert pv['ieso_version'] == ieso.__version__
+    assert pv['ies_optimiser_version'] == ies_optimiser.__version__
     assert pv['installation']['package_dir'] == PACKAGE
     if ISOLATED:
         assert pv['installation']['kind'] == 'wheel'
         assert (pv['git_scope'], pv['git_revision'], pv['enclosing_git']) == (None, None, None)
     assert pv['thermo_binary'] == fcn.Thermo_bin and pv['thermo_binary_origin'] == 'packaged'
     assert pv['source_files_sha256']['thermo/sim.bin'] == sha256(fcn.Thermo_bin)
-    assert pv['source_files_sha256']['ieso/fcn.py'] == sha256(os.path.join(PACKAGE, 'fcn.py'))
+    assert pv['source_files_sha256']['ies_optimiser/fcn.py'] == sha256(os.path.join(PACKAGE, 'fcn.py'))
     assert pv['result_format_version'] == 1 and pv['input_format'] == 'canonical'
     assert pv['source_matches_case'] is True and len(pv['case_sha256']) == 64
     gen = next(g for g in doc['generator'] if g['iden'] == 'nuclear')

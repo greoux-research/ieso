@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the four illustrative IESO datasets from one parameter table.
+"""Build the four illustrative IES Optimiser datasets from one parameter table.
 
     python3 tools/build_datasets.py            (from any directory)
 
@@ -47,7 +47,7 @@ def crf(r, n):
 # --- demand ------------------------------------------------------------------
 # Annual electricity demand: 5.69 TWh, the 2025 total estimated from ENTSO-E
 # actual load (monthly mean load x hours; 12% of 2025 hours are missing, so
-# monthly means stand in for them). The hourly SHAPE is 2021 (dmnd.csv); IESO
+# monthly means stand in for them). The hourly SHAPE is 2021 (dmnd.csv); IES Optimiser
 # scales it to this total.
 E_TOTAL = 5.69e6                        # MWh
 
@@ -220,7 +220,7 @@ def build(variant):
              'turbine_t_p': COGEN[iden] if iden in thermal else [],
              'condenser_p': 0.05 if iden in thermal else 0, 'a': 0, 'b': 0}
         if iden in ('solr', 'wind'):
-            # Round the annual availability assumption; IESO rescales the profile.
+            # Round the annual availability assumption; IES Optimiser rescales the profile.
             g['profile'] = path(iden + '.csv')
             g['capacity_factor'] = round(profile_mean(iden + '.csv'), 3)
         generators.append(g)

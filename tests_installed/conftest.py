@@ -1,6 +1,6 @@
 """Fixtures for the installed-artifact tests.
 
-These tests exercise the ieso package installed in the running Python -- in
+These tests exercise the ies_optimiser package installed in the running Python -- in
 CI, a wheel installed into a fresh environment with no source checkout -- and
 need only the test bundle beside them:
 
@@ -8,11 +8,11 @@ need only the test bundle beside them:
     tests/fixtures/thermo_reference.json
     examples/                         the synthetic cases and expected.json
     tools/check_invariants.py         the independent invariant checker
-    README.md, docs/ieso-api.md, docs/ieso-setup-guide.md   (their tested examples)
+    README.md, docs/ies-optimiser-api.md, docs/ies-optimiser-setup-guide.md   (their tested examples)
 
 Environment:
-    IESO_ISOLATED=1   assert that the process cannot reach a checkout, Git or a
-                      compiler, and that ieso is an installed wheel (set by the
+    IES_OPTIMISER_ISOLATED=1   assert that the process cannot reach a checkout, Git or a
+                      compiler, and that ies_optimiser is an installed wheel (set by the
                       CI test jobs, which run with PATH reduced to the
                       virtual environment).
 """
@@ -24,21 +24,21 @@ import shutil
 
 import pytest
 
-import ieso
+import ies_optimiser
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BUNDLE = os.path.dirname(HERE)
 EXAMPLES = os.path.join(BUNDLE, 'examples')
 FIXTURE = os.path.join(BUNDLE, 'tests', 'fixtures', 'thermo_reference.json')
 INVARIANTS = os.path.join(BUNDLE, 'tools', 'check_invariants.py')
-ISOLATED = os.environ.get('IESO_ISOLATED') == '1'
+ISOLATED = os.environ.get('IES_OPTIMISER_ISOLATED') == '1'
 
 
 def console():
-    """The installed 'ieso' console command, beside this interpreter."""
+    """The installed 'ies-optimiser' console command, beside this interpreter."""
     import sys
-    found = shutil.which('ieso', path=os.path.dirname(sys.executable))
-    assert found, 'no ieso console script beside ' + sys.executable
+    found = shutil.which('ies-optimiser', path=os.path.dirname(sys.executable))
+    assert found, 'no ies-optimiser console script beside ' + sys.executable
     return found
 
 
@@ -67,7 +67,7 @@ def solved(examples_copy, expected):
         with open(path, encoding='utf-8') as f:
             case = json.load(f)
         before = copy.deepcopy(case)
-        result = ieso.solve(case, options=sc['options'], source=path)
+        result = ies_optimiser.solve(case, options=sc['options'], source=path)
         assert case == before, 'solve() modified its input'
         out[sc['name']] = result
     return out

@@ -14,7 +14,7 @@ for output, cost and emissions alike. Expected values are worked by hand.
 import numpy as np
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 from conftest import demand_x, flex, generator, p2x, solve, system
 
 REL = 1e-9

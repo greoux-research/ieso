@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Check that IESO's distribution artifacts hold exactly what they should.
+"""Check that IES Optimiser's distribution artifacts hold exactly what they should.
 
     python tools/check_dist.py DIST_FILE [...]      # .whl and/or .tar.gz
 
 Prints each artifact's file list, then checks it against an allow-list:
 
 * sdist: pyproject.toml, CMakeLists.txt, README.md, LICENSE, PKG-INFO, the
-  package sources and resources under src/ieso/, and the C++ sources under
+  package sources and resources under src/ies_optimiser/, and the C++ sources under
   thermo/ -- nothing else (no datasets, results, runs, tests, profiles, object
   files or executables);
-* wheel: the ieso package (modules, py.typed, the two JSON Schemas, one
-  thermodynamics executable in ieso/_bin/) and its dist-info (METADATA, WHEEL,
+* wheel: the ies_optimiser package (modules, py.typed, the two JSON Schemas, one
+  thermodynamics executable in ies_optimiser/_bin/) and its dist-info (METADATA, WHEEL,
   RECORD, entry_points.txt, licenses/LICENSE), with the expected metadata:
-  Requires-Python >= 3.11, the three runtime dependencies, the 'ieso' console
+  Requires-Python >= 3.11, the three runtime dependencies, the 'ies-optimiser' console
   entry point, a py3-none platform tag.
 
 Exit status 0 when every artifact passes.
@@ -26,17 +26,17 @@ import tarfile
 import zipfile
 
 SDIST_ALLOWED = ['pyproject.toml', 'CMakeLists.txt', 'README.md', 'LICENSE', 'PKG-INFO',
-                 'src/ieso/*.py', 'src/ieso/py.typed', 'src/ieso/data/*.schema.json',
+                 'src/ies_optimiser/*.py', 'src/ies_optimiser/py.typed', 'src/ies_optimiser/data/*.schema.json',
                  'thermo/*.cpp', 'thermo/*.h', 'thermo/README.md']
-SDIST_REQUIRED = ['pyproject.toml', 'CMakeLists.txt', 'README.md', 'LICENSE', 'PKG-INFO', 'src/ieso/__init__.py',
-                  'src/ieso/py.typed', 'src/ieso/data/ieso-input-1.schema.json',
-                  'src/ieso/data/ieso-result-1.schema.json', 'thermo/sim.cpp', 'thermo/Cogen.cpp',
-                  'thermo/iesoH2O.cpp', 'thermo/Cogen.h', 'thermo/iesoH2O.h']
-WHEEL_ALLOWED = ['ieso/*.py', 'ieso/py.typed', 'ieso/data/*.schema.json', 'ieso/_bin/ieso-thermo',
-                 'ieso/_bin/ieso-thermo.exe', '*.dist-info/METADATA', '*.dist-info/WHEEL', '*.dist-info/RECORD',
+SDIST_REQUIRED = ['pyproject.toml', 'CMakeLists.txt', 'README.md', 'LICENSE', 'PKG-INFO', 'src/ies_optimiser/__init__.py',
+                  'src/ies_optimiser/py.typed', 'src/ies_optimiser/data/ies-optimiser-input-1.schema.json',
+                  'src/ies_optimiser/data/ies-optimiser-result-1.schema.json', 'thermo/sim.cpp', 'thermo/Cogen.cpp',
+                  'thermo/iesOptimiserH2O.cpp', 'thermo/Cogen.h', 'thermo/iesOptimiserH2O.h']
+WHEEL_ALLOWED = ['ies_optimiser/*.py', 'ies_optimiser/py.typed', 'ies_optimiser/data/*.schema.json', 'ies_optimiser/_bin/ies-optimiser-thermo',
+                 'ies_optimiser/_bin/ies-optimiser-thermo.exe', '*.dist-info/METADATA', '*.dist-info/WHEEL', '*.dist-info/RECORD',
                  '*.dist-info/entry_points.txt', '*.dist-info/licenses/LICENSE']
-WHEEL_REQUIRED = ['ieso/__init__.py', 'ieso/__main__.py', 'ieso/api.py', 'ieso/cli.py', 'ieso/py.typed',
-                  'ieso/data/ieso-input-1.schema.json', 'ieso/data/ieso-result-1.schema.json']
+WHEEL_REQUIRED = ['ies_optimiser/__init__.py', 'ies_optimiser/__main__.py', 'ies_optimiser/api.py', 'ies_optimiser/cli.py', 'ies_optimiser/py.typed',
+                  'ies_optimiser/data/ies-optimiser-input-1.schema.json', 'ies_optimiser/data/ies-optimiser-result-1.schema.json']
 DEPENDENCIES = ('numpy', 'ortools', 'pydantic')
 
 
@@ -72,9 +72,9 @@ def check_wheel(path, problems):
         names = [n for n in z.namelist() if not n.endswith('/')]      # repair tools may add directory entries
         print(name + ' (' + str(len(names)) + ' files)')
         check('wheel', names, WHEEL_ALLOWED, WHEEL_REQUIRED, problems)
-        exes = [n for n in names if n.startswith('ieso/_bin/')]
+        exes = [n for n in names if n.startswith('ies_optimiser/_bin/')]
         if len(exes) != 1:
-            problems.append('wheel: expected one executable in ieso/_bin/, found ' + str(exes))
+            problems.append('wheel: expected one executable in ies_optimiser/_bin/, found ' + str(exes))
         dist = [n for n in names if n.endswith('.dist-info/METADATA')]
         meta = z.read(dist[0]).decode() if dist else ''
         entry = [n for n in names if n.endswith('.dist-info/entry_points.txt')]
@@ -87,8 +87,8 @@ def check_wheel(path, problems):
     for dep in DEPENDENCIES:
         if not re.search(r'^Requires-Dist: ' + dep + r'\b', meta, re.M):
             problems.append('wheel: no Requires-Dist on ' + dep)
-    if not re.search(r'^ieso = ieso\.cli:main$', entries, re.M):
-        problems.append('wheel: no console entry point ieso = ieso.cli:main')
+    if not re.search(r'^ies-optimiser = ies_optimiser\.cli:main$', entries, re.M):
+        problems.append('wheel: no console entry point ies-optimiser = ies_optimiser.cli:main')
 
 
 def main(paths):

@@ -28,7 +28,7 @@ import sys
 
 import pytest
 
-from ieso import fcn
+from ies_optimiser import fcn
 
 from conftest import FIXTURE
 
@@ -75,7 +75,7 @@ def test_scenario_meets_the_contract(solved, sc):
 
 @pytest.mark.parametrize('sc', SCENARIOS, ids=[s['name'] for s in SCENARIOS])
 def test_independent_invariants_hold(solved, sc, invariants, tmp_path):
-    path = tmp_path / (sc['name'] + '.ieso.json')
+    path = tmp_path / (sc['name'] + '.ies-optimiser.json')
     path.write_text(json.dumps(solved[sc['name']].document), encoding='utf-8')
     fails, notes, cost, emis = invariants.check(str(path))
     assert fails == [], fails

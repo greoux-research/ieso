@@ -9,7 +9,7 @@ variables, and product delivery inherited the production plant's bound.
 import numpy as np
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 from conftest import demand_x, flex, generator, p2x, solve, system
 
 

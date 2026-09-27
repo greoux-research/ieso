@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from ieso import fcn as u
-from ieso.errors import InputError
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import InputError
 
 
 @pytest.fixture

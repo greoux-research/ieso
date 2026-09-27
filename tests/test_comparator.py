@@ -221,6 +221,34 @@ def test_provenance_is_compared_on_request(tmp_path, doc):
     assert code == 1 and 'source_sha256' in out
 
 
+def test_pre_rename_provenance_remains_comparable(tmp_path, doc):
+    old = copy.deepcopy(doc)
+    old['provenance']['ieso_version'] = old['provenance'].pop('ies_optimiser_version')
+    a, b = write(tmp_path, 'new.json', doc), write(tmp_path, 'old.json', old)
+    assert compare(a, b)[0] == 0
+    # Explicit provenance comparison still reports the actual field rename.
+    assert compare(a, b, '--provenance')[0] == 1
+    old['system']['cost'] += 1e9
+    assert compare(a, write(tmp_path, 'changed.json', old))[0] == 1
+
+
+@pytest.mark.parametrize('mode', ['missing', 'both', 'invalid_old', 'invalid_new'])
+def test_package_version_field_is_required_and_typed(tmp_path, doc, mode):
+    changed = copy.deepcopy(doc)
+    pv = changed['provenance']
+    if mode == 'missing':
+        del pv['ies_optimiser_version']
+    elif mode == 'both':
+        pv['ieso_version'] = pv['ies_optimiser_version']
+    elif mode == 'invalid_old':
+        del pv['ies_optimiser_version']
+        pv['ieso_version'] = 42
+    else:
+        pv['ies_optimiser_version'] = 42
+    code, out = compare(write(tmp_path, 'changed.json', changed), write(tmp_path, 'good.json', doc))
+    assert code == 1 and 'provenance' in out
+
+
 # --- legacy baselines -----------------------------------------------------------
 
 def legacy(doc):

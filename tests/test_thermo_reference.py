@@ -26,7 +26,7 @@ import subprocess
 
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIXTURE = json.load(open(os.path.join(ROOT, 'tests', 'fixtures', 'thermo_reference.json')))
@@ -99,7 +99,7 @@ def test_refusals_on_and_outside_the_domain(sim_bin, name, case):
 
 
 def test_python_boundary_parses_the_emitted_precision(sim_bin):
-    """IESO uses the coefficients exactly as printed -- 6 significant digits."""
+    """IES Optimiser uses the coefficients exactly as printed -- 6 significant digits."""
     ref = [c for c in PLANTS['nuclear']['accepted'] if c['extraction_c'] == 80][0]
     a, b, err = u.thermo(*conditions('nuclear'), 80, binary=sim_bin)
     assert err is False
@@ -149,7 +149,7 @@ REFERENCE_PLATFORM = platform.system() == 'Darwin' and platform.machine() == 'ar
 
 def packaged_binary():
     if not os.path.isfile(u.Thermo_bin):
-        pytest.skip('IESO installed without its executable')
+        pytest.skip('IES Optimiser installed without its executable')
     return u.Thermo_bin
 
 

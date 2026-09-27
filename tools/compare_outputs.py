@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare two IESO results field by field.
+"""Compare two IES Optimiser results field by field.
 
     tools/compare_outputs.py NEW OLD [--legacy] [--provenance]
 
@@ -130,7 +130,7 @@ SYSTEM = {'cost': NUM, 'output': NUM, 'emis': NUM, 'allocation_defined': BOOL,
           'allocated_share_total': OPT, 'allocated': DICT, 'unallocated': DICT,
           'surplus': DICT, 'checks': DICT, 'accounting_ok': BOOL}
 CHECK = {'residual': NUM, 'tolerance': NUM, 'ok': BOOL}
-PROVENANCE = {'ieso_version': STR, 'input': STR, 'input_sha256': HEX64, 'profiles_sha256': DICT,
+PROVENANCE = {'input': STR, 'input_sha256': HEX64, 'profiles_sha256': DICT,
               'options': DICT, 'hours': NUM, 'storage_closes_the_year': BOOL, 'solver': STR,
               'ortools': STR, 'numpy': STR, 'python': STR, 'platform': STR, 'run_utc': STR,
               'git_scope': ANY, 'git_revision': ANY, 'git_dirty': ANY, 'enclosing_git': ANY,
@@ -208,9 +208,16 @@ def schema(doc, which, legacy):
     if strict:
         need(solver, 'stat_status', 'solver', STR)
         fields(doc['provenance'], PROVENANCE, 'provenance')
+        pv = doc['provenance'] if isinstance(doc['provenance'], dict) else {}
+        # Historical reference files retain the version field from before the
+        # project rename. Require exactly one spelling, with the same type.
+        versions = [key for key in ('ies_optimiser_version', 'ieso_version') if key in pv]
+        if len(versions) != 1:
+            out.append(f'provenance: expected exactly one package version field in {which}')
+        else:
+            fields(pv, {versions[0]: STR}, 'provenance')
         # Added with case-relative profile paths; optional so that results
         # written before them still validate, but checked when present.
-        pv = doc['provenance'] if isinstance(doc['provenance'], dict) else {}
         if 'profile_resolution' in pv:
             fields(pv['profile_resolution'], {'mode': STR, 'base': ANY}, 'provenance.profile_resolution')
             if isinstance(pv['profile_resolution'], dict) and \

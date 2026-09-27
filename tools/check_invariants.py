@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Independent invariant checks on IESO results.
+"""Independent invariant checks on IES Optimiser results.
 
-    python tools/check_invariants.py RESULT.ieso.json [...]
+    python tools/check_invariants.py RESULT.ies-optimiser.json [...]
 
 Recomputes, from the result's own echoed input and its reported series --
-never from IESO's post-processing -- the conditions every optimal solution
-must satisfy. It imports nothing from IESO, so it checks an installed package
+never from IES Optimiser's post-processing -- the conditions every optimal solution
+must satisfy. It imports nothing from IES Optimiser, so it checks an installed package
 as well as a checkout. Profiles are read from the files the result's
 provenance says were consumed (provenance.profile_files). This is the checker
 used for the Step 1 reference evidence; it is kept here so that the
 installed-artifact tests (tests/installed) apply it too. Tolerance for a feasibility residual: 1e-6 + 1e-7 x scale
-(scale = the largest magnitude involved), the same order as IESO's own
+(scale = the largest magnitude involved), the same order as IES Optimiser's own
 Feas_* tolerances; bookkeeping identities: relative 1e-9.
 """
 
@@ -158,7 +158,7 @@ def check(path):
         need(emis <= cap + tol(max(abs(cap), abs(emis))), 'carbon cap exceeded')
     if 'non-served-power-constraint' in opts:
         need(ns.sum() <= opts['non-served-power-constraint'] * e['total'] + tol(e['total']), 'reliability cap exceeded')
-    need(sy['checks']['objective_reconciliation']['ok'], 'objective_reconciliation (IESO) failed')
+    need(sy['checks']['objective_reconciliation']['ok'], 'objective_reconciliation (IES Optimiser) failed')
     return fails, notes, cost, emis
 
 

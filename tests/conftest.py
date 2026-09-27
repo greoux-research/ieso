@@ -1,4 +1,4 @@
-"""Fixtures for the IESO regression tests.
+"""Fixtures for the IES Optimiser regression tests.
 
 The production model is an 8760-hour model. These tests shorten the horizon
 so that each case can be checked by hand. The horizon is passed to each solve
@@ -13,9 +13,9 @@ import sys
 import pytest
 
 
-from ieso import api
-from ieso import fcn as u
-from ieso.errors import IesoError
+from ies_optimiser import api
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import IesOptimiserError
 
 # The horizon of the test in progress: this harness's own state, reset by the
 # fixture below after every test. solve() passes it to the model per run.
@@ -111,7 +111,7 @@ def solve(s, opts=None, config=None):
 
 
 def solved_document(hours=4):
-    """A complete, genuinely solved result in the shape ieso.py writes.
+    """A complete, genuinely solved result in the shape ies_optimiser.py writes.
 
     Every reported block is present: an electric and a cogeneration unit, an
     inflow-fed store, a thermally coupled process, both caps, provenance. Used
@@ -152,7 +152,7 @@ def refused(monkeypatch, capsys, s, opts=None):
     Refusals are exceptions (InputError, ThermoError), never an exit, so the
     caller keeps running. monkeypatch and capsys are accepted for the existing
     call sites and unused."""
-    with pytest.raises(IesoError) as info:
+    with pytest.raises(IesOptimiserError) as info:
         solve(s, opts)
     return str(info.value)
 
@@ -180,7 +180,7 @@ def sim_bin(tmp_path_factory):
     if compiler is None:
         pytest.skip('no C++ compiler: thermodynamics integration tests not run')
     out = tmp_path_factory.mktemp('thermo') / 'sim.bin'
-    sources = [os.path.join(root, 'thermo', n) for n in ('iesoH2O.cpp', 'Cogen.cpp', 'sim.cpp')]
+    sources = [os.path.join(root, 'thermo', n) for n in ('iesOptimiserH2O.cpp', 'Cogen.cpp', 'sim.cpp')]
     build = subprocess.run([compiler, '-O2', '-o', str(out)] + sources + ['-lm'],
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     assert build.returncode == 0, build.stdout

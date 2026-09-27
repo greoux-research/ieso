@@ -1,2 +1,0 @@
-IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
-Excluded: solver.stat_time (elapsed wall-clock time); provenance.run_utc (timestamp); provenance (identifies the run; compare with --provenance)

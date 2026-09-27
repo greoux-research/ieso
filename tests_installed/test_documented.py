@@ -1,9 +1,9 @@
 """The documented examples work against the installed package.
 
-Code blocks in README.md, docs/ieso-api.md and docs/ieso-setup-guide.md that are preceded
+Code blocks in README.md, docs/ies-optimiser-api.md and docs/ies-optimiser-setup-guide.md that are preceded
 by the line '<!-- tested -->' are run here, from a directory holding a copy of
-examples/: Python blocks as scripts, shell blocks line by line (each 'ieso ...'
-or 'python -m ieso ...' command must exit 0).
+examples/: Python blocks as scripts, shell blocks line by line (each 'ies-optimiser ...'
+or 'python -m ies_optimiser ...' command must exit 0).
 """
 
 import os
@@ -17,7 +17,7 @@ import pytest
 
 from conftest import BUNDLE, EXAMPLES, console
 
-DOCS = [os.path.join(BUNDLE, 'README.md')] + [os.path.join(BUNDLE, 'docs', n) for n in ('ieso-api.md', 'ieso-setup-guide.md')]
+DOCS = [os.path.join(BUNDLE, 'README.md')] + [os.path.join(BUNDLE, 'docs', n) for n in ('ies-optimiser-api.md', 'ies-optimiser-setup-guide.md')]
 BLOCK = re.compile(r'^<!-- tested -->\s*\n```(\w+)\n(.*?)^```', re.M | re.S)
 
 
@@ -59,12 +59,12 @@ def test_documented_example_runs(workdir, name, kind, code):
         if not line or line.startswith('#'):
             continue
         args = shlex.split(line)
-        if args[0] == 'ieso':
+        if args[0] == 'ies-optimiser':
             args[0] = console()
-        elif args[:3] == ['python', '-m', 'ieso'] or args[:3] == ['python3', '-m', 'ieso']:
-            args = [sys.executable, '-m', 'ieso'] + args[3:]
+        elif args[:3] == ['python', '-m', 'ies_optimiser'] or args[:3] == ['python3', '-m', 'ies_optimiser']:
+            args = [sys.executable, '-m', 'ies_optimiser'] + args[3:]
         else:
-            pytest.fail('a tested shell block may only run ieso commands: ' + line)
+            pytest.fail('a tested shell block may only run ies_optimiser commands: ' + line)
         out = subprocess.run(args, cwd=str(workdir), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
                              timeout=900)
         assert out.returncode == 0, line + '\n' + out.stdout + out.stderr

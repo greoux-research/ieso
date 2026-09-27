@@ -1,4 +1,4 @@
-"""The thermodynamics executable, how IESO finds it, and what provenance says.
+"""The thermodynamics executable, how IES Optimiser finds it, and what provenance says.
 
 These run the compiled C++ (built fresh by the sim_bin fixture), not mocked
 coefficients. The supported extraction domain is the open interval between
@@ -18,8 +18,8 @@ import sys
 
 import pytest
 
-from ieso import fcn as u
-from ieso.errors import ThermoError
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import ThermoError
 from conftest import demand_x, generator, p2x, solve, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -205,22 +205,22 @@ def test_executed_and_hashed_binary_are_the_same_file(tmp_path, sim_bin, monkeyp
 def test_the_default_binary_is_the_packaged_one():
     """Resolved through the package's resources: never the repository's
     thermo/sim.bin (the Step 1 reference build), never the working directory."""
-    from ieso import _install
+    from ies_optimiser import _install
     assert os.path.isabs(u.Thermo_bin)
     assert u.Thermo_bin == _install.packaged_thermo()
-    assert os.path.basename(u.Thermo_bin) == ('ieso-thermo.exe' if sys.platform == 'win32' else 'ieso-thermo')
-    assert os.path.dirname(u.Thermo_bin).endswith(os.path.join('ieso', '_bin'))
+    assert os.path.basename(u.Thermo_bin) == ('ies-optimiser-thermo.exe' if sys.platform == 'win32' else 'ies-optimiser-thermo')
+    assert os.path.dirname(u.Thermo_bin).endswith(os.path.join('ies_optimiser', '_bin'))
     assert u.Thermo_bin != os.path.join(ROOT, 'thermo', 'sim.bin')
     assert u.RunConfig().thermo_bin == u.Thermo_bin          # the default a run uses
 
 
-@pytest.mark.skipif(not os.path.isfile(u.Thermo_bin), reason='IESO installed without its executable')
+@pytest.mark.skipif(not os.path.isfile(u.Thermo_bin), reason='IES Optimiser installed without its executable')
 def test_cli_from_another_directory_uses_the_packaged_binary(tmp_path):
     """End to end: decoys in the working directory are ignored."""
-    for decoy in (tmp_path / 'thermo', tmp_path / 'ieso' / '_bin'):
+    for decoy in (tmp_path / 'thermo', tmp_path / 'ies_optimiser' / '_bin'):
         decoy.mkdir(parents=True)
         fake(decoy, 'echo "0.5 1.0"')
-        fake(decoy, 'echo "0.5 1.0"', name='ieso-thermo')
+        fake(decoy, 'echo "0.5 1.0"', name='ies-optimiser-thermo')
     from conftest import system as mk
     s = mk(generators=[generator('nucl', fix=1.0, var=10.0, kind='elec + ther',
                                  turbine=(290, 70), cond=0.05)],
@@ -228,11 +228,11 @@ def test_cli_from_another_directory_uses_the_packaged_binary(tmp_path):
                      sources=('nucl',), temperature=80, fix_prod=1.0)],
            e_total=8760.0 * 100, xs=[demand_x('water', 8760.0 * 50, ['med'])])
     (tmp_path / 'case.json').write_text(json.dumps(s))
-    out = subprocess.run([sys.executable, '-m', 'ieso', 'case.json'],
+    out = subprocess.run([sys.executable, '-m', 'ies_optimiser', 'case.json'],
                          cwd=str(tmp_path), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, timeout=600)
     assert out.returncode == 0, out.stdout
-    doc = json.loads((tmp_path / 'case.ieso.json').read_text())
+    doc = json.loads((tmp_path / 'case.ies-optimiser.json').read_text())
     assert doc['generator'][0]['a'] == pytest.approx(0.124272, rel=1e-5)
     assert doc['provenance']['thermo_binary'] == u.Thermo_bin
     assert doc['provenance']['thermo_binary_origin'] == 'packaged'
@@ -256,13 +256,13 @@ def test_own_checkout_is_identified_as_such():
     state = u.source_state()
     if state['git_scope'] is None:
         pytest.skip('not running from a Git checkout')
-    assert state['git_scope'] == 'ieso'
+    assert state['git_scope'] == 'ies_optimiser'
     assert len(state['git_revision']) == 40
     assert state['enclosing_git'] is None
 
 
 def _copy_package(dest):
-    from ieso import _install
+    from ies_optimiser import _install
     shutil.copytree(_install.PACKAGE_DIR, str(dest), ignore=shutil.ignore_patterns('__pycache__', '_bin'))
 
 
@@ -274,11 +274,11 @@ def _state_of(package_parent):
     code = ('import json, sys; '
             'sys.meta_path[:] = [f for f in sys.meta_path if not type(f).__module__.startswith("_editable")]; '
             'sys.path.insert(0, sys.argv[1]); '
-            'from ieso import fcn; print(json.dumps(fcn.source_state()))')
+            'from ies_optimiser import fcn; print(json.dumps(fcn.source_state()))')
     out = subprocess.run([sys.executable, '-c', code, str(package_parent)], stdout=subprocess.PIPE,
                          text=True, check=True)
     state = json.loads(out.stdout)
-    assert state['installation']['package_dir'] == os.path.join(str(package_parent), 'ieso'), state
+    assert state['installation']['package_dir'] == os.path.join(str(package_parent), 'ies_optimiser'), state
     return state
 
 
@@ -290,12 +290,12 @@ def _commit(repo):
 
 
 @pytest.mark.skipif(shutil.which('git') is None, reason='git not available')
-def test_an_enclosing_repository_is_not_reported_as_the_ieso_revision(tmp_path):
-    """An IESO checkout vendored inside another project: 'git rev-parse HEAD'
-    walks upward and would report the host project's commit as IESO's."""
+def test_an_enclosing_repository_is_not_reported_as_the_ies_optimiser_revision(tmp_path):
+    """An IES Optimiser checkout vendored inside another project: 'git rev-parse HEAD'
+    walks upward and would report the host project's commit as IES Optimiser's."""
     host = tmp_path / 'host'
-    checkout = host / 'vendor' / 'ieso'
-    _copy_package(checkout / 'src' / 'ieso')
+    checkout = host / 'vendor' / 'ies_optimiser'
+    _copy_package(checkout / 'src' / 'ies_optimiser')
     shutil.copy(os.path.join(ROOT, 'pyproject.toml'), str(checkout / 'pyproject.toml'))
     _commit(host)
     state = _state_of(checkout / 'src')
@@ -313,25 +313,25 @@ def test_an_installed_package_consults_no_repository(tmp_path):
     Git is not consulted at all."""
     host = tmp_path / 'project'
     site = host / 'venv' / 'site-packages'
-    _copy_package(site / 'ieso')
+    _copy_package(site / 'ies_optimiser')
     _commit(host)
     state = _state_of(site)
     assert state['installation']['kind'] == 'unknown'          # a copy, not a recorded distribution
     assert (state['git_scope'], state['git_revision'], state['git_dirty'], state['enclosing_git']) == \
         (None, None, None, None)
-    assert state['source_files_sha256']['ieso/fcn.py'] == u.file_digest(str(site / 'ieso' / 'fcn.py'))
+    assert state['source_files_sha256']['ies_optimiser/fcn.py'] == u.file_digest(str(site / 'ies_optimiser' / 'fcn.py'))
 
 
 # --- output path ------------------------------------------------------------------
 
 @pytest.mark.parametrize('src, opts, expected', [
-    ('case.json', {}, 'case.ieso.json'),
+    ('case.json', {}, 'case.ies-optimiser.json'),
     ('case.json', {'carbon-constraint': 50.0, 'non-served-power-constraint': 0.05},
-     'case.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json'),
-    (os.path.join('runs.json', 'case.json'), {}, os.path.join('runs.json', 'case.ieso.json')),
+     'case.ies-optimiser.carbon-constraint_50.0.non-served-power-constraint_0.05.json'),
+    (os.path.join('runs.json', 'case.json'), {}, os.path.join('runs.json', 'case.ies-optimiser.json')),
     (os.path.join('a.json.d', 'my.json.case.json'), {},
-     os.path.join('a.json.d', 'my.json.case.ieso.json')),
-    ('case', {}, 'case.ieso.json'),
+     os.path.join('a.json.d', 'my.json.case.ies-optimiser.json')),
+    ('case', {}, 'case.ies-optimiser.json'),
 ])
 def test_output_path_is_suffix_aware(src, opts, expected):
     assert u.output_path(src, opts) == expected
@@ -342,8 +342,8 @@ def test_cli_writes_beside_the_input_in_a_directory_named_json(tmp_path):
     d.mkdir()
     s = system(generators=[generator('g', fix=1.0, var=1.0)], e_total=8760.0)
     (d / 'case.json').write_text(json.dumps(s))
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py'), str(d / 'case.json')],
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py'), str(d / 'case.json')],
                          cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, timeout=300)
     assert out.returncode == 0, out.stdout
-    assert (d / 'case.ieso.json').is_file()
+    assert (d / 'case.ies-optimiser.json').is_file()

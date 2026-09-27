@@ -17,9 +17,9 @@ import sys
 import numpy as np
 import pytest
 
-from ieso import api
-from ieso import fcn as u
-from ieso.errors import InputError
+from ies_optimiser import api
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import InputError
 from conftest import demand_x, flex, generator, p2x, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,7 +79,7 @@ def test_the_working_directory_does_not_matter(tmp_path, monkeypatch):
         monkeypatch.chdir(cwd)
         results.append(api.solve(path, config=cfg()).document)
     assert numbers(results[0]) == numbers(results[1]) == numbers(results[2])
-    assert os.getcwd() == ROOT                               # IESO did not change directory itself
+    assert os.getcwd() == ROOT                               # IES Optimiser did not change directory itself
 
 
 def test_a_decoy_in_the_working_directory_is_never_read(tmp_path, monkeypatch):
@@ -228,7 +228,7 @@ def full_year(directory):
 
 
 def cli(args, cwd):
-    return subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py')] + args, cwd=cwd,
+    return subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py')] + args, cwd=cwd,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=300)
 
 
@@ -237,7 +237,7 @@ def test_cli_from_any_directory_with_a_decoy(tmp_path):
     np.savetxt(str(tmp_path / 'dmnd.csv'), np.linspace(9.0, 1.0, 8760))       # decoy in the cwd
     out = cli([path, 'carbon-constraint=500'], cwd=str(tmp_path))
     assert out.returncode == 0, out.stdout
-    doc = json.loads(open(os.path.join(str(tmp_path / 'case dir'), 'case.ieso.carbon-constraint_500.0.json')).read())
+    doc = json.loads(open(os.path.join(str(tmp_path / 'case dir'), 'case.ies-optimiser.carbon-constraint_500.0.json')).read())
     assert doc['provenance']['profiles_sha256']['dmnd.csv'] == sha(tmp_path / 'case dir' / 'dmnd.csv')
     assert doc['provenance']['options'] == {'carbon-constraint': 500.0}      # the flag is not an option
 
@@ -254,11 +254,11 @@ def test_cli_profile_base_as_the_runner_uses_it(tmp_path):
     out = cli([copy_path, 'carbon-constraint=500', '--profile-base', str(tmp_path / 'datasets' / 'x')], cwd='/')
     assert out.returncode == 0, out.stdout
     written = sorted(p.name for p in runs.iterdir())
-    assert written == ['label.ieso.carbon-constraint_500.0.json', 'label.json']
-    pv = json.loads((runs / 'label.ieso.carbon-constraint_500.0.json').read_text())['provenance']
+    assert written == ['label.ies-optimiser.carbon-constraint_500.0.json', 'label.json']
+    pv = json.loads((runs / 'label.ies-optimiser.carbon-constraint_500.0.json').read_text())['provenance']
     assert pv['profile_resolution'] == {'mode': 'explicit', 'base': str(tmp_path / 'datasets' / 'x')}
     assert pv['input_sha256'] == sha(original)
-    assert not any(p.name.endswith('.ieso.json') for p in (tmp_path / 'datasets' / 'x').iterdir())
+    assert not any(p.name.endswith('.ies-optimiser.json') for p in (tmp_path / 'datasets' / 'x').iterdir())
 
 
 @pytest.mark.parametrize('args, reason', [
@@ -272,4 +272,4 @@ def test_cli_flag_errors_fail_before_solving(tmp_path, args, reason):
     path = full_year(str(tmp_path / 'case'))
     out = cli([path] + args, cwd=str(tmp_path))
     assert out.returncode == 1 and reason in out.stdout
-    assert not [p for p in (tmp_path / 'case').iterdir() if '.ieso' in p.name]
+    assert not [p for p in (tmp_path / 'case').iterdir() if '.ies-optimiser' in p.name]

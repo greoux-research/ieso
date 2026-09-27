@@ -1,5 +1,34 @@
 # Baseline verification
 
+> **Evidence kept outside the repository (since 2026-09-27).** Two items are
+> retained locally by the maintainer and are identified here by name and
+> checksum, not by location:
+>
+> | Item | Identified by | SHA-256 |
+> |---|---|---|
+> | Pre-commit evidence archive `ies-optimiser-archive-2026-09-27-precommit/`: the historical `runs/`, old `dist/` artifacts and the standalone `thermo/sim.bin`, at their original relative paths | its `MANIFEST.json`, which records each archived file's path, size, SHA-256 and whether it was tracked | `182a0d243ac2f89a94ecc3a4d9b146fdf6670a6012bad5c0cc7b6b70f66af098` |
+> | Git history bundle `ieso-history.bundle`: the repository history before the re-upload, with the tags `v25.10` and `v26.05` | the file itself | `925c6f8038af80d4af35445bc016ab5593c4bfde7f2271c590f50cc8a2e0e7f9` |
+>
+> This repository starts at the re-upload commit and does not contain the
+> commits cited below. Run the historical `git show` commands in a clone of the
+> bundle, whose last commit `430d2fc` holds the code the re-upload was made from:
+>
+> ```bash
+> git clone ieso-history.bundle ieso-history && cd ieso-history
+> ```
+>
+> Paths of the form `runs/…`, `dist/…` and `thermo/sim.bin` below refer to the
+> archive where the files are no longer in this checkout; `results/` is
+> unchanged. The bundle's verification is recorded under "History and workflows
+> recovered", at the end of this record.
+>
+> **Placeholders.** Machine-specific paths in this record are written as
+> `<checkout>` (the repository checkout), `<workspace>` (the directory containing
+> it), `<scratch>` (a temporary directory on the verification machine) and
+> `<maintainer-local>` (a location kept by the maintainer outside the
+> repository). Results under `results/` record the actual paths of the runs
+> that produced them in their `provenance`, and are left as produced.
+
 Record of the reference state established before any corrective change, as
 required by the IESO correction and verification plan (Revision 3.1, stage 1).
 
@@ -516,7 +545,7 @@ The accounting equations, with units, are written out at the head of
 ## Tests
 
 ```
-/private/tmp/ieso-review-venv/bin/python -m pytest -p no:cacheprovider tests/
+<scratch>/ieso-review-venv/bin/python -m pytest -p no:cacheprovider tests/
 285 passed, 3 warnings in 21.37s
 ```
 
@@ -637,7 +666,7 @@ strengthened schema caught it, and the fixture now writes its input first.
 ## Verification after the second review
 
 ```
-/private/tmp/ieso-review-venv/bin/python -m pytest -p no:cacheprovider tests/
+<scratch>/ieso-review-venv/bin/python -m pytest -p no:cacheprovider tests/
 353 passed, 3 warnings in 21.70s
 ```
 
@@ -1046,7 +1075,7 @@ errors raised before solving. One case in `tests/test_profiles.py` separates
 
 **Runs.** `runs/step3-20260926T171649Z/` (ignored), same environment as Step 1
 (Python 3.9.6, NumPy 2.0.2, OR-Tools 9.15.6755, `sim.bin` 72a69d68…).
-The runner was started from `/Users/leo/Documents`, outside the repository, with
+The runner was started from `<workspace>`, outside the repository, with
 the relative output directory `ieso/runs/step3-20260926T171649Z/cases`.
 
 - All eight optimal, `accounting_ok: true`, exit 0.
@@ -1068,7 +1097,7 @@ the relative output directory `ieso/runs/step3-20260926T171649Z/cases`.
 
 **Legacy check.** The pre-migration inputs of commit `a1b2cb2`
 (`elec-grid.json`, `elec-grid+power-to-water-med.json`) were run with
-`--profile-base /Users/leo/Documents/ieso` from the scratch directory
+`--profile-base <checkout>` from the scratch directory
 (`legacy/`). Both results are **`IDENTICAL`** to `eg-base` and `med-base`,
 with no mapping. Their `input_sha256` and `profiles_sha256` equal the
 reference's. Run without the flag, the same input is refused, and the refusal
@@ -1144,7 +1173,7 @@ established.
 - `tools/generate_schemas.py --check`: current.
 - Environment: Python 3.9.6, NumPy 2.0.2, OR-Tools 9.15.6755, Pydantic 2.13.5 (pydantic-core 2.46.5), jsonschema 4.25.1, mypy 1.19.1; `sim.bin` 72a69d68….
 
-**Runs.** `runs/step4-20260926T175530Z/` (ignored), started from `/Users/leo/Documents` with a relative output directory, as in Step 3.
+**Runs.** `runs/step4-20260926T175530Z/` (ignored), started from `<workspace>` with a relative output directory, as in Step 3.
 - All eight optimal, `accounting_ok: true`, exit 0.
 - **`IDENTICAL`** to `results/elec-grid-2026-09-26/` under the strict comparator, after the same three profile-string mappings as Step 3 and nothing else.
 - **`IDENTICAL`** to the Step 3 runs with no mapping at all.
@@ -1185,7 +1214,7 @@ established.
 - **Tools and tests:** they now import the installed package, with no `sys.path` insertion.
 
 **Environment change.**
-- The machine had only Python 3.9.6. With your approval, uv (installed in a throwaway venv) installed CPython 3.12.14 in `~/.local/share/uv`.
+- The machine had only Python 3.9.6. With your approval, uv (installed in a throwaway venv) installed CPython 3.12.14 in uv's default managed-Python directory.
 - Development venv: NumPy 2.0.2, OR-Tools 9.15.6755 and Pydantic 2.13.5, as in the reference. The one transitive difference is `absl-py` 2.5.0 (2.3.1 before).
 - Before the move, the unchanged checkout passed all 540 tests on 3.12. Its 8 annual runs (`runs/step5-premove-py312-20260926T181453Z/`) are **`IDENTICAL`** to the reference and to Step 4, so the interpreter change alone changes nothing.
 
@@ -1326,3 +1355,221 @@ An independent review of the prepared release found three defects. All three wer
 - Evidence: `runs/step7-review-fixes-20260927T035032Z/`.
 
 Cross-platform CI and publication remain pending, exactly as before.
+
+
+## Project rename verification — 2026-09-27
+
+The project is now `ies-optimiser` (distribution and CLI), with Python package
+`ies_optimiser`. Documentation, source and native identifiers, schema filenames,
+output filenames and provenance names follow the rename. Earlier entries in this
+record, `results/`, previously built `dist/` artifacts and `examples/expected.json`
+retain the names under which their evidence was recorded. No input numbers,
+solver settings, equations, profile conventions or comparison tolerances changed.
+
+Verification used Python 3.12.14, NumPy 2.5.3, OR-Tools 9.15.6755 and Pydantic
+2.13.5 on macOS arm64. The pre-rename sources were copied before renaming;
+they and the renamed editable package ran in the same Python environment.
+The baseline used the existing packaged thermodynamics executable; the renamed
+executable was rebuilt from the renamed C++ sources, whose only changes are
+identifiers and includes. All Python numeric literals were also checked unchanged.
+
+- Development suite: **594 passed**. The initial run exposed seven output-suffix
+  mismatches; after correcting the runtime suffix to `.ies-optimiser`, the full
+  suite passed. The subsequent comparator compatibility tests passed **92 tests**,
+  including five new cases covering historical provenance, missing/ambiguous
+  version fields, invalid types and detection of changed numerical values.
+- Public-boundary mypy: **passed**, 10 source files. Generated schemas and
+  examples: **up to date**. Dataset regeneration left all JSON inputs and profiles
+  unchanged. `git diff --check`: **passed**.
+- A source distribution and a macOS arm64 wheel built from that sdist: **passed**
+  content inspection. Native inspection: **passed**, system libraries only,
+  arm64, macOS 11.0 minimum, executable permissions and thermodynamics probes.
+- Fresh wheel installation outside the checkout, with the isolation harness:
+  **47 passed**; installed native inspection also **passed**. Build artifacts are
+  local verification artifacts under `<scratch>/ies-optimiser-dist/`; nothing
+  was uploaded, committed or pushed.
+- All eight bundled configurations were run through `tools/run_cases.sh` (the
+  pre-rename copy for the baseline), into `runs/rename-baseline-final-20260927/`
+  and `runs/rename-after-20260927/`. Every solve was **optimal** with
+  **accounting_ok=true**. All eight comparisons are **IDENTICAL** under
+  `tools/compare_outputs.py`, and a separate recursive equality check found
+  exact equality after excluding only provenance and `solver.stat_time`.
+  Independent `tools/check_invariants.py` checks: **8/8 passed**. Thus problem
+  sizes, objective, capacities, emissions, coefficients and all dispatch values
+  are unchanged in this environment.
+
+The comparator requires exactly one string version field: current
+`ies_optimiser_version` or historical `ieso_version`. This keeps archived results
+comparable without rewriting them. Explicit `--provenance` comparisons still
+report the field rename; numerical assertions and tolerances are unchanged.
+The first comparison correctly rejected the old spelling until this explicit
+compatibility handling was added. Preliminary baseline attempts using the old
+editable environment could not resolve the moved package; the successful baseline
+above uses the preserved source copy and the common verification environment.
+
+Per-case comparison reports, `_invariants.txt`, environment records and test/build
+logs are under `runs/rename-after-20260927/` (logs in `verification/`). The existing
+`results/` references were not modified. No `.github/workflows/` directory was
+present in this checkout to update or run; cross-platform CI remains unverified
+for this rename.
+
+### Follow-up review and corrections — 2026-09-27
+
+The user supplied an independent review reporting a fresh editable build,
+**599 development tests passed**, clean mypy/generated-file checks and the same
+renamed thermodynamics digest. The reviewer also reported eight optimal annual
+runs, reconciling accounts, independent invariants passing, and IDENTICAL results
+against the pre-rename baseline in the same environment.
+
+Against the committed NumPy 2.0.2 references, the review reports cost agreement
+within 3e-15 relative and identical capacities, problem sizes and cogeneration
+coefficients. Dispatch differences observed with NumPy 2.5.3 produced identical
+comparison reports before and after the rename, supporting the conclusion that
+they were not introduced by the rename. These additional cross-environment
+findings are attributed to the supplied review; its scratchpad reports were not
+provided with the feedback and were not independently rerun during this follow-up.
+
+The review identified and this follow-up corrected two test guards: flag-error
+checks now look for `.ies-optimiser` outputs, and source provenance still guards
+against the historical `ieso_modules/` layout. Wheel installation examples now
+use the normalized `ies_optimiser-2026.9.0rc1-...whl` filename. Comment placement,
+import alignment and the documented CLI spelling were corrected as well.
+
+A `.gitignore` now excludes new run, build, distribution, native-object and
+Python-cache artifacts. It does not untrack the historical artifacts already in
+the repository. No reference artifacts or index entries were removed. The
+`.github/workflows/` files and the old Git history were afterwards recovered
+from a local clone of the original repository; see the next section.
+
+Follow-up validation: `tests/test_paths.py`, `tests/test_tooling.py` and
+`tests/test_comparator.py`: **132 passed**, with three upstream SWIG deprecation
+warnings. `git diff --check` passed. Ignore checks confirmed new `runs/`, `build/`,
+`dist/` and Python cache files are excluded while previously tracked artifacts
+remain tracked. All five historical commit IDs listed by the reviewer were
+confirmed absent locally (`git cat-file`). No solver code or inputs changed in
+this follow-up, so annual numerical runs were not repeated.
+
+### History and workflows recovered — 2026-09-27
+
+**Source.** A local clone of the original repository
+(`origin https://github.com/greoux-research/ieso.git`, since renamed) was found at
+`<scratch>/ieso-ci-repro/ieso`: 31 commits on `main` ending at
+`430d2fcf486b8fc57236bdf9ac1934dfef720054`, the tags `v25.10` (`b9090e7`) and
+`v26.05` (`e3f4548`), and the three workflows. Its only uncommitted change, the
+`[tool.mypy]` comment in `pyproject.toml`, is already in this repository. The
+public repository no longer serves these commits (`44db591` is not found there).
+
+**The re-upload is that history's continuation.** The tree of the re-upload
+commit `9ad6f45` equals that of `430d2fc` except for: that one `pyproject.toml`
+change; `.github/` and `.gitignore`, absent from the re-upload; and files the old
+`.gitignore` excluded, present in the re-upload (`runs/`, `dist/`, `__pycache__/`,
+`thermo/*.o`, `thermo/sim.bin`). Those were never tracked before the re-upload.
+
+**Bundle.** `git bundle create <maintainer-local>/ieso-history.bundle --all`, from that
+clone: 15,499,778 bytes, SHA-256
+`925c6f8038af80d4af35445bc016ab5593c4bfde7f2271c590f50cc8a2e0e7f9`, holding
+`refs/heads/main` (`430d2fc`) and both tags. `git bundle verify`: complete
+history. Checked in a fresh clone of the bundle alone:
+
+- every commit this record cites resolves: `44db591`, `a3ff7a5`, `e900e36`,
+  `aa761ef`, `a663acb`, `a1b2cb2` (short and full forms) and `b9090e7`;
+- the eight pre-correction results at `44db591` reproduce the SHA-256 digests of
+  the table at the top of this record, 8 of 8;
+- the four Step 1 inputs at `a1b2cb2` reproduce the digests of the Step 1 table,
+  4 of 4;
+- `aa761ef:results/2026-09-26/` is present.
+
+The bundle is a single file on one disk, outside this repository. Copying it
+elsewhere, or pushing it to an archive repository, is still to be decided.
+
+**Workflows.** `wheels.yml`, `release.yml` and `verify-index.yml` were restored
+from `430d2fc` with 14 changed lines and nothing else:
+
+- artifact file names `ieso-*` → `ies_optimiser-*` (wheel and sdist names
+  normalise the hyphen to an underscore), in the release file checks,
+  `SHA256SUMS`, the upload staging, and the extracted-sdist directory;
+- PyPI and TestPyPI project URLs → `/project/ies-optimiser/`;
+- bundled documentation → `docs/ies-optimiser-api.md`,
+  `docs/ies-optimiser-setup-guide.md`;
+- comments: "IESO" → "IES Optimiser", and `pip install ies-optimiser`.
+
+Validation, local only:
+
+- No YAML key, job, action pin or indentation changed, so the structure is the
+  one Step 7 recorded as actionlint-clean. The recovery review did not locate
+  actionlint; the subsequent follow-up found the existing binary and re-ran it
+  successfully, as recorded below.
+- The release job's file checks, checksum and upload-staging commands were run
+  against empty files named as this build names them
+  (`ies_optimiser-2026.9.0rc1-py3-none-<tag>.whl` for the four tags, and the
+  sdist). All checks passed, and 5 files were staged with `SHA256SUMS` left
+  behind. The old `ieso-*` pattern matches none of these files.
+- The sdist built for this rename extracts to `ies_optimiser-2026.9.0rc1/`, the
+  directory `wheels.yml` changes into.
+- Every repository path the workflows name exists.
+- `tools/release_check.py --tag v2026.9.0rc1` passes, and refuses `v2026.9.0`.
+
+**Package name.** On 2026-09-27, PyPI and TestPyPI answered 404 on both their
+JSON and simple endpoints for `ies-optimiser`, `ies_optimiser` and
+`ies.optimiser`. The name is unregistered; that does not prove it can be
+registered.
+
+**Not done.** Nothing was committed, pushed, tagged or dispatched. No workflow
+has run on GitHub, so the cross-platform release gate of Step 6 still has not
+passed. Trusted Publishing (project `ies-optimiser`, repository
+`ies-optimiser`) and the `testpypi` and `pypi` environments of the new GitHub
+repository were not yet configured at the time of recovery; the maintainer
+subsequently confirmed their configuration (see the cleanup entry below).
+
+### Recovery follow-up validation — 2026-09-27
+
+The existing `<scratch>/ieso-ci-tools/bin/actionlint` was located and run
+against all three restored `.github/workflows/*.yml` files: **passed**, exit 0,
+no diagnostics and no download required. This validates the workflow definitions
+locally; it does not replace executing the platform jobs on GitHub.
+
+`git bundle verify <maintainer-local>/ieso-history.bundle` was independently
+re-run: **complete history**, with `main`, both historical tags and the original
+remote refs. Its SHA-256 matches the recovery record above exactly. The release
+and support documentation now reflects restored workflows with GitHub execution
+still pending, instead of incorrectly reporting the directory as absent.
+
+`git diff --check` passed. HEAD remains `9ad6f4570c9e1d1417b278d53f5cba8f73098b12`;
+nothing was committed, pushed, tagged, published or dispatched. The bundle and
+temporary recovery clone were not deleted or modified.
+
+### Pre-commit repository cleanup — 2026-09-27
+
+With the maintainer's authorization, 499 local files (482,546,093 bytes) were
+archived to `<maintainer-local>/ies-optimiser-archive-2026-09-27-precommit/`.
+Every copy was verified by SHA-256 before its source was removed. The archive
+contains the historical and rename-verification `runs/`, obsolete `dist/`
+artifacts, Python/type-checker caches, native object files and the standalone
+reference `thermo/sim.bin`. Its `MANIFEST.json` records paths, sizes, hashes and
+tracked status; `README.txt` explains restoration. Of those files, 392 were
+tracked and will be removed from the repository by the maintainer's next commit.
+The index was not staged or otherwise changed by this cleanup.
+
+Source files, native build sources, workflows, tools, tests and fixtures,
+examples, datasets, documentation and all `results/` reference files were kept.
+The separate `<maintainer-local>/ieso-history.bundle` was not changed. The existing
+`.gitignore` prevents generated artifacts from being added again. This cleanup
+changes no equations, input values, solver settings or runtime code.
+
+The maintainer confirms Trusted Publishing is configured on both PyPI and
+TestPyPI for project `ies-optimiser`, repository `ies-optimiser`, and that GitHub
+`testpypi` and `pypi` environments have been created. This is maintainer-reported
+configuration, not a completed release verification; the first GitHub workflow
+execution remains pending. No commit, push, tag or publication was performed.
+
+Cleanup validation: full development suite **589 passed, 10 skipped**, with
+three upstream SWIG deprecation warnings. The ten skips are exclusively the
+historical reference executable's fixture-replay tests because `thermo/sim.bin`
+is now archived; fresh-source thermodynamics and installed-package tests in the
+development suite passed. No tests or assertions were modified for the cleanup.
+Public-boundary mypy: **passed**, 10 files. Generated schemas/examples: **current**.
+All three workflows: **actionlint passed**. `git diff --check`: **passed**.
+Every file in `results/` was independently compared byte-for-byte with HEAD:
+**unchanged**. The checkout now contains approximately 43,939 KB of files outside
+`.git` (including the retained reference results). Numerical runs were not
+repeated because no runtime code or model input changed.

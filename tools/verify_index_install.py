@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify an IESO release as installed from a package index.
+"""Verify an IES Optimiser release as installed from a package index.
 
     python tools/verify_index_install.py --index testpypi|pypi --version V \\
         --sha256sums FILE --bundle DIR --report DIR
@@ -7,19 +7,19 @@
 Run it with the Python to be tested, outside any checkout. In a fresh
 virtual environment it:
 
-1. installs ieso==V alone (no dependencies) from the chosen index --
+1. installs ies-optimiser==V alone (no dependencies) from the chosen index --
    TestPyPI or PyPI, and nothing else -- as a binary wheel, and checks from
    pip's installation report that the file came from that index's file host
    and that its SHA-256 is one of the release's recorded hashes (SHA256SUMS
    from the build that was tested);
-2. installs ieso's own dependencies, as its metadata declares them, from
+2. installs ies-optimiser's own dependencies, as its metadata declares them, from
    production PyPI only (a separate, explicit step: no combined or fallback
    index), plus pytest and jsonschema, all as wheels;
 3. runs the installed-artifact tests and the native inspection
    (tools/test_installed_wheel.py, check_installed) with PATH reduced to the
    environment;
-4. with --index pypi, also installs the unversioned 'ieso' into a second fresh
-   environment -- what 'pip install ieso' does -- and checks it selects V.
+4. with --index pypi, also installs the unversioned 'ies-optimiser' into a second fresh
+   environment -- what 'pip install ies-optimiser' does -- and checks it selects V.
 
 REPORT receives the pip reports, the installed listing and the test reports.
 --index-url and --file-host override the index (a local rehearsal index).
@@ -28,6 +28,7 @@ REPORT receives the pip reports, the installed listing and the test reports.
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -74,8 +75,8 @@ def check_origin(report_file, version, host, hashes):
     digest = info.get('archive_info', {}).get('hashes', {}).get('sha256') or \
         info.get('archive_info', {}).get('hash', '').replace('sha256=', '')
     print('installed ' + meta['name'] + ' ' + meta['version'] + ' from ' + url, flush=True)
-    if meta['name'].lower() != 'ieso' or meta['version'] != version:
-        problems.append('installed ' + meta['name'] + ' ' + meta['version'] + ', expected ieso ' + version)
+    if re.sub(r'[-_.]+', '-', meta['name']).lower() != 'ies-optimiser' or meta['version'] != version:
+        problems.append('installed ' + meta['name'] + ' ' + meta['version'] + ', expected ies-optimiser ' + version)
     if host and urlparse(url).hostname != host:
         problems.append('downloaded from ' + str(urlparse(url).hostname) + ', expected ' + host)
     if not url.endswith('.whl'):
@@ -88,7 +89,7 @@ def check_origin(report_file, version, host, hashes):
 
 def dependencies(py):
     code = ('import importlib.metadata as m; '
-            'print("\\n".join(r for r in (m.requires("ieso") or []) if "extra ==" not in r))')
+            'print("\\n".join(r for r in (m.requires("ies-optimiser") or []) if "extra ==" not in r))')
     out = subprocess.run([py, '-c', code], capture_output=True, text=True, check=True)
     return [line.strip() for line in out.stdout.splitlines() if line.strip()]
 
@@ -120,16 +121,16 @@ def main(argv=None):
     hashes = read_sums(args.sha256sums)
     bundle, report = os.path.abspath(args.bundle), os.path.abspath(args.report)
     os.makedirs(report, exist_ok=True)
-    root = tempfile.mkdtemp(prefix='ieso-index-')
+    root = tempfile.mkdtemp(prefix='ies-optimiser-index-')
     failures = []
 
     venv = os.path.join(root, 'venv')
     subprocess.run([sys.executable, '-m', 'venv', venv], check=True)
     py = t.python(venv)
     pip(py, 'install', '-q', '--upgrade', 'pip', check=True)
-    first = os.path.join(report, 'pip-report-ieso.json')
-    if not install_from_index(py, 'ieso==' + args.version, index_url, first, args.attempts):
-        print('FAIL: ieso==' + args.version + ' could not be installed from ' + index_url)
+    first = os.path.join(report, 'pip-report-ies-optimiser.json')
+    if not install_from_index(py, 'ies-optimiser==' + args.version, index_url, first, args.attempts):
+        print('FAIL: ies-optimiser==' + args.version + ' could not be installed from ' + index_url)
         return 1
     failures += check_origin(first, args.version, host, hashes)
     deps = dependencies(py)
@@ -145,24 +146,24 @@ def main(argv=None):
         failures += t.check_installed(venv, bundle, report, root)
 
     if args.index == 'pypi':
-        # What the documented 'pip install ieso' does, in a second environment.
+        # What the documented 'pip install ies-optimiser' does, in a second environment.
         plain = os.path.join(root, 'plain')
         subprocess.run([sys.executable, '-m', 'venv', plain], check=True)
         ppy = t.python(plain)
         pip(ppy, 'install', '-q', '--upgrade', 'pip', check=True)
         unversioned = os.path.join(report, 'pip-report-unversioned.json')
-        if pip(ppy, 'install', '--no-cache-dir', '--only-binary=:all:', '--report', unversioned, 'ieso').returncode:
-            failures.append('pip install ieso')
+        if pip(ppy, 'install', '--no-cache-dir', '--only-binary=:all:', '--report', unversioned, 'ies-optimiser').returncode:
+            failures.append('pip install ies-optimiser')
         else:
             with open(unversioned, encoding='utf-8') as f:
-                got = {i['metadata']['name'].lower(): i['metadata']['version'] for i in json.load(f)['install']}
-            print('pip install ieso selected ' + str(got.get('ieso')), flush=True)
-            if got.get('ieso') != args.version:
-                failures.append('pip install ieso selected ' + str(got.get('ieso')) + ', not ' + args.version)
-            out = subprocess.run([os.path.join(t.scripts(plain), 'ieso'), '--version'], capture_output=True,
+                got = {re.sub(r'[-_.]+', '-', i['metadata']['name']).lower(): i['metadata']['version'] for i in json.load(f)['install']}
+            print('pip install ies-optimiser selected ' + str(got.get('ies-optimiser')), flush=True)
+            if got.get('ies-optimiser') != args.version:
+                failures.append('pip install ies-optimiser selected ' + str(got.get('ies-optimiser')) + ', not ' + args.version)
+            out = subprocess.run([os.path.join(t.scripts(plain), 'ies-optimiser'), '--version'], capture_output=True,
                                  text=True, env=t.isolated_env(plain), cwd=root)
-            if out.stdout.strip() != 'ieso ' + args.version:
-                failures.append('ieso --version printed ' + repr(out.stdout.strip()))
+            if out.stdout.strip() != 'ies-optimiser ' + args.version:
+                failures.append('ies-optimiser --version printed ' + repr(out.stdout.strip()))
 
     shutil.rmtree(root, ignore_errors=True)
     for f in failures:

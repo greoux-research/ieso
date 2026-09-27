@@ -1,8 +1,8 @@
 """The public input contract (Step 4): typed models, the legacy adapter,
 structured diagnostics and the split between structure and semantics.
 
-Structure is validated once, by ieso.models; semantics by
-ieso.chk. Every refusal is an InputError whose diagnostics carry a
+Structure is validated once, by ies_optimiser.models; semantics by
+ies_optimiser.chk. Every refusal is an InputError whose diagnostics carry a
 stable code, a JSON Pointer path, the entity and, where hourly, a zero-based
 hour. These tests pin those codes and paths: they are the public contract.
 """
@@ -15,10 +15,10 @@ import os
 import numpy as np
 import pytest
 
-from ieso import api, formats
-from ieso import fcn as u
-from ieso.errors import InputError, ThermoError
-from ieso.models import Case, Generator, SolveOptions, Storage
+from ies_optimiser import api, formats
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import InputError, ThermoError
+from ies_optimiser.models import Case, Generator, SolveOptions, Storage
 from conftest import demand_x, flex, generator, p2x, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -381,7 +381,7 @@ def test_thermal_topology_failures(horizon):
 # --- validation without solving -------------------------------------------------------------
 
 def test_validate_reports_instead_of_raising_and_never_solves(monkeypatch):
-    from ieso import opt
+    from ies_optimiser import opt
     monkeypatch.setattr(opt, 'run', lambda *a, **k: pytest.fail('validate must not solve'))
     report = api.validate(canonical(), config=u.RunConfig(hours=H))
     assert report.valid and report.format == 'canonical'

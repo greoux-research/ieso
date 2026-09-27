@@ -1,0 +1,28 @@
+# Local verification output and distribution/build artifacts.
+# Historical run/build artifacts were archived outside the checkout.
+/runs/
+/dist/
+/build/
+/src/ies_optimiser/_bin/
+*.egg-info/
+
+# Python caches, test reports and local environments.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+
+# Native build products (reference results remain under results/).
+*.o
+*.obj
+/thermo/sim.bin
+/thermo/sim.exe
+
+# Local OS metadata.
+.DS_Store

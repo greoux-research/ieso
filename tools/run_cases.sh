@@ -1,18 +1,18 @@
 #!/bin/bash
-# Gréoux Research. IESO: https://github.com/greoux-research/ieso
+# Gréoux Research. IES Optimiser: https://github.com/greoux-research/ies-optimiser
 #
 # Non-destructive scenario runner.
 #
 # Each input is COPIED into the run directory as <label>.json before solving, so
-# IESO writes its result beside the copy, named after the run label, and nothing
+# IES Optimiser writes its result beside the copy, named after the run label, and nothing
 # under datasets/ is ever written. The copy's profile paths are relative to the
 # ORIGINAL case directory, so each run is given that directory explicitly with
 # --profile-base; the result's provenance records it (profile_resolution) along
 # with the files actually read. Works from any directory.
 #
-# The cases are solved by the IESO installed in $PYTHON's environment
-# (python -P -m ieso; -P keeps the calling directory, which may be this
-# checkout with its ieso.py launcher, off sys.path): an editable install of
+# The cases are solved by the IES Optimiser installed in $PYTHON's environment
+# (python -P -m ies_optimiser; -P keeps the calling directory, which may be this
+# checkout with its ies_optimiser.py launcher, off sys.path): an editable install of
 # this checkout, or a wheel. Python 3.11 or later. The
 # environment record names the package that ran, its version and the
 # thermodynamics executable it resolved.
@@ -35,15 +35,15 @@ run () {  # run <label> <input.json, relative to the repository> [name=value ...
   cp "$src" "$OUT/$label.json"
   local t0 rc t1 status
   t0=$(date +%s)
-  "$PY" -P -m ieso "$OUT/$label.json" "$@" --profile-base "$(dirname "$src")" > "$OUT/$label.log" 2>&1
+  "$PY" -P -m ies_optimiser "$OUT/$label.json" "$@" --profile-base "$(dirname "$src")" > "$OUT/$label.log" 2>&1
   rc=$?; t1=$(date +%s)
-  # IESO exits 1 when the solve did not reach an optimal solution, 3 when it
+  # IES Optimiser exits 1 when the solve did not reach an optimal solution, 3 when it
   # did but the result failed its own accounting checks, 2 or 1 on a refused
   # input. Any non-zero exit is a failure here.
   [ "$rc" -ne 0 ] && FAILURES=$((FAILURES+1))
   status=$("$PY" - "$OUT/$label" <<'PY' 2>/dev/null || echo unknown
 import glob, json, sys
-files = sorted(glob.glob(sys.argv[1] + '.ieso*.json'))
+files = sorted(glob.glob(sys.argv[1] + '.ies-optimiser*.json'))
 if not files:
     print('no-output')
 else:
@@ -63,9 +63,9 @@ PY
   echo "numpy:       $("$PY" -c 'import numpy;print(numpy.__version__)' 2>/dev/null)"
   echo "ortools:     $("$PY" -c 'import ortools.init.python.init as i;print(i.OrToolsVersion.version_string())' 2>/dev/null)"
   "$PY" -P - <<'PY' 2>&1
-from ieso import _install, fcn
+from ies_optimiser import _install, fcn
 install = _install.installation()
-print('ieso:        ' + str(install['version']) + ' (' + install['kind'] + ', ' + install['package_dir'] + ')')
+print('ies_optimiser:        ' + str(install['version']) + ' (' + install['kind'] + ', ' + install['package_dir'] + ')')
 print('thermo:      ' + str(fcn.file_digest(fcn.Thermo_bin)) + ' (' + fcn.Thermo_bin + ')')
 PY
   echo "platform:    $(uname -sr)"

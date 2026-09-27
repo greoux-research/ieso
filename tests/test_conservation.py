@@ -9,7 +9,7 @@ demand go negative. Every expected value below is worked out by hand.
 
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 from conftest import demand_x, generator, p2x, refused, solve, system
 
 TOL = 1e-7

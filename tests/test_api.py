@@ -10,9 +10,9 @@ import sys
 import numpy as np
 import pytest
 
-from ieso import api, cli
-from ieso import fcn as u
-from ieso.errors import InputError, ThermoError
+from ies_optimiser import api, cli
+from ies_optimiser import fcn as u
+from ies_optimiser.errors import InputError, ThermoError
 from conftest import demand_x, flex, generator, p2x, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,7 +78,7 @@ def guarded_open(file, mode='r', *a, **k):
 builtins.open = guarded_open
 from ortools.linear_solver import pywraplp
 pywraplp.Solver.CreateSolver = staticmethod(refuse('a solver creation'))
-import ieso, ieso.api, ieso.cli, ieso.__main__
+import ies_optimiser, ies_optimiser.api, ies_optimiser.cli, ies_optimiser.__main__
 sys.stdout.write('IMPORTED')
 """
     out = subprocess.run([sys.executable, '-B', '-c', probe], cwd=str(tmp_path),
@@ -229,10 +229,10 @@ def full_year_case(tmp_path, name='case.json'):
 def test_cli_and_api_give_the_same_mathematical_result(tmp_path):
     path = full_year_case(tmp_path)
     opts = ['carbon-constraint=20', 'non-served-power-constraint=0.05']
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py'), str(path)] + opts, cwd=ROOT,
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py'), str(path)] + opts, cwd=ROOT,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
     assert out.returncode == 0, out.stdout
-    cli_file = tmp_path / 'case.ieso.carbon-constraint_20.0.non-served-power-constraint_0.05.json'
+    cli_file = tmp_path / 'case.ies-optimiser.carbon-constraint_20.0.non-served-power-constraint_0.05.json'
     result = api.solve(api.load_input(path), options={'carbon-constraint': 20.0,
                                                       'non-served-power-constraint': 0.05}, source=path)
     api_file = tmp_path / 'api.json'
@@ -251,21 +251,21 @@ def test_cli_exit_codes_in_process(tmp_path, monkeypatch):
     path = full_year_case(tmp_path)
     assert cli.main([]) == 1
     assert cli.main([str(path), 'carbon-contraint=1']) == 1
-    assert not list(tmp_path.glob('*.ieso*.json'))
+    assert not list(tmp_path.glob('*.ies-optimiser*.json'))
     assert cli.main([str(path)]) == 0
-    assert (tmp_path / 'case.ieso.json').is_file()
+    assert (tmp_path / 'case.ies-optimiser.json').is_file()
     monkeypatch.setattr(u, 'Recon_rtol', -1.0)          # make every reconciliation fail
     monkeypatch.setattr(u, 'Recon_atol', -1.0)
-    (tmp_path / 'case.ieso.json').unlink()
+    (tmp_path / 'case.ies-optimiser.json').unlink()
     assert cli.main([str(path)]) == 3
-    assert json.loads((tmp_path / 'case.ieso.json').read_text())['system']['accounting_ok'] is False
+    assert json.loads((tmp_path / 'case.ies-optimiser.json').read_text())['system']['accounting_ok'] is False
 
 
 def test_cli_launcher_without_arguments_exits_one():
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py')], cwd=ROOT,
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py')], cwd=ROOT,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=120)
     assert out.returncode == 1
-    assert "'ieso input.json'" in out.stdout
+    assert "'ies-optimiser input.json'" in out.stdout
 
 
 # --- per-run settings are checked, not trusted -----------------------------------------

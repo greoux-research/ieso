@@ -1,0 +1,241 @@
+# Build IES Optimiser's wheels and source distribution, and test the artifacts users
+# install, on every supported platform and Python (docs/support-matrix.md).
+#
+# Build configuration lives in pyproject.toml ([tool.cibuildwheel],
+# [tool.scikit-build]); installed-wheel testing in tools/test_installed_wheel.py.
+# This workflow publishes nothing, creates no release and uses no credentials:
+# its artifacts are kept for inspection, and release.yml (which calls it)
+# publishes them only after every job here has passed.
+
+name: wheels
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # release.yml runs this same workflow on a release tag and publishes the
+  # artifacts it built and tested, from the same run.
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wheels-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  # The installed-artifact tests and what they need -- no package code.
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: test-bundle
+          if-no-files-found: error
+          path: |
+            tests_installed/
+            tests/fixtures/
+            examples/
+            README.md
+            docs/ies-optimiser-api.md
+            docs/ies-optimiser-setup-guide.md
+            tools/check_invariants.py
+            tools/inspect_native.py
+            tools/test_installed_wheel.py
+            tools/verify_index_install.py
+
+  sdist:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Build the source distribution
+        run: |
+          python -m pip install build
+          python -m build --sdist --outdir dist
+          python tools/check_dist.py dist/*.tar.gz
+      - name: Build a wheel from the source distribution, in a separate directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/from-sdist"
+          tar -xzf dist/*.tar.gz -C "$RUNNER_TEMP/from-sdist"
+          cd "$RUNNER_TEMP"/from-sdist/ies_optimiser-*
+          python -m build --wheel --outdir "$GITHUB_WORKSPACE/wheel-from-sdist"
+          python "$GITHUB_WORKSPACE/tools/check_dist.py" "$GITHUB_WORKSPACE"/wheel-from-sdist/*.whl
+      # This wheel proves the sdist builds and works; it is linux_x86_64, built
+      # on the runner, and never distributed, so it is not held to the
+      # manylinux policy (the distributable wheels are, in the 'wheels' job).
+      - name: Test the wheel built from the source distribution
+        run: >
+          python tools/test_installed_wheel.py wheel-from-sdist --bundle . --report report/sdist-wheel
+          --local-build
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: verification-sdist
+          path: |
+            wheel-from-sdist/
+            report/
+
+  wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {platform: linux-x86_64, os: ubuntu-24.04}
+          - {platform: macos-x86_64, os: macos-15-intel}
+          - {platform: macos-arm64, os: macos-15}
+          - {platform: windows-amd64, os: windows-2022}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build, repair and test the wheel (cibuildwheel)
+        uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae  # v4.2.1
+        with:
+          output-dir: wheelhouse
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Check contents and the native executable
+        shell: bash
+        run: |
+          python -m pip install pyelftools pefile auditwheel
+          python tools/check_dist.py wheelhouse/*.whl | tee "native-${{ matrix.platform }}.txt"
+          python tools/inspect_native.py wheelhouse --report "native-${{ matrix.platform }}.json" | tee -a "native-${{ matrix.platform }}.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: wheel-${{ matrix.platform }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: native-report-${{ matrix.platform }}
+          path: native-${{ matrix.platform }}.*
+
+  # Installed-wheel tests on Linux run in a clean python:<version>-slim
+  # container: no compiler, no Git and no checkout exist there at all.
+  test-linux:
+    needs: [bundle, wheels]
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    runs-on: ubuntu-24.04
+    container: python:${{ matrix.python }}-slim
+    timeout-minutes: 45
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: wheel-linux-x86_64
+          path: dist
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: test-bundle
+          path: bundle
+      - name: Install the wheel and test it in isolation
+        run: python bundle/tools/test_installed_wheel.py dist --bundle bundle --report report
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: installed-test-linux-x86_64-py${{ matrix.python }}
+          path: report/
+
+  # macOS and Windows: a fresh virtual environment with PATH reduced to it; no
+  # checkout step, so no source tree exists on the runner.
+  test-native:
+    needs: [bundle, wheels]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-x86_64, macos-arm64, windows-amd64]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          - {platform: macos-x86_64, os: macos-15-intel}
+          - {platform: macos-arm64, os: macos-15}
+          - {platform: windows-amd64, os: windows-2022}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: wheel-${{ matrix.platform }}
+          path: dist
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: test-bundle
+          path: bundle
+      - name: Install the wheel and test it in isolation
+        run: python bundle/tools/test_installed_wheel.py dist --bundle bundle --report report
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: installed-test-${{ matrix.platform }}-py${{ matrix.python }}
+          path: report/
+
+  # The development suite (formulation, validation, API, thermodynamics domain)
+  # from an editable install. POSIX only: its helpers write shell-script fake
+  # executables. Windows is covered by the installed-artifact tests.
+  suite:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Editable install
+        run: python -m pip install -e ".[dev]"
+      - name: Development suite and type check
+        run: |
+          python -m pytest -p no:cacheprovider -q -rs
+          python -m mypy
+      - name: Generated files are current
+        run: |
+          python tools/generate_schemas.py --check
+          python tools/build_examples.py --check
+
+  # One status for branch protection and for the release step: everything above passed.
+  gate:
+    needs: [bundle, sdist, wheels, test-linux, test-native, suite]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: All build and test jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for r in $RESULTS; do [ "$r" = "success" ] || exit 1; done

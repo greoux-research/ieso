@@ -2,7 +2,7 @@
 with the models and with real documents.
 
 The schemas describe structure only; the tests below check both directions --
-documents IESO accepts or writes validate against them, and representative
+documents IES Optimiser accepts or writes validate against them, and representative
 malformed documents do not.
 """
 
@@ -15,9 +15,9 @@ import sys
 import jsonschema
 import pytest
 
-from ieso import api, schemas
-from ieso import fcn as u
-from ieso.results import Result
+from ies_optimiser import api, schemas
+from ies_optimiser import fcn as u
+from ies_optimiser.results import Result
 from conftest import demand_x, flex, generator, p2x, solved_document, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,8 +59,8 @@ def test_the_generation_command_agrees():
 @pytest.mark.parametrize('kind, version', [('input', 1), ('result', 1)])
 def test_schemas_are_versioned_and_say_they_are_structural(kind, version):
     schema = json.loads(checked_in(kind))
-    assert schema['x-ieso-format'] == {'kind': kind, 'version': version}
-    assert schema['$id'].endswith('ieso-' + kind + '-' + str(version) + '.schema.json')
+    assert schema['x-ies-optimiser-format'] == {'kind': kind, 'version': version}
+    assert schema['$id'].endswith('ies-optimiser-' + kind + '-' + str(version) + '.schema.json')
     assert 'structure only' in schema['description']
 
 
@@ -86,10 +86,10 @@ def test_canonical_bundled_datasets_validate(tmp_path):
         with open(os.path.join(ROOT, 'datasets', name, name + '.json')) as f:
             legacy = json.load(f)
         assert list(v.iter_errors(legacy))                      # unversioned: not this schema ...
-        api.parse_case(legacy)                                  # ... but read by IESO's legacy adapter
+        api.parse_case(legacy)                                  # ... but read by IES Optimiser's legacy adapter
         v.validate(api.to_canonical(legacy))
     v.validate(schemas.input_schema()['examples'][0])
-    api.parse_case(schemas.input_schema()['examples'][0])      # the example is valid IESO input too
+    api.parse_case(schemas.input_schema()['examples'][0])      # the example is valid IES Optimiser input too
 
 
 @pytest.mark.parametrize('mutate', [
@@ -106,7 +106,7 @@ def test_canonical_bundled_datasets_validate(tmp_path):
     lambda d: d.update(solver={}),
 ], ids=['version', 'range', 'string', 'capacity', 'pair', 'enum', 'output', 'rte', 'null',
         'required', 'solver'])
-def test_malformed_inputs_fail_both_the_schema_and_ieso(mutate):
+def test_malformed_inputs_fail_both_the_schema_and_ies_optimiser(mutate):
     doc = api.to_canonical(base())
     mutate(doc)
     assert list(validator('input').iter_errors(doc))
@@ -115,7 +115,7 @@ def test_malformed_inputs_fail_both_the_schema_and_ieso(mutate):
 
 
 def test_the_schema_does_not_claim_the_semantic_rules():
-    """Structure-only: a duplicate identifier passes the schema, not IESO."""
+    """Structure-only: a duplicate identifier passes the schema, not IES Optimiser."""
     doc = api.to_canonical(base())
     doc['flex'].append(copy.deepcopy(doc['flex'][0]))
     validator('input').validate(doc)

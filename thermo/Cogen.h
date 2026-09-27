@@ -1,7 +1,7 @@
 #ifndef COGEN_H
 #define COGEN_H
 
-#include "iesoH2O.h"
+#include "iesOptimiserH2O.h"
 
 #include <iomanip>
 #include <string>
@@ -85,11 +85,11 @@ private:
 
 	/*! Point */
 
-	iesoH2OPt Pt;
+	iesOptimiserH2OPt Pt;
 
 	/*! Expansion */
 
-	iesoH2OComex Expansion;
+	iesOptimiserH2OComex Expansion;
 
 };
 

@@ -1,6 +1,6 @@
 # Synthetic examples
 
-Two small full-year IESO cases in the canonical input format, used by the
+Two small full-year IES Optimiser cases in the canonical input format, used by the
 installed-artifact tests on every supported platform and as runnable examples:
 
 - `electricity-storage/` -- solar, two gas units and a battery meeting an
@@ -15,8 +15,8 @@ is taken from the datasets in `datasets/` or any other source. The examples
 are covered by the repository's MIT licence. They illustrate the model; they
 describe no real system.
 
-    ieso validate examples/power-to-x-thermal/case.json
-    ieso examples/electricity-storage/case.json carbon-constraint=150
+    ies-optimiser validate examples/power-to-x-thermal/case.json
+    ies-optimiser examples/electricity-storage/case.json carbon-constraint=150
 
 `expected.json` holds the reference results the tests compare against, with
 the environment that produced them (`python tools/build_examples.py

@@ -1,9 +1,0 @@
-commit:      a1b2cb248d9164a6ac07eb3d15ae065336795711
-dirty:       yes
-python:      Python 3.12.14 (/private/tmp/ieso-ref312b/bin/python)
-numpy:       2.0.2
-ortools:     9.15.6755
-ieso:        2026.9.0rc1 (wheel, /private/tmp/ieso-ref312b/lib/python3.12/site-packages/ieso)
-thermo:      844201c090940277a1457e89713cf86db543cc5b2548654d42bcfad4761c44ca (/private/tmp/ieso-ref312b/lib/python3.12/site-packages/ieso/_bin/ieso-thermo)
-platform:    Darwin 25.5.0
-recorded:    2026-09-27T03:51:00Z

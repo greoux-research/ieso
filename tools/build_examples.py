@@ -13,7 +13,7 @@ other source, so the examples are covered by the repository's MIT licence.
 They use the model's own horizon (8760 hours) and conventions, in the
 canonical input format. The installed-artifact tests (tests/installed) solve
 them on every supported platform and compare with examples/expected.json,
-which --record-expected writes from the reference environment: it needs IESO
+which --record-expected writes from the reference environment: it needs IES Optimiser
 installed (pip install -e . or a wheel) and records the versions it ran with.
 """
 
@@ -105,7 +105,7 @@ def power_to_x_thermal():
 
 README = """# Synthetic examples
 
-Two small full-year IESO cases in the canonical input format, used by the
+Two small full-year IES Optimiser cases in the canonical input format, used by the
 installed-artifact tests on every supported platform and as runnable examples:
 
 - `electricity-storage/` -- solar, two gas units and a battery meeting an
@@ -120,8 +120,8 @@ is taken from the datasets in `datasets/` or any other source. The examples
 are covered by the repository's MIT licence. They illustrate the model; they
 describe no real system.
 
-    ieso validate examples/power-to-x-thermal/case.json
-    ieso examples/electricity-storage/case.json carbon-constraint=150
+    ies-optimiser validate examples/power-to-x-thermal/case.json
+    ies-optimiser examples/electricity-storage/case.json carbon-constraint=150
 
 `expected.json` holds the reference results the tests compare against, with
 the environment that produced them (`python tools/build_examples.py
@@ -145,12 +145,12 @@ def files():
 
 def record_expected():
     import platform
-    import ieso
+    import ies_optimiser
     from importlib import metadata
     scenarios = []
     for name, folder, options in SCENARIOS:
         path = os.path.join(EXAMPLES, folder, 'case.json')
-        result = ieso.solve(path, options=options)
+        result = ies_optimiser.solve(path, options=options)
         doc = result.document
         capacities = {}
         for g in doc['generator']:
@@ -171,7 +171,7 @@ def record_expected():
             'cogeneration': {g['iden']: [g['a'], g['b']] for g in doc['generator'] if g['type'] == 'elec + ther'},
         })
     expected = {
-        'recorded_with': {'ieso': ieso.__version__, 'python': platform.python_version(),
+        'recorded_with': {'ies_optimiser': ies_optimiser.__version__, 'python': platform.python_version(),
                           'platform': platform.platform(), 'numpy': metadata.version('numpy'),
                           'ortools': metadata.version('ortools'), 'pydantic': metadata.version('pydantic')},
         'contract': 'Step 1 cross-environment contract (docs/baseline-verification.md): optimal, accounting_ok, '

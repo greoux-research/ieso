@@ -1,7 +1,7 @@
 """The validate and schema commands (Step 4), through the real launcher.
 
-python ieso.py validate CASE.json [--json] [--profile-base DIR]
-python ieso.py schema input|result
+python ies_optimiser.py validate CASE.json [--json] [--profile-base DIR]
+python ies_optimiser.py schema input|result
 
 validate never solves and never writes; with --json it prints exactly one
 JSON document on stdout and nothing else there. schema needs no case and no
@@ -15,16 +15,16 @@ import sys
 
 import pytest
 
-from ieso import api, cli, schemas
-from ieso import fcn as u
+from ies_optimiser import api, cli, schemas
+from ies_optimiser import fcn as u
 from conftest import demand_x, generator, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IESO = os.path.join(ROOT, 'ieso.py')
+IES_OPTIMISER = os.path.join(ROOT, 'ies_optimiser.py')
 
 
 def run(*args, cwd):
-    out = subprocess.run([sys.executable, IESO] + [str(a) for a in args], cwd=cwd, stdout=subprocess.PIPE,
+    out = subprocess.run([sys.executable, IES_OPTIMISER] + [str(a) for a in args], cwd=cwd, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, text=True, timeout=300)
     return out.returncode, out.stdout, out.stderr
 
@@ -136,7 +136,7 @@ def test_schema_needs_no_case_and_no_thermodynamics(monkeypatch, capsys):
     monkeypatch.setattr(u, 'thermo', lambda *a, **k: pytest.fail('schema must not run thermodynamics'))
     monkeypatch.setattr(u, 'Thermo_bin', '/nonexistent/sim.bin')
     assert cli.main(['schema', 'input']) == 0
-    assert json.loads(capsys.readouterr().out)['x-ieso-format']['kind'] == 'input'
+    assert json.loads(capsys.readouterr().out)['x-ies-optimiser-format']['kind'] == 'input'
     assert cli.main(['schema']) == 1 and cli.main(['schema', 'case']) == 1
 
 
@@ -144,10 +144,10 @@ def test_the_solve_form_is_unchanged_and_rejects_validate_flags(tmp_path):
     path = year_case(tmp_path)
     code, _, err = run(path, '--json', cwd=tmp_path)
     assert code == 1 and 'unknown flag' in err
-    assert not list(tmp_path.glob('*.ieso*.json'))
+    assert not list(tmp_path.glob('*.ies-optimiser*.json'))
     code, _, err = run(path, cwd=tmp_path)
     assert code == 0, err
-    doc = json.loads((tmp_path / 'case.ieso.json').read_text())
+    doc = json.loads((tmp_path / 'case.ies-optimiser.json').read_text())
     assert doc['provenance']['input_format'] == 'canonical'
 
 
@@ -155,12 +155,12 @@ def test_statuses_stay_distinguishable(tmp_path):
     """Invalid input: exit 1, nothing written. Infeasible: exit 1, a result
     with stat_succ 0. Optimal: exit 0 (3 would be an accounting failure)."""
     invalid = year_case(tmp_path, 'invalid.json', capacity_factor=2)
-    assert run(invalid, cwd=tmp_path)[0] == 1 and not (tmp_path / 'invalid.ieso.json').exists()
+    assert run(invalid, cwd=tmp_path)[0] == 1 and not (tmp_path / 'invalid.ies-optimiser.json').exists()
     infeasible = year_case(tmp_path, 'infeasible.json', l_prod=[0, 0.5])
     doc = json.loads(infeasible.read_text())
     doc['demand']['e']['l_ns'] = [0, 0]
     infeasible.write_text(json.dumps(doc))
     assert run('validate', infeasible, cwd=tmp_path)[0] == 0          # a valid case ...
     assert run(infeasible, cwd=tmp_path)[0] == 1                      # ... that is infeasible
-    result = json.loads((tmp_path / 'infeasible.ieso.json').read_text())
+    result = json.loads((tmp_path / 'infeasible.ies-optimiser.json').read_text())
     assert result['solver']['stat_succ'] == 0 and result['solver']['stat_status'] == 'infeasible'

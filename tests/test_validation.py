@@ -1,4 +1,4 @@
-"""The input contract: what IESO accepts, what it refuses, and why.
+"""The input contract: what IES Optimiser accepts, what it refuses, and why.
 
 An input outside the model's domain used to be absorbed silently: an
 efficiency of 4 created energy, a negative capacity factor built nothing and
@@ -16,7 +16,7 @@ import sys
 
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 from conftest import demand_x, flex, generator, p2x, refused, solve, system
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -165,7 +165,7 @@ def cli_input(tmp_path, name='case.json'):
 
 
 def run_cli(path, *args, cwd=ROOT):
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py'), str(path)] + list(args),
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py'), str(path)] + list(args),
                          cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, timeout=300)
     return out.returncode, out.stdout
@@ -190,14 +190,14 @@ def test_invalid_options_fail_before_solving(tmp_path, args, reason):
     code, out = run_cli(p, *args)
     assert code != 0
     assert reason in out
-    assert not list(tmp_path.glob('*.ieso*.json'))          # nothing written
+    assert not list(tmp_path.glob('*.ies-optimiser*.json'))          # nothing written
 
 
 def test_valid_combined_options(tmp_path):
     p = cli_input(tmp_path)
     code, out = run_cli(p, 'carbon-constraint=-5', 'non-served-power-constraint=0.05')
     assert code == 0, out
-    written = tmp_path / 'case.ieso.carbon-constraint_-5.0.non-served-power-constraint_0.05.json'
+    written = tmp_path / 'case.ies-optimiser.carbon-constraint_-5.0.non-served-power-constraint_0.05.json'
     doc = json.loads(written.read_text())
     assert doc['provenance']['options'] == {'carbon-constraint': -5.0,
                                             'non-served-power-constraint': 0.05}

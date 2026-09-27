@@ -1,11 +1,11 @@
-# AGENTS.md — guide for coding assistants working on IESO
+# AGENTS.md — guide for coding assistants working on IES Optimiser
 
-IESO is a linear energy-system optimiser (OR-Tools GLOP, 8760 hourly steps) with a small C++ thermodynamics executable. Read `docs/ieso-modelling-approach.md` before touching equations, and `docs/ieso-api.md` before touching inputs, validation or results.
+IES Optimiser is a linear energy-system optimiser (OR-Tools GLOP, 8760 hourly steps) with a small C++ thermodynamics executable. Read `docs/ies-optimiser-modelling-approach.md` before touching equations, and `docs/ies-optimiser-api.md` before touching inputs, validation or results.
 
 ## Layout and public API
 
-- `src/ieso/` is the package. Public: `ieso` (`__init__.py` exports `solve`, `validate`, `load_input`, `parse_case`, `to_canonical`, `write_result`, `output_path`, `check_options`, `RunConfig`, the errors and the models), `ieso.api`, `ieso.models` (input models), `ieso.results` (result models), `ieso.errors` (`Diagnostic`, `InputError`, `ThermoError`), `ieso.schemas`, `ieso.cli`. Internal: `chk` (semantic validation), `fcn`, `formats`, `eqs_*`, `obj`, `opt`, `pos`, `pos_dmd`, `_install`.
-- `thermo/*.cpp` + `CMakeLists.txt` build `ieso/_bin/ieso-thermo`; `pyproject.toml` holds metadata, scikit-build-core, cibuildwheel, pytest and mypy configuration.
+- `src/ies_optimiser/` is the package. Public: `ies_optimiser` (`__init__.py` exports `solve`, `validate`, `load_input`, `parse_case`, `to_canonical`, `write_result`, `output_path`, `check_options`, `RunConfig`, the errors and the models), `ies_optimiser.api`, `ies_optimiser.models` (input models), `ies_optimiser.results` (result models), `ies_optimiser.errors` (`Diagnostic`, `InputError`, `ThermoError`), `ies_optimiser.schemas`, `ies_optimiser.cli`. Internal: `chk` (semantic validation), `fcn`, `formats`, `eqs_*`, `obj`, `opt`, `pos`, `pos_dmd`, `_install`.
+- `thermo/*.cpp` + `CMakeLists.txt` build `ies_optimiser/_bin/ies-optimiser-thermo`; `pyproject.toml` holds metadata, scikit-build-core, cibuildwheel, pytest and mypy configuration.
 - `tests/` development suite; `tests_installed/` tests run against an installed wheel; `examples/` synthetic cases; `datasets/` CC BY-NC data (never packaged); `results/` stored reference results (never overwrite).
 
 ## Commands
@@ -29,13 +29,13 @@ Regenerate, never hand-edit: `python tools/generate_schemas.py` (after changing 
 - Profiles supply shape only (rescaled to `capacity_factor` or `total`); relative profile paths resolve against the input file's directory or an explicit `--profile-base`, never the working directory.
 - The thermodynamics executable prints six significant digits; its domain checks, exit codes and the Python timeout are part of the contract. Cogeneration requires `0 < a < 1`, `b > 0`, `a*b < 1`.
 - Input models are the only structural validator; semantic rules live in `chk.py`. Diagnostics codes and JSON Pointer paths are public contract; hours are zero-based.
-- Importing `ieso` has no side effects; the API never mutates its inputs and writes nothing except through `write_result`.
+- Importing `ies_optimiser` has no side effects; the API never mutates its inputs and writes nothing except through `write_result`.
 
 ## Conventions when reading results
 
 - Units: power MW, energy MWh, product quantities in their own unit (m³, kg, MWh heat); costs USD, emissions kg CO₂eq.
 - `kpis.cost` and `accounts.resource_cost` allocate the whole system cost by electricity-equivalent use: a convention, not a production cost (`tools/product_costs.py` costs products directly).
-- `surplus`/`heat_surplus` are balance residuals; IESO does not report curtailment as such.
+- `surplus`/`heat_surplus` are balance residuals; IES Optimiser does not report curtailment as such.
 - `demand_match` and `demand_marginal` are dual values (subgradients at breakpoints), not prices paid. Different equally optimal dispatches are legitimate across solver builds.
 
 ## Releases

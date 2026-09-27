@@ -29,14 +29,14 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# PEP 440 public versions IESO uses: YYYY.M.PATCH, optionally aN/bN/rcN (normal form).
+# PEP 440 public versions IES Optimiser uses: YYYY.M.PATCH, optionally aN/bN/rcN (normal form).
 VERSION = re.compile(r'^(\d{4})\.(\d{1,2})\.(\d+)((a|b|rc)(\d+))?$')
-INDEXES = {'pypi': 'https://pypi.org/pypi/ieso/json', 'testpypi': 'https://test.pypi.org/pypi/ieso/json'}
+INDEXES = {'pypi': 'https://pypi.org/pypi/ies-optimiser/json', 'testpypi': 'https://test.pypi.org/pypi/ies-optimiser/json'}
 
 
 def published(url):
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'ieso-release-check'}),
+        with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'ies-optimiser-release-check'}),
                                     timeout=30) as r:
             return set(json.load(r)['releases'])
     except urllib.error.HTTPError as e:

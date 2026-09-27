@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install an IESO wheel into a fresh environment and test it in isolation.
+"""Install an IES Optimiser wheel into a fresh environment and test it in isolation.
 
     python tools/test_installed_wheel.py WHEEL_OR_DIR --bundle DIR --report DIR [--constraints FILE]
 
@@ -11,10 +11,10 @@ Run it with the Python to be tested. It:
    (pip --only-binary=:all:, so no dependency is built from source), plus
    pytest and jsonschema; --constraints pins versions (the reference
    environment's);
-3. records what was installed and how ieso was found;
+3. records what was installed and how ies_optimiser was found;
 4. runs the installed-artifact tests (BUNDLE/tests_installed) from the
    bundle directory, with PATH reduced to the environment's own scripts (and
-   System32 on Windows), no PYTHONPATH, python -P, and IESO_ISOLATED=1, so the
+   System32 on Windows), no PYTHONPATH, python -P, and IES_OPTIMISER_ISOLATED=1, so the
    tests can assert that no checkout, Git or compiler is reachable;
 5. inspects the installed thermodynamics executable (tools/inspect_native.py;
    with --local-build, as a host-built, non-distributable wheel).
@@ -60,7 +60,7 @@ def isolated_env(venv):
     if os.name == 'nt':
         path.append(os.path.join(os.environ.get('SystemRoot', r'C:\Windows'), 'System32'))
     env['PATH'] = os.pathsep.join(path)
-    env['IESO_ISOLATED'] = '1'
+    env['IES_OPTIMISER_ISOLATED'] = '1'
     env['PYTHONUTF8'] = '1'
     return env
 
@@ -74,14 +74,14 @@ def step(title, cmd, **kw):
 
 
 def check_installed(venv, bundle, report, root, local_build=False):
-    """Steps 3-5 for an environment in which ieso is installed: record how ieso
+    """Steps 3-5 for an environment in which ies_optimiser is installed: record how ies_optimiser
     is found, run the installed-artifact tests in isolation, inspect the
     executable. Returns the list of failures. Also used by
     tools/verify_index_install.py."""
     failures = []
     py = python(venv)
-    probe = ('import json, sys, ieso; from ieso import _install, fcn; '
-             'print(json.dumps({"python": sys.version, "executable": sys.executable, "ieso": ieso.__version__, '
+    probe = ('import json, sys, ies_optimiser; from ies_optimiser import _install, fcn; '
+             'print(json.dumps({"python": sys.version, "executable": sys.executable, "ies_optimiser": ies_optimiser.__version__, '
              '"installation": _install.installation(), "thermo": fcn.Thermo_bin, "sys_path": sys.path}))')
     found = subprocess.run([py, '-I', '-c', probe], capture_output=True, text=True, cwd=root, env=isolated_env(venv))
     if found.returncode != 0:
@@ -93,7 +93,7 @@ def check_installed(venv, bundle, report, root, local_build=False):
         info = json.loads(found.stdout)
         print(json.dumps(info['installation']), flush=True)
         if info['installation']['kind'] != 'wheel':
-            failures.append('ieso is not the installed wheel: ' + info['installation']['kind'])
+            failures.append('ies_optimiser is not the installed wheel: ' + info['installation']['kind'])
 
     pytest = [py, '-P', '-m', 'pytest', 'tests_installed', '-p', 'no:cacheprovider', '-q', '-rs',
               '--junitxml', os.path.join(report, 'junit.xml')]
@@ -131,7 +131,7 @@ def main(argv=None):
     bundle = os.path.abspath(args.bundle)
     report = os.path.abspath(args.report)
     os.makedirs(report, exist_ok=True)
-    root = tempfile.mkdtemp(prefix='ieso-installed-')
+    root = tempfile.mkdtemp(prefix='ies-optimiser-installed-')
     venv = os.path.join(root, 'venv')
     failures = []
 

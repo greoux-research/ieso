@@ -22,7 +22,7 @@ import sys
 import numpy as np
 import pytest
 
-from ieso import fcn as u
+from ies_optimiser import fcn as u
 from conftest import demand_x, flex, generator, p2x, solve, system
 
 SEEDS = list(range(24))           # recorded: each seed reproduces its case exactly
@@ -410,13 +410,13 @@ def test_provenance_matches_what_was_run(tmp_path):
                e_total=8760.0)
     path = tmp_path / 'case.json'
     path.write_text(json.dumps(s))
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py'), str(path),
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py'), str(path),
                           'carbon-constraint=10'], cwd=ROOT, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT, text=True, timeout=300)
     assert out.returncode == 0, out.stdout
-    doc = json.loads((tmp_path / 'case.ieso.carbon-constraint_10.0.json').read_text())
+    doc = json.loads((tmp_path / 'case.ies-optimiser.carbon-constraint_10.0.json').read_text())
     pv = doc['provenance']
-    from ieso import _install
+    from ies_optimiser import _install
     PACKAGE = _install.PACKAGE_DIR
     assert pv['input_sha256'] == u.file_digest(str(path))
     assert pv['profiles_sha256'] == {str(prof): u.file_digest(str(prof))}

@@ -1,6 +1,6 @@
 # Illustrative cases
 
-Four examples of IESO input structure and use, sharing one electricity system
+Four examples of IES Optimiser input structure and use, sharing one electricity system
 and adding one Power-to-X process at a time. Inputs are illustrative assumptions,
 not a representation of a country, a forecast, or current cost estimates.
 
@@ -20,7 +20,7 @@ Profile paths are relative to each input's own directory, so a case runs from
 any directory and can be copied elsewhere with its CSVs:
 
 ```sh
-ieso datasets/elec-grid/elec-grid.json
+ies-optimiser datasets/elec-grid/elec-grid.json
 bash tools/run_cases.sh runs/examples
 ```
 

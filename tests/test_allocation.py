@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from ieso import fcn as u
-from ieso import pos_dmd
+from ies_optimiser import fcn as u
+from ies_optimiser import pos_dmd
 from conftest import flex, generator, p2x, demand_x, solve, system
 
 

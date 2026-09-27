@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect the thermodynamics executable inside an IESO wheel, or installed.
+"""Inspect the thermodynamics executable inside an IES Optimiser wheel, or installed.
 
     python tools/inspect_native.py WHEEL_OR_DIR [--copy-to DIR] [--report FILE]
     python tools/inspect_native.py --installed [--report FILE]
@@ -9,7 +9,7 @@ extension modules; this checks the standalone executable itself, against the
 wheel's own platform tag:
 
 * the wheel is py3-none-<platform> (never 'any'), holds exactly one
-  ieso/_bin/ieso-thermo[.exe], executable (mode 755) on POSIX;
+  ies_optimiser/_bin/ies-optimiser-thermo[.exe], executable (mode 755) on POSIX;
 * Linux (ELF): machine matches the tag; every DT_NEEDED library is one the
   manylinux policy allows (auditwheel's policy data) and every versioned
   symbol requirement (GLIBC, GLIBCXX, CXXABI, GCC) is within the tag's policy;
@@ -45,7 +45,7 @@ import sys
 import tempfile
 import zipfile
 
-EXE_NAMES = ('ieso/_bin/ieso-thermo', 'ieso/_bin/ieso-thermo.exe')
+EXE_NAMES = ('ies_optimiser/_bin/ies-optimiser-thermo', 'ies_optimiser/_bin/ies-optimiser-thermo.exe')
 SMOKE = [['--limits', '290', '70', '0.05'], ['290', '70', '0.05', '80']]
 
 
@@ -252,16 +252,16 @@ def from_wheel(target, report, local_build=False):
 
 
 def installed(report, local_build=False):
-    import ieso
-    from ieso import _install, fcn
-    report.note('package', os.path.dirname(os.path.abspath(ieso.__file__)))
+    import ies_optimiser
+    from ies_optimiser import _install, fcn
+    report.note('package', os.path.dirname(os.path.abspath(ies_optimiser.__file__)))
     report.note('installation', _install.installation()['kind'])
     path = fcn.Thermo_bin
     report.check('packaged executable exists', os.path.isfile(path), path)
     report.check('packaged executable is executable', os.access(path, os.X_OK), path)
     report.check('named for the platform', os.path.basename(path) == _install.THERMO_NAME, os.path.basename(path))
     from importlib import metadata
-    wheel = metadata.distribution('ieso').read_text('WHEEL') or ''
+    wheel = metadata.distribution('ies-optimiser').read_text('WHEEL') or ''
     tags = [t.split('-')[-1] for t in re.findall(r'^Tag: (\S+)$', wheel, re.M)]
     report.note('wheel_tags', tags)
     if os.path.isfile(path):
@@ -271,7 +271,7 @@ def installed(report, local_build=False):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('target', nargs='?', help='a wheel, or a directory holding exactly one')
-    ap.add_argument('--installed', action='store_true', help='inspect the ieso package installed in this Python')
+    ap.add_argument('--installed', action='store_true', help='inspect the ies_optimiser package installed in this Python')
     ap.add_argument('--copy-to', help='copy the wheel here when every check passes')
     ap.add_argument('--report', help='write the findings as JSON')
     ap.add_argument('--local-build', action='store_true',

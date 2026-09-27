@@ -1,8 +1,0 @@
-commit:      a1b2cb248d9164a6ac07eb3d15ae065336795711
-dirty:       yes
-python:      Python 3.9.6 (/private/tmp/ieso-review-venv/bin/python)
-numpy:       2.0.2
-ortools:     9.15.6755
-sim.bin:     72a69d6890285dddfbce71481584f1c27c0993ce1711240a417334e6f0456969
-platform:    Darwin 25.5.0
-recorded:    2026-09-26T16:57:44Z

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Direct production cost of each Power-to-X product in an IESO result.
+"""Direct production cost of each Power-to-X product in an IES Optimiser result.
 
-    tools/product_costs.py RESULT.ieso.json [RESULT ...]
+    tools/product_costs.py RESULT.ies-optimiser.json [RESULT ...]
 
-IESO's product cost KPI (demand.x[*].kpis.cost) is an ALLOCATION: the whole
+IES Optimiser's product cost KPI (demand.x[*].kpis.cost) is an ALLOCATION: the whole
 system cost -- generation, storage and the processes' own plant -- is pooled
 and divided among all demands in proportion to electricity-equivalent use. It
 is not the cost of making the product, and it should not be compared with

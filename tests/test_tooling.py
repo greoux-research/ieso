@@ -2,7 +2,7 @@
 
 A comparator that passes over what it cannot find reports agreement it has not
 checked, and a failed solve that exits zero is indistinguishable from a good one
-to anything calling IESO from a script. Both weaken the evidence rather than the
+to anything calling IES Optimiser from a script. Both weaken the evidence rather than the
 model, which is why they are tested.
 """
 
@@ -172,23 +172,23 @@ def test_a_differing_solver_status_is_caught(tmp_path):
 
 def test_provenance_identifies_the_running_code():
     """A version constant is a label; two trees can share it and differ."""
-    from ieso import fcn as u
+    from ies_optimiser import fcn as u
     state = u.source_state()
     assert set(state) == {'installation', 'git_scope', 'git_revision', 'git_dirty', 'enclosing_git',
                           'source_sha256', 'source_files_sha256', 'thermo_binary', 'thermo_binary_origin'}
     assert len(state['source_sha256']) == 64
     files = state['source_files_sha256']
-    assert 'ieso/fcn.py' in files and 'ieso/__init__.py' in files
-    assert not any(k.startswith('ieso_modules') for k in files)
+    assert 'ies_optimiser/fcn.py' in files and 'ies_optimiser/__init__.py' in files
+    assert not any(k.startswith('ieso_modules/') for k in files)
     # the compiled thermodynamic binary sets the cogeneration coefficients and
     # is untracked, so it is covered whether or not it is present
     assert 'thermo/sim.bin' in files
 
 
 def test_source_digest_changes_with_the_source(tmp_path, monkeypatch):
-    from ieso import fcn as u
+    from ies_optimiser import fcn as u
     before = u.source_state()['source_sha256']
-    from ieso import _install
+    from ies_optimiser import _install
     extra = os.path.join(_install.PACKAGE_DIR, '_digest_probe.py')
     try:
         with open(extra, 'w') as f:
@@ -202,7 +202,7 @@ def test_source_digest_changes_with_the_source(tmp_path, monkeypatch):
 
 
 def test_an_infeasible_model_is_reported_as_such(horizon):
-    """ieso.py exits non-zero on this; the status says why."""
+    """ies_optimiser.py exits non-zero on this; the status says why."""
     from conftest import generator, solve, system
     hours = horizon(24)
     s = system(generators=[generator('gas', var=10.0, l_prod=(0, 0))],
@@ -229,7 +229,7 @@ def cli_case(tmp_path, name, feasible):
 
 
 def run_cli(path):
-    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ieso.py'), path],
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'ies_optimiser.py'), path],
                          cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, timeout=300)
     return out.returncode, out.stdout
@@ -238,16 +238,16 @@ def run_cli(path):
 def test_cli_exits_zero_on_an_optimal_solve(tmp_path):
     code, _ = run_cli(cli_case(tmp_path, 'ok.json', feasible=True))
     assert code == 0
-    written = json.load(open(str(tmp_path / 'ok.ieso.json')))
+    written = json.load(open(str(tmp_path / 'ok.ies-optimiser.json')))
     assert written['solver']['stat_status'] == 'optimal'
     assert written['solver']['stat_succ'] == 1
 
 
 def test_cli_exits_non_zero_on_an_unsuccessful_solve(tmp_path):
-    """A script calling IESO must be able to tell without parsing the result."""
+    """A script calling IES Optimiser must be able to tell without parsing the result."""
     code, _ = run_cli(cli_case(tmp_path, 'bad.json', feasible=False))
     assert code != 0
-    written = json.load(open(str(tmp_path / 'bad.ieso.json')))
+    written = json.load(open(str(tmp_path / 'bad.ies-optimiser.json')))
     assert written['solver']['stat_succ'] == 0
     assert written['solver']['stat_status'] != 'optimal'
     # the file is still written, and is still traceable
