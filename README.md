@@ -14,7 +14,7 @@ IES Optimiser (*Integrated Energy Systems Optimiser*) is a linear optimiser-base
 
 IES Optimiser needs Python 3.11 or later, on Linux x86_64 (glibc 2.28+), macOS (Apple Silicon 11+, Intel 10.15+) or Windows x86_64. Wheels include the compiled thermodynamics executable; no compiler is needed.
 
-IES Optimiser is **not yet published on PyPI**. When it is, it will install into a fresh virtual environment with:
+Install it from PyPI into a fresh virtual environment:
 
 ```bash
 python3 -m venv ies-optimiser-env
@@ -22,7 +22,7 @@ source ies-optimiser-env/bin/activate          # Windows: ies-optimiser-env\Scri
 python -m pip install ies-optimiser
 ```
 
-Until then, install a wheel built by the repository's CI, or from a checkout; see the [Setup Guide](https://github.com/greoux-research/ies-optimiser/blob/main/docs/ies-optimiser-setup-guide.md).
+To install a wheel file or a development checkout instead, see the [Setup Guide](https://github.com/greoux-research/ies-optimiser/blob/main/docs/ies-optimiser-setup-guide.md).
 
 ## Use
 

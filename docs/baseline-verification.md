@@ -1573,3 +1573,86 @@ Every file in `results/` was independently compared byte-for-byte with HEAD:
 **unchanged**. The checkout now contains approximately 43,939 KB of files outside
 `.git` (including the retained reference results). Numerical runs were not
 repeated because no runtime code or model input changed.
+
+## First remote CI and TestPyPI release candidate — 2026-09-27
+
+The rename, the restored workflows and the cleanup were committed and pushed
+by the maintainer as `da20deb796d23f22ba23c947d4779c4eb10403a9` on `main`. It
+is the first commit to run the workflows prepared in Steps 6 and 7.
+
+**Cross-platform verification: `wheels.yml` on `main`.** Run
+[36307899271](https://github.com/greoux-research/ies-optimiser/actions/runs/36307899271),
+triggered by the push (08:58–09:32 UTC): **25 of 25 jobs succeeded**,
+including `gate`.
+
+- **Wheels** built, repaired and native-checked on all four platforms of the
+  support matrix: Linux x86_64 (manylinux, GCC), macOS arm64, macOS x86_64 and
+  Windows AMD64 (MSVC, static runtime). Before this run, only macOS arm64 had
+  been built.
+- **Installed-wheel tests** in isolation: 16 of 16, one per platform and Python
+  version (3.11, 3.12, 3.13 and 3.14). Linux ran in `python:<v>-slim`
+  containers; macOS and Windows used fresh environments with no checkout.
+- **Source distribution:** built, content-checked, and a wheel built from it
+  was tested.
+- **Development suite, mypy and generated-file checks:** passed on Ubuntu and
+  macOS.
+
+Every item the Step 6 record listed as "configured, not yet executed" has now
+run and passed. The cross-platform release gate of Step 6 has passed.
+
+**Release candidate: `release.yml` on tag `v2026.9.0rc1`.** The annotated tag
+points to `da20deb`. Run
+[36309847312](https://github.com/greoux-research/ies-optimiser/actions/runs/36309847312)
+(09:35–10:30 UTC): **36 jobs succeeded and 2 were skipped by design**.
+
+| Stage | Result |
+|---|---|
+| `check`: the tag names the source version, the commit is on `main`, and the version is new on both indexes | passed |
+| `build`: the whole of `wheels.yml`, again, on the tagged commit | passed |
+| `collect`: file-name checks, `twine check --strict`, content checks, `SHA256SUMS` | passed |
+| `testpypi`: upload through Trusted Publishing, with no API token | passed |
+| `verify-testpypi`: installed from TestPyPI and tested on the four platforms, Python 3.11 and 3.14 each | 8 of 8 passed |
+| `pypi`, `verify-pypi` | skipped: a prerelease stops after TestPyPI |
+
+The verification jobs install only `ies-optimiser` from TestPyPI, checking its
+hash against the run's `SHA256SUMS` and the host it came from. They then install
+the dependencies from PyPI and run the installed-artifact tests.
+
+**Published on TestPyPI** as
+[`ies-optimiser` 2026.9.0rc1](https://test.pypi.org/project/ies-optimiser/2026.9.0rc1/),
+uploaded 10:16:57–10:17:04 UTC, `Requires-Python >=3.11`. SHA-256 as served by
+TestPyPI:
+
+| File | SHA-256 |
+|---|---|
+| `ies_optimiser-2026.9.0rc1-py3-none-macosx_10_15_x86_64.whl` | `cf1a2d2ec02092884345842de0de06ee18a9f8abf2bf5c6612563bfe8c0863f8` |
+| `ies_optimiser-2026.9.0rc1-py3-none-macosx_11_0_arm64.whl` | `5dcb449deb1c1cb738c9db2b377012424d449eb4e462a5929cb9d1f41443cd69` |
+| `ies_optimiser-2026.9.0rc1-py3-none-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | `2f0261daeed9af1d8fbbd50b1f0f68ca9080eb6c13505850d14186cc0fc4b2c8` |
+| `ies_optimiser-2026.9.0rc1-py3-none-win_amd64.whl` | `31577fa64595ab9f55e3bbf105308fb4fb63aac3e3821819ca1e9a6843ee6fca` |
+| `ies_optimiser-2026.9.0rc1.tar.gz` | `c923fb8ded9c709e606ba7682d5115fa1e83662744892e5d6310e072e54f7e27` |
+
+These digests were read from TestPyPI's JSON API after the run. The run's own
+`SHA256SUMS` is in its `release-dist` artifact, which was not downloaded here.
+Its agreement with these files is what `verify-testpypi` checked on every
+platform.
+
+**Observation: the Linux wheel's tags.** The Linux wheel carries two platform
+tags, `manylinux_2_24` and `manylinux_2_28`: auditwheel found the executable
+compatible with glibc 2.24 and added the older tag. The effective floor stays
+glibc 2.28, set by the OR-Tools dependency, as `docs/support-matrix.md` states.
+Restricting the wheel to the documented tag is a possible change to the repair
+command; it is not required.
+
+**What this establishes, and what it does not.** It establishes that the
+renamed package builds, installs and passes its installed-artifact tests on
+every supported platform and Python version. It also shows that Trusted
+Publishing to TestPyPI works end to end, with the published files being those
+that were tested. It does not cover PyPI: no final version has been released.
+The `pypi` job, its manual approval and `verify-pypi`, including the unversioned
+`pip install ies-optimiser`, have not run. The installed tests compare the
+synthetic examples under the cross-environment contract. The eight bundled
+annual configurations were not re-run by CI.
+
+**Remaining:** a final release, `2026.9.0`, which follows `docs/releasing.md`
+and needs approval in the `pypi` environment; and the off-disk backup of the
+evidence archive and history bundle.

@@ -1,6 +1,6 @@
 # Releasing IES Optimiser
 
-> **Current verification status:** The workflows have been restored for `ies-optimiser` and pass local actionlint checks. They have not yet run on GitHub for this rename; cross-platform verification and the release gate remain pending. See [Baseline Verification](baseline-verification.md).
+> **Current verification status (2026-09-27):** every platform and Python version above was built and tested on GitHub for commit `da20deb`, and the release candidate `2026.9.0rc1` was published to TestPyPI and verified from it on all four platforms. See [Baseline Verification](baseline-verification.md).
 
 Releases are published to PyPI by `.github/workflows/release.yml` with PyPI Trusted Publishing (OpenID Connect): no API token exists anywhere. A release is one tagged commit on `main`; one workflow run builds its wheels and sdist, tests them on every supported platform and Python, uploads **those same files** to TestPyPI, verifies installation from TestPyPI, and — for a final version, after manual approval — uploads them to PyPI and verifies installation from PyPI.
 
@@ -8,7 +8,7 @@ Releases are published to PyPI by `.github/workflows/release.yml` with PyPI Trus
 
 These are done by a maintainer, once, in the web interfaces; the workflow cannot do them.
 
-**Setup status (2026-09-27):** The maintainer reports that Trusted Publishing is configured on PyPI and TestPyPI for project and repository `ies-optimiser`, and that the GitHub `testpypi` and `pypi` environments have been created. The first workflow run still needs to verify the integration; environment protection rules should match the requirements below.
+**Setup status (2026-09-27):** The maintainer reports that Trusted Publishing is configured on PyPI and TestPyPI for project and repository `ies-optimiser`, and that the GitHub `testpypi` and `pypi` environments have been created. The TestPyPI integration was verified by the `v2026.9.0rc1` release; the PyPI upload and its approval step are first exercised by the final release `2026.9.0`. Environment protection rules should match the requirements below.
 
 **PyPI** (https://pypi.org/manage/account/publishing/, "Add a new pending publisher"):
 

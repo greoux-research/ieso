@@ -1,8 +1,8 @@
 # Changelog
 
-## 2026.9.0 — first packaged release (in preparation)
+## 2026.9.0 — 2026-09-27: first packaged release
 
-The first release installable with pip. Versions now follow the calendar scheme `YEAR.MONTH.PATCH` (earlier tags: `v26.05`, `v25.10`); release candidates are `2026.9.0rcN`.
+The first release installable with pip: `python -m pip install ies-optimiser`. Versions now follow the calendar scheme `YEAR.MONTH.PATCH` (earlier tags: `v26.05`, `v25.10`); release candidates are `2026.9.0rcN`. The candidate `2026.9.0rc1` was published to TestPyPI and verified from it on every supported platform.
 
 ### Installation and interface
 - IES Optimiser is a Python package, `ies_optimiser` (Python 3.11 or later), with an `ies-optimiser` command (`python -m ies_optimiser` is the same). Wheels for Linux x86_64 (manylinux_2_28), macOS arm64 and x86_64, and Windows x86_64 include the compiled thermodynamics executable; see [Supported Platforms](docs/support-matrix.md).

@@ -1,8 +1,8 @@
 # Supported Platforms
 
-> **Current verification status:** The workflows have been restored for `ies-optimiser` and pass local actionlint checks. They have not yet run on GitHub for this rename; cross-platform verification and the release gate remain pending. See [Baseline Verification](baseline-verification.md).
+> **Current verification status (2026-09-27):** every platform and Python version above was built and tested on GitHub for commit `da20deb`, and the release candidate `2026.9.0rc1` was published to TestPyPI and verified from it on all four platforms. See [Baseline Verification](baseline-verification.md).
 
-IES Optimiser is distributed as one wheel per platform (`py3-none-<platform>`: the package and its compiled thermodynamics executable, for every supported Python) and a source distribution. It is **not yet published** on a package index.
+IES Optimiser is distributed as one wheel per platform (`py3-none-<platform>`: the package and its compiled thermodynamics executable, for every supported Python) and a source distribution, all published on PyPI as `ies-optimiser`.
 
 | Platform | Wheel tag | Minimum OS | Python |
 |---|---|---|---|

@@ -9,7 +9,7 @@ build-backend = "scikit_build_core.build"
 name = "ies-optimiser"
 # The single authoritative version (calendar versioning: year.month.patch).
 # Installed code reads it from the distribution metadata (ies_optimiser.__version__).
-version = "2026.9.0rc1"
+version = "2026.9.0"
 description = "IES Optimiser: a linear optimiser-based integrated energy system modelling environment"
 readme = "README.md"
 license = "MIT"

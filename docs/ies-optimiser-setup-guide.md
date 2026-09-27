@@ -8,7 +8,7 @@ IES Optimiser's modelling approach is described in [this article](ies-optimiser-
 
 IES Optimiser is a Python package, `ies_optimiser`, with a small C++ thermodynamics executable built into it. It needs Python 3.11 or later and installs three libraries with it: [OR-Tools](https://developers.google.com/optimization/install) (the GLOP solver), [NumPy](https://numpy.org/install/) and [Pydantic](https://docs.pydantic.dev/) 2 (input validation and JSON Schemas). The platforms and Python versions it is built and tested for are listed in [Supported Platforms](support-matrix.md).
 
-**IES Optimiser is not yet published on a package index**: `pip install ies-optimiser` does not install it. Install it from a wheel file, or from a source checkout, as below.
+IES Optimiser is published on PyPI as `ies-optimiser`: in a fresh virtual environment, `python -m pip install ies-optimiser` installs it with its dependencies. Installing from a wheel file, or from a source checkout for development, is described below.
 
 The solver build matters: GLOP may settle on a different vertex of the same optimal face from one version to another, so a result is reproducible only against a recorded environment. Every result records its own — see `provenance` in the output.
 
@@ -21,7 +21,7 @@ A wheel (`ies_optimiser-<version>-py3-none-<platform>.whl`) holds the package an
 ```bash
 python3 -m venv ies-optimiser-env
 source ies-optimiser-env/bin/activate            # Windows: ies-optimiser-env\Scripts\activate
-python -m pip install ./ies_optimiser-2026.9.0rc1-py3-none-macosx_11_0_arm64.whl
+python -m pip install ./ies_optimiser-2026.9.0-py3-none-macosx_11_0_arm64.whl
 ies-optimiser --version
 ```
 
