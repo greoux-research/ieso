@@ -1,6 +1,6 @@
 # Supported Platforms
 
-> **Current verification status (2026-09-27):** every platform and Python version above was built and tested on GitHub for commit `da20deb`, and the release candidate `2026.9.0rc1` was published to TestPyPI and verified from it on all four platforms. See [Baseline Verification](baseline-verification.md).
+> **Current verification status (2026-09-27):** `2026.9.0` is published on PyPI. Before release, every platform and Python version above was built and tested on GitHub for its commit, `c23fd8b`; after release, it was installed from PyPI and tested on all four platforms, with Python 3.11 and 3.14. See [Baseline Verification](baseline-verification.md).
 
 IES Optimiser is distributed as one wheel per platform (`py3-none-<platform>`: the package and its compiled thermodynamics executable, for every supported Python) and a source distribution, all published on PyPI as `ies-optimiser`.
 

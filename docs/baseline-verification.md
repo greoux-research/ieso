@@ -1656,3 +1656,90 @@ annual configurations were not re-run by CI.
 **Remaining:** a final release, `2026.9.0`, which follows `docs/releasing.md`
 and needs approval in the `pypi` environment; and the off-disk backup of the
 evidence archive and history bundle.
+
+## Release 2026.9.0 on PyPI — 2026-09-27
+
+The first final release, published by the procedure in `docs/releasing.md`.
+
+**Release commit.** `c23fd8b9fc2fb6d5e68ebda0416f568de82a1943` on `main`
+("Preparing the 2026.9.0 release"). It sets `version = "2026.9.0"`, dates the
+changelog entry, and describes installation from PyPI in the README (the PyPI
+project page), the setup guide and the support matrix. Before the tag, locally:
+
+- **Development suite:** 589 passed, with 10 skips: the archived reference
+  executable's fixture replays, as in the pre-commit cleanup.
+- **Other checks:** mypy clean, generated schemas and examples current,
+  actionlint passed.
+- **Release pre-check:** `tools/release_check.py --tag v2026.9.0` passed (a
+  final version, new on both indexes).
+- **Local artifacts:** a locally built sdist and wheel passed
+  `twine check --strict` and `tools/check_dist.py`.
+
+**Cross-platform verification.** `wheels.yml` run
+[36313741494](https://github.com/greoux-research/ies-optimiser/actions/runs/36313741494)
+on `c23fd8b` (10:49–11:22 UTC): **25 of 25 jobs succeeded**, including `gate`.
+Its coverage is the same as the run recorded for `da20deb` above.
+
+**Release run.** The annotated tag `v2026.9.0` points to `c23fd8b`. `release.yml`
+run [36318142266](https://github.com/greoux-research/ies-optimiser/actions/runs/36318142266)
+(12:11–13:40 UTC): **45 of 45 jobs succeeded**.
+
+| Stage | Time (UTC) | Result |
+|---|---|---|
+| `check`: tag matches source version, commit on `main`, version new on both indexes | 12:11 | passed |
+| `build`: the whole of `wheels.yml` on the tagged commit | 12:11–12:50 | passed |
+| `collect`: file-name checks, `twine check --strict`, content checks, `SHA256SUMS` | 12:50 | passed |
+| `testpypi`: upload through Trusted Publishing | 12:50 | passed |
+| `verify-testpypi`: installed from TestPyPI and tested on the four platforms, Python 3.11 and 3.14 each | 12:51–13:05 | 8 of 8 passed |
+| approval in the `pypi` environment, by the maintainer, after reviewing `verify-testpypi` | about 13:24 | given |
+| `pypi`: the same files, checked against `SHA256SUMS`, uploaded through Trusted Publishing | 13:24–13:25 | passed |
+| `verify-pypi`: installed from PyPI and tested on the four platforms, Python 3.11 and 3.14 each, including the unversioned `pip install ies-optimiser` selecting `2026.9.0` | 13:25–13:40 | 8 of 8 passed |
+
+The upload created the PyPI project `ies-optimiser`, and PyPI notified the
+maintainer that a trusted publisher had created it. This was the first
+exercise of the PyPI publisher and of the `pypi` environment's approval step.
+
+**Published on PyPI** as
+[`ies-optimiser` 2026.9.0](https://pypi.org/project/ies-optimiser/2026.9.0/),
+uploaded 13:25:03–13:25:09 UTC, `Requires-Python >=3.11`:
+
+| File | Bytes | SHA-256 |
+|---|---|---|
+| `ies_optimiser-2026.9.0-py3-none-macosx_10_15_x86_64.whl` | 110,479 | `b5927c8912395a39ee89b5337208c0de72d746ee812622a07c30fa8a65d41814` |
+| `ies_optimiser-2026.9.0-py3-none-macosx_11_0_arm64.whl` | 110,657 | `bea47320b7138b79bca0da7fd6e2ce5f272b52d3e3fdf6b4377bed5ae68796a9` |
+| `ies_optimiser-2026.9.0-py3-none-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | 109,338 | `f377effe2e8e92a1d4c32873bf25026e08284fd359ada8da0b7b7cff706f91ce` |
+| `ies_optimiser-2026.9.0-py3-none-win_amd64.whl` | 262,175 | `a7949be60ffc03b555f85429c8693586d241a35ab822492e16c695b99274e520` |
+| `ies_optimiser-2026.9.0.tar.gz` | 87,478 | `7ffa8a9720a551bf235e9ebf8afb03252a05f2fcaed2ed21ff691c37a7cfeff1` |
+
+These digests were read from PyPI's JSON API after the upload. They are
+identical, file for file, to those TestPyPI serves for `2026.9.0`, uploaded
+34 minutes earlier in the same run. The files published on PyPI are therefore
+the files verified from TestPyPI, as the workflow's `SHA256SUMS` check also
+requires. The run's `SHA256SUMS` itself, in its `release-dist` artifact, was
+not downloaded here.
+
+**Independent install on the maintainer's machine.** Python 3.12.14 on
+macOS arm64, in a new virtual environment outside the checkout,
+`pip install ies-optimiser`:
+
+- installed `2026.9.0` as a wheel, not from the checkout;
+- `ies-optimiser --version` printed `ies-optimiser 2026.9.0`;
+- `ies-optimiser validate` on `examples/power-to-x-thermal/case.json` passed
+  every stage, including thermodynamics, which runs the compiled executable
+  from the PyPI wheel.
+
+Dependencies resolved to NumPy 2.5.3, OR-Tools 9.15.6755 and Pydantic 2.13.5.
+Under Python 3.9, pip correctly refused the package: "Requires-Python >=3.11".
+
+**What this establishes, and what it does not.** `ies-optimiser` 2026.9.0 is
+installable from PyPI with `pip install ies-optimiser` on every platform and
+Python version of the support matrix. The published files are the tested
+ones, and they were published without an API token and after explicit
+approval. As before, the installed-artifact tests compare the synthetic examples
+under the cross-environment contract. The eight bundled annual configurations
+were last compared in the rename verification above, in one local environment.
+Neither this nor any earlier stage validates an application of the model.
+
+**Remaining:** the GitHub release for tag `v2026.9.0` (step 5 of
+`docs/releasing.md`), and the off-disk backup of the evidence archive and
+history bundle.
