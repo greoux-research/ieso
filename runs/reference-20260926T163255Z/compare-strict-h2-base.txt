@@ -1,0 +1,2 @@
+IDENTICAL: h2-base.ieso.json
+Excluded: solver.stat_time (elapsed wall-clock time); provenance.run_utc (timestamp); provenance (identifies the run; compare with --provenance)

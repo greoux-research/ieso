@@ -1,0 +1,119 @@
+# A. Step 4 runs against results/elec-grid-2026-09-26 (profile strings mapped in a copy of the reference, as in Step 3)
+== eg-base.ieso.json | mapped strings: 3 | IDENTICAL: eg-base.ieso.json
+   key order differs at (serialisation only): 8 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/eg-base.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/eg-base.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/eg-base.json"
+   provenance.input_sha256: "c77753a748d72e2af8e6baa0b2e9810c475e70283924295f661d983a076bcdff" -> "f046c105c71b053d9e8e7e2d397769e14987dc956f259dc38c812d7408e3200e"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid"}
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | mapped strings: 3 | IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+   key order differs at (serialisation only): 8 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/eg-cn.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/eg-cn.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/eg-cn.json"
+   provenance.input_sha256: "c77753a748d72e2af8e6baa0b2e9810c475e70283924295f661d983a076bcdff" -> "f046c105c71b053d9e8e7e2d397769e14987dc956f259dc38c812d7408e3200e"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid"}
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== h2-base.ieso.json | mapped strings: 3 | IDENTICAL: h2-base.ieso.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/h2-base.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/h2-base.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/h2-base.json"
+   provenance.input_sha256: "2c7abd909046cca8290d272d3d1f87f0a03a3ebb48ecc59381fb1f164386fa97" -> "904c3788c6aa09c59b356f476facd346295f6f5e46f1827d4fe2d6e6ae008572"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-hydrog
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | mapped strings: 3 | IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/h2-cn.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/h2-cn.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/h2-cn.json"
+   provenance.input_sha256: "2c7abd909046cca8290d272d3d1f87f0a03a3ebb48ecc59381fb1f164386fa97" -> "904c3788c6aa09c59b356f476facd346295f6f5e46f1827d4fe2d6e6ae008572"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-hydrog
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== med-base.ieso.json | mapped strings: 3 | IDENTICAL: med-base.ieso.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/med-base.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/med-base.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/med-base.json"
+   provenance.input_sha256: "c6d26923ccd250ce9fe93663a26975649ae2c9cb45d9d1704dd95191c3420143" -> "79b9c47d5481d12566998b9339d323db3bf86df8c828eba508f28acf2063c2cf"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-water-
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | mapped strings: 3 | IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/med-cn.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/med-cn.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/med-cn.json"
+   provenance.input_sha256: "c6d26923ccd250ce9fe93663a26975649ae2c9cb45d9d1704dd95191c3420143" -> "79b9c47d5481d12566998b9339d323db3bf86df8c828eba508f28acf2063c2cf"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-water-
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== ro-base.ieso.json | mapped strings: 3 | IDENTICAL: ro-base.ieso.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/ro-base.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/ro-base.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/ro-base.json"
+   provenance.input_sha256: "bc6aaac998998f91a6482197d12a0d394971cc799c5f6f6ee6b806c4f67a4216" -> "ab246583a4fb27494f232ecf1710ae78551b52c625c8af135c496c3eda94e111"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-water-
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+== ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | mapped strings: 3 | IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+   key order differs at (serialisation only): 9 objects
+   provenance.git_revision: changed (code state)
+   provenance.input: "/Users/leo/Documents/ieso/runs/rounded-examples/ro-cn.json" -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/ro-cn.json"
+   provenance.input_format: null -> "legacy"
+   provenance.input_resolved: null -> "/Users/leo/Documents/ieso/runs/step4-20260926T175530Z/cases/ro-cn.json"
+   provenance.input_sha256: "bc6aaac998998f91a6482197d12a0d394971cc799c5f6f6ee6b806c4f67a4216" -> "ab246583a4fb27494f232ecf1710ae78551b52c625c8af135c496c3eda94e111"
+   provenance.profile_files: new since the reference (Step 3)
+   provenance.profile_resolution: null -> {"mode": "explicit", "base": "/Users/leo/Documents/ieso/datasets/elec-grid+power-to-water-
+   provenance.profiles_sha256: keys renamed (Step 3), digests equal: True
+   provenance.result_format_version: null -> 1
+   provenance.source_files_sha256: changed (code state)
+   provenance.source_sha256: changed (code state)
+
+# B. Step 4 runs against Step 3 runs (runs/step3-20260926T171649Z), no mapping
+== eg-base.ieso.json | IDENTICAL: eg-base.ieso.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== h2-base.ieso.json | IDENTICAL: h2-base.ieso.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== med-base.ieso.json | IDENTICAL: med-base.ieso.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== ro-base.ieso.json | IDENTICAL: ro-base.ieso.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+== ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'result_format_version', 'source_files_sha256', 'source_sha256']
+
+# C. Canonical form of two bundled cases (to_canonical, run with --profile-base) against the legacy runs above
+== eg-base | IDENTICAL: eg-base.ieso.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'input_sha256'] | input_format legacy -> canonical
+== med-cn | IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json | provenance keys differing: ['input', 'input_format', 'input_resolved', 'input_sha256'] | input_format legacy -> canonical

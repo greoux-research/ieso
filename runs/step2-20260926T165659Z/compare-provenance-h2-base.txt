@@ -1,0 +1,21 @@
+DIFFERENCES: h2-base.ieso.json
+  provenance.git_revision: 'a1b2cb248d9164a6ac07eb3d15ae065336795711' vs 'a663acbb6738e97be19bda94b1de3fa245867bdd'
+  provenance.input: '/Users/leo/Documents/ieso/runs/step2-20260926T165659Z/cases/h2-base.json' vs '/Users/leo/Documents/ieso/runs/rounded-examples/h2-base.json'
+  provenance.source_files_sha256.ieso.py: 'ed02c296acabbed0295c2a40a5e04f37cea4e27694392a94cb5362c8a91dc9e0' vs '2090e04ee59bdf40817e4ea886c2123eda0cd0a7e78ef8a24872e96f1430e89e'
+  provenance.source_files_sha256.ieso_modules/api.py: absent in old
+  provenance.source_files_sha256.ieso_modules/chk.py: 'a2a97cee7ed4dae9816efa8d5f76da1762890862fce281226f065d7a9973e85c' vs 'f0dd3d29f93708e3380d940214d8883eaaf145e02ff4d708f529a9dd7c96e4c6'
+  provenance.source_files_sha256.ieso_modules/cli.py: absent in old
+  provenance.source_files_sha256.ieso_modules/eqs_dmd_e.py: '0c771493942ffad8dcc62702d815c1ca32a201ab0c7488800574e1d4273db657' vs 'c55e9f6d71fadce681f6b0b7ffdc3b7fec9ae29374db0a8e830fd44b469bcf59'
+  provenance.source_files_sha256.ieso_modules/eqs_dmd_x.py: '8ec7f1ab859ef538d083251f1f8f7eb8ae3fc0ac150dec928bf22496b5bd68df' vs '58d373e2e6027ebee1f2a95987a1f98cb6df7576ad36ed670ab55362566e24e6'
+  provenance.source_files_sha256.ieso_modules/eqs_flx.py: '2ee554d098d63aae9554c77e2a10c88abdcc514885493572af6e362146fd81da' vs 'd8fc8771766d230c427c8d51677be2e926fa6e0c4b886bdc7067db2ab5545736'
+  provenance.source_files_sha256.ieso_modules/eqs_gen.py: '0dca82098cfce985d71228bf2dd08a3507a4edde9f962f8a39999a0f781b0d49' vs '9c0e77c6d8d5b31c95b58efeebf93ca4880384c39d08781dfeff4536a1984f97'
+  provenance.source_files_sha256.ieso_modules/eqs_p2x_1.py: 'd4bfd41399ee2d9ef05e95d37244b2ae48a38ebb6ac483d6943be427a55c6768' vs '8139a0c9dcff6a734a2db69297126b8a04af16d81f99a3196783111d8fe05806'
+  provenance.source_files_sha256.ieso_modules/eqs_p2x_2.py: 'e3bf7270580471a43a68c047e262fbaa6ced7180814145c3b78c7c1b0291ad1d' vs 'f2d418b6b082941d35966da3b722dae413b84170b95f1ced1a3880d433bac7b0'
+  provenance.source_files_sha256.ieso_modules/errors.py: absent in old
+  provenance.source_files_sha256.ieso_modules/fcn.py: 'c08d08e993cf8c4601fbe09a8a62941a121da595dafe34218cd8b0517e2646a4' vs '98718bd3b177a4fe5091792439e6cd09f72bfb17139fd9440d27cff76e665eb3'
+  provenance.source_files_sha256.ieso_modules/obj.py: '9590cb9b74bb5fe931924e94949a51c90ce9892fd7dbe2242cb6920e6e81e633' vs '44c7b916be5f7605631aca926297a9202700af97caf889564cc91751aa5db82a'
+  provenance.source_files_sha256.ieso_modules/opt.py: '21560a0532f828794b49f48dad2977b6a2aabd28d2ac4afe6e0ad606a1f00c96' vs 'f252acee3fbccc47d5e71b9f3dd9fdf6614bb56a164e5170487c108ba21079f8'
+  provenance.source_files_sha256.ieso_modules/pos.py: '61f29ee0565ab2454838fc0846750fbfc58e1ce1ab5f7f173f52322472ed074b' vs '0f375cdb18b69a3f7c07aef58a1a31268a2475f1f91f745f2670c0ac4a91ac9f'
+  provenance.source_files_sha256.ieso_modules/pos_dmd.py: 'af0dd3d60f3c7ff1827bbdc87a63002fed6783f890a9095d4314b1bcf04b3fcb' vs '0c928d07e7cbd56e820177d6fa034784fe958a9f843c2beb7f57eb56d7413656'
+  provenance.source_sha256: '157514addce16c9fd5911dfe4871c46c18b22b47cf664fa07ebd9b48695338fa' vs '1dc6468a9f25879c80699bd23bbdd782ed6dc4f230e8f2825dbf6f22ca42dfe1'
+Excluded: solver.stat_time (elapsed wall-clock time); provenance.run_utc (timestamp)

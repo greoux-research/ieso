@@ -1,0 +1,4 @@
+DIFFERENCES: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+  provenance.git_revision: 'a1b2cb248d9164a6ac07eb3d15ae065336795711' vs 'a663acbb6738e97be19bda94b1de3fa245867bdd'
+  provenance.input: '/Users/leo/Documents/ieso/runs/reference-20260926T163255Z/cases/ro-cn.json' vs '/Users/leo/Documents/ieso/runs/rounded-examples/ro-cn.json'
+Excluded: solver.stat_time (elapsed wall-clock time); provenance.run_utc (timestamp)

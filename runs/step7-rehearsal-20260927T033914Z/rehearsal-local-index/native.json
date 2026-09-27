@@ -1,0 +1,75 @@
+{
+  "checks": [
+    {
+      "check": "packaged executable exists",
+      "ok": true,
+      "detail": "/var/folders/yk/bxkqd09j7l1c34gyfcvw5l_00000gn/T/ieso-index-um7qubmt/venv/lib/python3.12/site-packages/ieso/_bin/ieso-thermo"
+    },
+    {
+      "check": "packaged executable is executable",
+      "ok": true,
+      "detail": "/var/folders/yk/bxkqd09j7l1c34gyfcvw5l_00000gn/T/ieso-index-um7qubmt/venv/lib/python3.12/site-packages/ieso/_bin/ieso-thermo"
+    },
+    {
+      "check": "named for the platform",
+      "ok": true,
+      "detail": "ieso-thermo"
+    },
+    {
+      "check": "only system libraries (libSystem, libc++)",
+      "ok": true,
+      "detail": [
+        "/usr/lib/libSystem.B.dylib",
+        "/usr/lib/libc++.1.dylib"
+      ]
+    },
+    {
+      "check": "macosx platform tag",
+      "ok": true,
+      "detail": [
+        "macosx_11_0_arm64"
+      ]
+    },
+    {
+      "check": "macosx_11_0_arm64: architecture",
+      "ok": true,
+      "detail": [
+        "arm64"
+      ]
+    },
+    {
+      "check": "macosx_11_0_arm64: minimum OS not above the tag",
+      "ok": true,
+      "detail": [
+        "11.0"
+      ]
+    },
+    {
+      "check": "runs: --limits 290 70 0.05",
+      "ok": true,
+      "detail": "32.875489523760166 285.83002280575192"
+    },
+    {
+      "check": "runs: 290 70 0.05 80",
+      "ok": true,
+      "detail": "0.124272 1.97657"
+    }
+  ],
+  "ok": true,
+  "host": "macOS-26.5.2-arm64-arm-64bit",
+  "package": "/var/folders/yk/bxkqd09j7l1c34gyfcvw5l_00000gn/T/ieso-index-um7qubmt/venv/lib/python3.12/site-packages/ieso",
+  "installation": "wheel",
+  "wheel_tags": [
+    "macosx_11_0_arm64"
+  ],
+  "linked_libraries": [
+    "/usr/lib/libSystem.B.dylib",
+    "/usr/lib/libc++.1.dylib"
+  ],
+  "architectures": [
+    "arm64"
+  ],
+  "minimum_os": [
+    "11.0"
+  ]
+}

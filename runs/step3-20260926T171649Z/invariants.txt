@@ -1,0 +1,8 @@
+PASS  eg-base.ieso.json  cost 586,293,103.05  emis 984,225,807.71  unmet electricity 0 MWh
+PASS  eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json  cost 614,924,155.35  emis 284,500,000.00  unmet electricity 0 MWh
+PASS  h2-base.ieso.json  cost 601,106,597.49  emis 969,414,173.02  unmet electricity 0 MWh; unmet hydrogen 0
+PASS  h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json  cost 629,082,805.60  emis 284,500,000.00  unmet electricity 0 MWh; unmet hydrogen 0
+PASS  med-base.ieso.json  cost 655,035,056.36  emis 1,265,515,242.38  unmet electricity 0 MWh; unmet water 0
+PASS  med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json  cost 733,734,237.75  emis 284,500,000.00  unmet electricity 0 MWh; unmet water 0
+PASS  ro-base.ieso.json  cost 631,258,283.93  emis 1,031,589,756.14  unmet electricity 0 MWh; unmet water 0
+PASS  ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json  cost 669,084,370.19  emis 284,500,000.00  unmet electricity 0 MWh; unmet water 0

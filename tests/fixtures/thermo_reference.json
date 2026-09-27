@@ -1,0 +1,136 @@
+{
+  "reference_executable": {
+    "sha256": "72a69d6890285dddfbce71481584f1c27c0993ce1711240a417334e6f0456969",
+    "built_from": "thermo/*.cpp at a1b2cb2 with thermo/build.sh (g++ -fPIC -Wall, no optimisation flag)",
+    "compiler": "Apple clang 21.0.0 (clang-2100.1.1.101), macOS 26.5.2 arm64",
+    "emitted_precision": "a and b printed by std::cout default: 6 significant digits"
+  },
+  "plants": {
+    "nuclear": {
+      "turbine_inlet_c": 290,
+      "turbine_inlet_bar": 70,
+      "condenser_bar": 0.05,
+      "limits_stdout": "32.875489523760166 285.83002280575192",
+      "accepted": [
+        {
+          "label": "just inside low (+1 C)",
+          "extraction_c": 33.875489523760166,
+          "stdout": "0.00286978 1.98584"
+        },
+        {
+          "label": "50 C",
+          "extraction_c": 50,
+          "stdout": "0.047596 1.9832"
+        },
+        {
+          "label": "80 C (bundled MED case)",
+          "extraction_c": 80,
+          "stdout": "0.124272 1.97657"
+        },
+        {
+          "label": "150 C",
+          "extraction_c": 150,
+          "stdout": "0.282007 1.94094"
+        },
+        {
+          "label": "just inside high (-1 C)",
+          "extraction_c": 284.8300228057519,
+          "stdout": "0.580095 1.71891"
+        }
+      ],
+      "refused": [
+        {
+          "label": "exactly on low",
+          "extraction_c": "32.875489523760166",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "exactly on high",
+          "extraction_c": "285.83002280575192",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "outside low (-1 C)",
+          "extraction_c": "31.875489523760166",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "outside high (+1 C)",
+          "extraction_c": "286.8300228057519",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        }
+      ]
+    },
+    "fossil": {
+      "turbine_inlet_c": 564,
+      "turbine_inlet_bar": 152,
+      "condenser_bar": 0.05,
+      "limits_stdout": "32.875489523760166 343.21981389825999",
+      "accepted": [
+        {
+          "label": "just inside low (+1 C)",
+          "extraction_c": 33.875489523760166,
+          "stdout": "0.0028693 1.56002"
+        },
+        {
+          "label": "50 C",
+          "extraction_c": 50,
+          "stdout": "0.0474633 1.56454"
+        },
+        {
+          "label": "80 C (bundled MED case)",
+          "extraction_c": 80,
+          "stdout": "0.123277 1.57164"
+        },
+        {
+          "label": "150 C",
+          "extraction_c": 150,
+          "stdout": "0.275663 1.57484"
+        },
+        {
+          "label": "just inside high (-1 C)",
+          "extraction_c": 342.21981389826,
+          "stdout": "0.696976 1.43054"
+        }
+      ],
+      "refused": [
+        {
+          "label": "exactly on low",
+          "extraction_c": "32.875489523760166",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "exactly on high",
+          "extraction_c": "343.21981389825999",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "outside low (-1 C)",
+          "extraction_c": "31.875489523760166",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        },
+        {
+          "label": "outside high (+1 C)",
+          "extraction_c": "344.21981389826",
+          "exit_status": 3,
+          "stdout": "",
+          "stderr_contains": "extraction temperature"
+        }
+      ]
+    }
+  }
+}

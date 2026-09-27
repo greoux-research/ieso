@@ -1,0 +1,39 @@
+# A. installed wheel (Python 3.12.14, NumPy 2.0.2, OR-Tools 9.15.6755) vs results/elec-grid-2026-09-26 (profile strings mapped, as in Steps 3-4)
+IDENTICAL: eg-base.ieso.json
+IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: h2-base.ieso.json
+IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: med-base.ieso.json
+IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: ro-base.ieso.json
+IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+
+# B. vs Step 4 runs (Python 3.9, checkout, reference sim.bin), no mapping
+IDENTICAL: eg-base.ieso.json
+IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: h2-base.ieso.json
+IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: med-base.ieso.json
+IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: ro-base.ieso.json
+IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+
+# C. vs pre-move Python 3.12 runs (checkout, reference sim.bin), no mapping
+IDENTICAL: eg-base.ieso.json
+IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: h2-base.ieso.json
+IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: med-base.ieso.json
+IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: ro-base.ieso.json
+IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+
+# D. provenance differences vs Step 4 (keys)
+eg-base. ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+eg-cn.ie ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+h2-base. ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+h2-cn.ie ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+med-base ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+med-cn.i ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+ro-base. ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel
+ro-cn.ie ['git_dirty', 'git_revision', 'git_scope', 'ieso_version', 'input', 'input_resolved', 'installation', 'python', 'source_files_sha256', 'source_sha256', 'thermo_binary', 'thermo_binary_origin'] | input_sha equal: True | profiles equal: True | thermo packaged wheel

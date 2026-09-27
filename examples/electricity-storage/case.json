@@ -1,0 +1,75 @@
+{
+    "format_version": 1,
+    "demand": {
+        "e": {
+            "iden": "electricity",
+            "profile": "demand.csv",
+            "total": 1000000.0,
+            "var_cost_ns": 10000,
+            "l_ns": [
+                0,
+                1000000.0
+            ]
+        },
+        "x": []
+    },
+    "generator": [
+        {
+            "iden": "solar",
+            "type": "elec",
+            "profile": "solar.csv",
+            "capacity_factor": 0.22,
+            "fix_cost_prod": 60000,
+            "var_cost_prod": 0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1
+        },
+        {
+            "iden": "ccgt",
+            "type": "elec",
+            "profile": "",
+            "capacity_factor": 0.9,
+            "fix_cost_prod": 100000,
+            "var_cost_prod": 60,
+            "var_emis_prod": 370,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1
+        },
+        {
+            "iden": "ocgt",
+            "type": "elec",
+            "profile": "",
+            "capacity_factor": 0.95,
+            "fix_cost_prod": 50000,
+            "var_cost_prod": 110,
+            "var_emis_prod": 550,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1
+        }
+    ],
+    "flex": [
+        {
+            "iden": "battery",
+            "fix_cost_strg": 25000,
+            "hours_of_storage": 4,
+            "round_trip_efficiency": 0.85,
+            "l_strg": [
+                0,
+                100000.0
+            ],
+            "c_strg": -1,
+            "soc_ini": 0.5
+        }
+    ],
+    "p2x": []
+}

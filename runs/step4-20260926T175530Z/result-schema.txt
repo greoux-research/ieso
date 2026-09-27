@@ -1,0 +1,11 @@
+schema valid | model valid | canonical/eg-base.ieso.json
+schema valid | model valid | canonical/med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+schema valid | model valid | cases/eg-base.ieso.json
+schema valid | model valid | cases/eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+schema valid | model valid | cases/h2-base.ieso.json
+schema valid | model valid | cases/h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+schema valid | model valid | cases/med-base.ieso.json
+schema valid | model valid | cases/med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+schema valid | model valid | cases/ro-base.ieso.json
+schema valid | model valid | cases/ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+stored reference (pre-format-1) eg-base against the format-1 schema: not valid (expected: it predates result_format_version and the Step 3 provenance fields)

@@ -1,0 +1,192 @@
+[build-system]
+# scikit-build-core drives CMake, which builds the thermodynamics executable
+# (thermo/*.cpp) into the wheel. 0.11 is the first release with PEP 639
+# licence metadata.
+requires = ["scikit-build-core>=0.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "ieso"
+# The single authoritative version (calendar versioning: year.month.patch).
+# Installed code reads it from the distribution metadata (ieso.__version__).
+version = "2026.9.0rc1"
+description = "IESO: a linear optimiser-based integrated energy system modelling environment"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Gréoux Research" }]
+# The minimum. Verified locally on macOS arm64 with 3.11, 3.12, 3.13 and 3.14;
+# the full platform matrix (docs/support-matrix.md) is verified by CI.
+requires-python = ">=3.11"
+# Ranges follow what the code imports and what has been verified:
+#  - numpy: array handling and profile I/O; written against the NumPy 2 API,
+#    verified with 2.0.2.
+#  - ortools: GLOP through ortools.linear_solver.pywraplp and the version query
+#    in ortools.init. Verified with 9.15.6755. The solver build decides which
+#    optimal vertex is returned, so results are reproducible only against a
+#    recorded version; the range is not a claim that every 9.x gives the same
+#    dispatch, and releases before 9.15 are not tested.
+#  - pydantic: the input and result models; validate_by_name and
+#    serialize_by_alias need 2.11.
+dependencies = [
+    "numpy>=2.0,<3",
+    "ortools>=9.15,<10",
+    "pydantic>=2.11,<3",
+]
+keywords = ["energy system", "optimisation", "linear programming", "power-to-x", "cogeneration"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C++",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+# pip install -e ".[dev]": the test suite, the schema tests and the type check.
+dev = [
+    "pytest>=8",
+    "jsonschema>=4.18",
+    "mypy>=1.10",
+    "build>=1.2",
+]
+
+[project.scripts]
+ieso = "ieso.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/greoux-research/ieso"
+Documentation = "https://github.com/greoux-research/ieso/tree/main/docs"
+Source = "https://github.com/greoux-research/ieso"
+Issues = "https://github.com/greoux-research/ieso/issues"
+Changelog = "https://github.com/greoux-research/ieso/blob/main/CHANGELOG.md"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build/{wheel_tag}"
+cmake.version = ">=3.15"
+# The wheel carries a native executable but no Python extension: it is tagged
+# py3-none-<platform>, installable on any Python 3 of that platform, and never
+# as a pure-Python (any) wheel.
+wheel.py-api = "py3"
+wheel.packages = ["src/ieso"]
+# ieso/_bin/ieso-thermo comes from the CMake install step. src/ieso/_bin is
+# ignored by Git and excluded from the sdist, and a clean build tree holds none.
+# The source distribution is an allow-list: the package, the native sources
+# and their build files, the metadata. Datasets (whose profiles are licensed
+# CC BY-NC 4.0), results, runs, tests, tools, docs and build products are
+# excluded.
+sdist.exclude = ["/*"]
+sdist.include = [
+    "/pyproject.toml",
+    "/CMakeLists.txt",
+    "/README.md",
+    "/LICENSE",
+    "/src/ieso/*.py",
+    "/src/ieso/py.typed",
+    "/src/ieso/data/*.schema.json",
+    "/thermo/*.cpp",
+    "/thermo/*.h",
+    "/thermo/README.md",
+]
+
+# Cross-platform wheels (.github/workflows/wheels.yml runs cibuildwheel with
+# this configuration; docs/support-matrix.md explains the choices).
+#
+# The wheel is py3-none-<platform>: one wheel per platform serves every
+# supported Python, so it is built once, with CPython 3.11 (the minimum), and
+# the CI test jobs install it on each supported Python. The repair step checks
+# the thermodynamics executable itself (tools/inspect_native.py), since the
+# repair tools are written for extension modules.
+[tool.cibuildwheel]
+build = "cp311-*"
+skip = "*-musllinux_*"
+build-frontend = "build"
+build-verbosity = 1
+before-build = "python -m pip install pyelftools pefile auditwheel"
+test-requires = ["pytest", "jsonschema"]
+test-sources = [
+    "tests_installed", "tests/fixtures", "examples", "README.md", "docs/ieso-api.md", "docs/ieso-setup-guide.md",
+    "tools/check_invariants.py",
+]
+test-command = "python -m pytest tests_installed -p no:cacheprovider -q -rs"
+
+[tool.cibuildwheel.linux]
+# glibc 2.28 and later (RHEL 8, Debian 10, Ubuntu 18.10 and newer), the same
+# baseline as the OR-Tools wheels IESO depends on.
+archs = ["x86_64"]
+manylinux-x86_64-image = "manylinux_2_28"
+repair-wheel-command = [
+    "auditwheel repair --plat manylinux_2_28_x86_64 -w {dest_dir} {wheel}",
+    "python {project}/tools/inspect_native.py {dest_dir}",
+]
+
+[tool.cibuildwheel.macos]
+archs = ["native"]
+repair-wheel-command = [
+    "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+    "python {project}/tools/inspect_native.py {dest_dir}",
+]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+# No DLL to bundle (the C++ runtime is linked statically): check, then copy.
+repair-wheel-command = "python {project}/tools/inspect_native.py {wheel} --copy-to {dest_dir}"
+
+# Minimum macOS: the floor of the OR-Tools wheels for each architecture.
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_arm64"
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Static type checking of the public boundary:  python -m mypy
+# Scope: the modules users and scripts call. The model-building modules are
+# imported and followed silently (their errors are not reported here) and are
+# typed incrementally; chk's functions and the fcn functions the boundary calls
+# are annotated already.
+[tool.mypy]
+# No python_version: mypy checks against the interpreter it runs in, whose
+# installed NumPy stubs may use syntax newer than 3.11 (NumPy 2.5 requires
+# 3.12). Compatibility with 3.11 itself is tested by running on 3.11.
+files = [
+    "src/ieso/__init__.py", "src/ieso/__main__.py", "src/ieso/_install.py", "src/ieso/api.py",
+    "src/ieso/cli.py", "src/ieso/errors.py", "src/ieso/formats.py", "src/ieso/models.py",
+    "src/ieso/results.py", "src/ieso/schemas.py",
+]
+mypy_path = "src"
+plugins = ["pydantic.mypy"]
+strict = true
+# Calls from the boundary into the equation-building modules are allowed while
+# those remain unannotated.
+untyped_calls_exclude = [
+    "ieso.eqs_dmd_e", "ieso.eqs_dmd_x", "ieso.eqs_flx", "ieso.eqs_gen", "ieso.eqs_p2x_1", "ieso.eqs_p2x_2",
+    "ieso.obj", "ieso.opt", "ieso.pos",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "ieso.chk", "ieso.fcn", "ieso.eqs_dmd_e", "ieso.eqs_dmd_x", "ieso.eqs_flx", "ieso.eqs_gen", "ieso.eqs_p2x_1",
+    "ieso.eqs_p2x_2", "ieso.obj", "ieso.opt", "ieso.pos", "ieso.pos_dmd",
+]
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["ortools.*"]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true

@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Gréoux Research (2024). IESO: a linear optimiser-based integrated energy system modelling environment. https://github.com/greoux-research/ieso
+
+
+from ieso import chk
+from ieso import fcn as u
+from ieso.formats import pointer
+
+
+def define(glop, s, opts, stat, cfg):
+
+    # --- --- --- --- --- --- --- --- --- Solver vars & cons: generators (gen)
+
+    for n, gen in enumerate(s['generator']):
+
+        # *_c_prod
+
+        llim = gen['l_prod'][0]
+        ulim = gen['l_prod'][1]
+
+        if gen['c_prod'] < 0:
+
+            # Capacity
+
+            name = gen['iden'] + '_c_prod'
+            gen['c_prod'] = glop.NumVar(llim, ulim, name)
+
+            stat['capa'] += 1
+
+        # *_e_prod_[i]
+
+        for i in range(0, cfg.hours):
+
+            # Electricity output
+
+            # Hourly output is non-negative and limited by the capacity and
+            # availability relations below. l_prod bounds the installed capacity,
+            # not the operating point: reusing it here turned a minimum plant
+            # size into a minimum output in every hour of the year.
+
+            name = gen['iden'] + '_e_prod_' + str(i)
+            gen['e_prod'].append(glop.NumVar(0, glop.infinity(), name))
+
+            stat['outp'] += 1
+
+        # set of constraints: generation is limited by capacity
+
+        cf = u.cf_h(gen['profile'], gen['capacity_factor'], gen['iden'], hours=cfg.hours, base=cfg.profile_base)
+
+        for i in range(0, cfg.hours):
+
+            glop.Add(gen['e_prod'][i] <= cf[i] * gen['c_prod'])
+
+            stat['cons'] += 1
+
+            # Nameplate, added only in the hours that need it. A normalised
+            # profile may exceed one wherever the requested capacity_factor is
+            # above the profile's own mean/max ratio, and there the availability
+            # relation no longer holds output to the installed capacity. Where
+            # cf <= 1 it is the tighter of the two and already implies this, so
+            # adding the row everywhere would only enlarge the problem.
+
+            if cf[i] > 1.0:
+
+                glop.Add(gen['e_prod'][i] <= gen['c_prod'])
+
+                stat['cons'] += 1
+
+        # if the generator is thermal
+        # and if it is coupled to a thermal p2x
+
+        if gen['type'] == 'elec + ther':
+
+            gen['a'] = 0
+            gen['b'] = 0
+
+            # ---
+
+            for p2x in s['p2x']:
+
+                if p2x['type'] == 'elec + ther' and gen['iden'] in p2x['supply_sources']:
+
+                    # Obtained, or refused with a ThermoError, by the same
+                    # function the validate command uses (chk.cogeneration).
+
+                    gen['a'], gen['b'] = chk.cogeneration(gen, p2x, cfg, path=pointer('generator', n))
+
+                    break
+
+            # ---
+
+            if gen['a'] > 0 and gen['b'] > 0:
+
+                # *_h_prod_[i]
+
+                for i in range(0, cfg.hours):
+
+                    # Heat output
+
+                    name = gen['iden'] + '_h_prod_' + str(i)
+                    gen['h_prod'].append(glop.NumVar(0, glop.infinity(), name))
+
+                    stat['outp'] += 1
+
+                # co-generation constraints
+
+                for i in range(0, cfg.hours):
+
+                    glop.Add(gen['e_prod'][i] <= cf[i] *
+                               gen['c_prod'] - gen['h_prod'][i] * gen['a'])
+                    glop.Add(gen['h_prod'][i] <= cf[i]
+                               * gen['c_prod'] * gen['b'])
+
+                    stat['cons'] += 2
+
+                    # Nameplate, in the same form as equations 6 and 7 with the
+                    # availability factor at one, and again only where cf > 1.
+                    # c_prod is the *electrical* capacity, so the heat limit
+                    # carries the coefficient b, which routinely exceeds one:
+                    # h <= c_prod would roughly halve the heat a nuclear unit
+                    # can supply.
+
+                    if cf[i] > 1.0:
+
+                        glop.Add(gen['e_prod'][i] + gen['h_prod'][i] * gen['a'] <= gen['c_prod'])
+                        glop.Add(gen['h_prod'][i] <= gen['c_prod'] * gen['b'])
+
+                        stat['cons'] += 2
+
+            else:
+
+                gen['type'] = 'elec'
+
+                gen['a'] = 0
+                gen['b'] = 0

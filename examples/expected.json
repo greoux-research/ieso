@@ -1,0 +1,90 @@
+{
+  "recorded_with": {
+    "ieso": "2026.9.0",
+    "python": "3.12.14",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.0.2",
+    "ortools": "9.15.6755",
+    "pydantic": "2.13.5"
+  },
+  "contract": "Step 1 cross-environment contract (docs/baseline-verification.md): optimal, accounting_ok, identical problem size, objective rel 1e-10, capacities abs 1e-6 + rel 1e-7, emissions rel 1e-9 where the carbon cap binds, cogeneration coefficients within one unit in the 6th significant digit.",
+  "scenarios": [
+    {
+      "name": "electricity-storage",
+      "case": "electricity-storage/case.json",
+      "options": {},
+      "status": "optimal",
+      "accounting_ok": true,
+      "objective": 66667230.499594316,
+      "system_cost": 66666918.85575582,
+      "emissions": 218274898.79204184,
+      "carbon_cap_binding": null,
+      "problem_size": {
+        "stat_capa": 4,
+        "stat_outp": 61320,
+        "stat_cons": 70081
+      },
+      "capacities": {
+        "generator/solar/c_prod": 248.25620133923547,
+        "generator/ccgt/c_prod": 113.0576265588607,
+        "generator/ocgt/c_prod": 23.23292055858104,
+        "flex/battery/c_strg": 147.92251395095417
+      },
+      "cogeneration": {}
+    },
+    {
+      "name": "electricity-storage-carbon-cap",
+      "case": "electricity-storage/case.json",
+      "options": {
+        "carbon-constraint": 150.0
+      },
+      "status": "optimal",
+      "accounting_ok": true,
+      "objective": 70765481.80650651,
+      "system_cost": 70765481.80651478,
+      "emissions": 150000000.0000011,
+      "carbon_cap_binding": true,
+      "problem_size": {
+        "stat_capa": 4,
+        "stat_outp": 61320,
+        "stat_cons": 70082
+      },
+      "capacities": {
+        "generator/solar/c_prod": 402.53100408138573,
+        "generator/ccgt/c_prod": 92.45515803339973,
+        "generator/ocgt/c_prod": 16.883383479512613,
+        "flex/battery/c_strg": 487.47152476496075
+      },
+      "cogeneration": {}
+    },
+    {
+      "name": "power-to-x-thermal",
+      "case": "power-to-x-thermal/case.json",
+      "options": {},
+      "status": "optimal",
+      "accounting_ok": true,
+      "objective": 45392767.64872517,
+      "system_cost": 45392223.69897221,
+      "emissions": 42906842.74454344,
+      "carbon_cap_binding": null,
+      "problem_size": {
+        "stat_capa": 5,
+        "stat_outp": 78840,
+        "stat_cons": 96361
+      },
+      "capacities": {
+        "generator/nuclear/c_prod": 46.86140239423423,
+        "generator/ccgt/c_prod": 42.46539860978213,
+        "generator/solar/c_prod": 62.953050464542656,
+        "p2x/med/c_prod": 1300.9055102516515,
+        "p2x/med/c_strg": 163578.36871224607
+      },
+      "cogeneration": {
+        "nuclear": [
+          0.124272,
+          1.97657
+        ]
+      }
+    }
+  ]
+}

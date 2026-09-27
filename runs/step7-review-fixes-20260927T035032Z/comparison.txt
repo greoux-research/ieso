@@ -1,0 +1,18 @@
+# vs results/elec-grid-2026-09-26 (profile strings mapped)
+IDENTICAL: eg-base.ieso.json
+IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: h2-base.ieso.json
+IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: med-base.ieso.json
+IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: ro-base.ieso.json
+IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+# vs Step 6 wheel runs (no mapping)
+IDENTICAL: eg-base.ieso.json
+IDENTICAL: eg-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: h2-base.ieso.json
+IDENTICAL: h2-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: med-base.ieso.json
+IDENTICAL: med-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json
+IDENTICAL: ro-base.ieso.json
+IDENTICAL: ro-cn.ieso.carbon-constraint_50.0.non-served-power-constraint_0.05.json

@@ -1,0 +1,2806 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/greoux-research/ieso/schemas/ieso-result-1.schema.json",
+  "title": "IESO result, format 1",
+  "description": "An IESO result: OptimalResult when solver.stat_succ is 1 (check system.accounting_ok), UnsuccessfulResult when it is 0 (inputs, status and provenance only). This schema describes structure only. Unique identifiers, references between objects, thermal topology, profile files and their contents and lengths, hourly shortfall bounds and thermodynamic admissibility are checked by IESO (ieso validate CASE.json). A valid case may still define an infeasible optimisation problem.",
+  "x-ieso-format": {
+    "kind": "result",
+    "version": 1
+  },
+  "$defs": {
+    "Accounts": {
+      "additionalProperties": false,
+      "description": "The quantities behind the cost KPI (active demands only).",
+      "properties": {
+        "allocation_share": {
+          "description": "Share of total electricity-equivalent output allocated to this commodity; null when the system produced no output.",
+          "title": "Allocation share",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "allocated_output": {
+          "description": "Electricity-equivalent output allocated (MWh).",
+          "title": "Allocated output",
+          "type": "number"
+        },
+        "resource_cost": {
+          "description": "System cost allocated (USD); excludes shortage penalties.",
+          "title": "Resource cost",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "shortage_penalty": {
+          "description": "unmet_demand x var_cost_ns (USD): a modelled price, not spend.",
+          "title": "Shortage penalty",
+          "type": "number"
+        },
+        "emissions": {
+          "description": "Emissions allocated (kg CO2eq).",
+          "title": "Emissions",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "demand": {
+          "description": "Annual demand.",
+          "title": "Demand",
+          "type": "number"
+        },
+        "unmet_demand": {
+          "description": "Annual unmet demand.",
+          "title": "Unmet demand",
+          "type": "number"
+        },
+        "served_demand": {
+          "description": "Annual served demand.",
+          "title": "Served demand",
+          "type": "number"
+        },
+        "resource_cost_per_demand": {
+          "description": "resource_cost / demand (USD/unit).",
+          "title": "Resource cost per demand",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "resource_cost_per_served": {
+          "description": "resource_cost / served_demand (USD/unit); null when nothing was served.",
+          "title": "Resource cost per served",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "surplus": {
+          "description": "Annual sum of the surplus series, in the commodity's unit.",
+          "title": "Surplus",
+          "type": "number"
+        }
+      },
+      "required": [
+        "allocation_share",
+        "allocated_output",
+        "resource_cost",
+        "shortage_penalty",
+        "emissions",
+        "demand",
+        "unmet_demand",
+        "served_demand",
+        "resource_cost_per_demand",
+        "resource_cost_per_served",
+        "surplus"
+      ],
+      "title": "Accounts",
+      "type": "object"
+    },
+    "Allocated": {
+      "additionalProperties": false,
+      "properties": {
+        "output": {
+          "description": "Electricity-equivalent output (MWh).",
+          "title": "Output",
+          "type": "number"
+        },
+        "share": {
+          "description": "Share of total output; null when there is no output.",
+          "title": "Share",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "cost": {
+          "description": "USD.",
+          "title": "Cost",
+          "type": "number"
+        },
+        "emis": {
+          "description": "kg CO2eq.",
+          "title": "Emis",
+          "type": "number"
+        }
+      },
+      "required": [
+        "output",
+        "share",
+        "cost",
+        "emis"
+      ],
+      "title": "Allocated",
+      "type": "object"
+    },
+    "Availability": {
+      "additionalProperties": false,
+      "description": "What the availability profile asked for against what it delivered.",
+      "properties": {
+        "capacity_factor_requested": {
+          "title": "Capacity factor requested",
+          "type": "number"
+        },
+        "profile_peak": {
+          "description": "Maximum of the rescaled availability series.",
+          "title": "Profile peak",
+          "type": "number"
+        },
+        "hours_above_nameplate": {
+          "description": "Hours in which the rescaled series exceeds one.",
+          "title": "Hours above nameplate",
+          "type": "number"
+        },
+        "capacity_factor_effective": {
+          "description": "Mean availability once output is held to capacity.",
+          "title": "Capacity factor effective",
+          "type": "number"
+        }
+      },
+      "required": [
+        "capacity_factor_requested",
+        "profile_peak",
+        "hours_above_nameplate",
+        "capacity_factor_effective"
+      ],
+      "title": "Availability",
+      "type": "object"
+    },
+    "CapDetail": {
+      "additionalProperties": false,
+      "description": "What was observed on a cap row, kept apart from its interpretation.",
+      "properties": {
+        "raw_dual": {
+          "description": "The row dual as returned by the solver.",
+          "title": "Raw dual",
+          "type": "number"
+        },
+        "cap": {
+          "description": "The cap (right-hand side).",
+          "title": "Cap",
+          "type": "number"
+        },
+        "activity": {
+          "description": "The row activity at the solution.",
+          "title": "Activity",
+          "type": "number"
+        },
+        "slack": {
+          "description": "cap - activity.",
+          "title": "Slack",
+          "type": "number"
+        },
+        "binding": {
+          "description": "Whether the row is at its cap (within tolerance).",
+          "title": "Binding",
+          "type": "boolean"
+        },
+        "binding_zero_dual": {
+          "description": "Binding with a zero dual: degenerate, or a genuinely worthless cap. IESO does not tell them apart.",
+          "title": "Binding zero dual",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "raw_dual",
+        "cap",
+        "activity",
+        "slack",
+        "binding",
+        "binding_zero_dual"
+      ],
+      "title": "CapDetail",
+      "type": "object"
+    },
+    "Check": {
+      "additionalProperties": false,
+      "properties": {
+        "residual": {
+          "title": "Residual",
+          "type": "number"
+        },
+        "tolerance": {
+          "title": "Tolerance",
+          "type": "number"
+        },
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "residual",
+        "tolerance",
+        "ok"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "CommodityDemand": {
+      "additionalProperties": false,
+      "description": "Final demand for a Power-to-X commodity (heat, hydrogen, water...).\n\nA demand with ``total`` 0 is inactive: it builds nothing, and its penalty,\nshortfall bounds and profile are not read.",
+      "properties": {
+        "iden": {
+          "description": "Identifier of the commodity, unique among demands.",
+          "examples": [
+            "water"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Shape of hourly demand. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Profile"
+        },
+        "total": {
+          "description": "Annual demand in the commodity's unit (m3, kg, MWh of heat...). 0 makes the demand inactive.",
+          "examples": [
+            50000000.0
+          ],
+          "minimum": 0.0,
+          "title": "Annual total",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "Identifiers of the processes (p2x) that deliver this commodity. A process may supply at most one active demand.",
+          "examples": [
+            [
+              "p2x-ro"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Supply sources",
+          "type": "array"
+        },
+        "var_cost_ns": {
+          "description": "Penalty per unit of unmet demand (USD per unit). Required when the demand is active.",
+          "examples": [
+            1000
+          ],
+          "minimum": 0.0,
+          "title": "Shortfall penalty",
+          "type": "number"
+        },
+        "l_ns": {
+          "anyOf": [
+            {
+              "items": false,
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 0,
+              "type": "array"
+            }
+          ],
+          "description": "[low, high] bounds on unmet demand in each hour. Required, as a pair, when the demand is active; an inactive demand may give [] or omit it.",
+          "examples": [
+            [
+              0,
+              1000000000.0
+            ]
+          ],
+          "title": "Shortfall bounds"
+        }
+      },
+      "required": [
+        "iden",
+        "total"
+      ],
+      "title": "CommodityDemand",
+      "type": "object"
+    },
+    "CommodityDemandResult": {
+      "additionalProperties": false,
+      "properties": {
+        "iden": {
+          "description": "Identifier of the commodity, unique among demands.",
+          "examples": [
+            "water"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Shape of hourly demand. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Profile"
+        },
+        "total": {
+          "description": "Annual demand in the commodity's unit (m3, kg, MWh of heat...). 0 makes the demand inactive.",
+          "examples": [
+            50000000.0
+          ],
+          "minimum": 0.0,
+          "title": "Annual total",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "Identifiers of the processes (p2x) that deliver this commodity. A process may supply at most one active demand.",
+          "examples": [
+            [
+              "p2x-ro"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Supply sources",
+          "type": "array"
+        },
+        "var_cost_ns": {
+          "description": "Penalty per unit of unmet demand (USD per unit). Required when the demand is active.",
+          "examples": [
+            1000
+          ],
+          "minimum": 0.0,
+          "title": "Shortfall penalty",
+          "type": "number"
+        },
+        "l_ns": {
+          "anyOf": [
+            {
+              "items": false,
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 0,
+              "type": "array"
+            }
+          ],
+          "description": "[low, high] bounds on unmet demand in each hour. Required, as a pair, when the demand is active; an inactive demand may give [] or omit it.",
+          "examples": [
+            [
+              0,
+              1000000000.0
+            ]
+          ],
+          "title": "Shortfall bounds"
+        },
+        "output_ns": {
+          "description": "Hourly unmet demand; empty for an inactive demand.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Output ns",
+          "type": "array"
+        },
+        "surplus": {
+          "description": "Hourly delivery beyond served demand; empty for an inactive demand.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Surplus",
+          "type": "array"
+        },
+        "shadow_prices": {
+          "$ref": "#/$defs/CommodityPrices",
+          "title": "Shadow prices"
+        },
+        "kpis": {
+          "$ref": "#/$defs/Kpis"
+        },
+        "accounts": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Accounts"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present for an active demand.",
+          "title": "Accounts"
+        }
+      },
+      "required": [
+        "iden",
+        "total",
+        "output_ns",
+        "surplus",
+        "shadow_prices",
+        "kpis"
+      ],
+      "title": "CommodityDemandResult",
+      "type": "object"
+    },
+    "CommodityPrices": {
+      "additionalProperties": false,
+      "description": "Dual values on a commodity balance (empty series for an inactive demand).",
+      "properties": {
+        "demand_match": {
+          "description": "Hourly dual of the demand-balance row (USD/unit).",
+          "items": {
+            "type": "number"
+          },
+          "title": "Demand match",
+          "type": "array"
+        },
+        "demand_marginal": {
+          "description": "Hourly dual-based marginal value of demand (USD/unit).",
+          "items": {
+            "type": "number"
+          },
+          "title": "Demand marginal",
+          "type": "array"
+        }
+      },
+      "required": [
+        "demand_match",
+        "demand_marginal"
+      ],
+      "title": "CommodityPrices",
+      "type": "object"
+    },
+    "Demand": {
+      "additionalProperties": false,
+      "description": "Final demands: electricity (``e``) and Power-to-X commodities (``x``).",
+      "properties": {
+        "e": {
+          "$ref": "#/$defs/ElectricityDemand",
+          "description": "Demand for electricity.",
+          "title": "E"
+        },
+        "x": {
+          "default": [],
+          "description": "Demands for other commodities.",
+          "items": {
+            "$ref": "#/$defs/CommodityDemand"
+          },
+          "title": "X",
+          "type": "array"
+        }
+      },
+      "required": [
+        "e"
+      ],
+      "title": "Demand",
+      "type": "object"
+    },
+    "DemandResult": {
+      "additionalProperties": false,
+      "properties": {
+        "e": {
+          "$ref": "#/$defs/ElectricityDemandResult",
+          "title": "E"
+        },
+        "x": {
+          "items": {
+            "$ref": "#/$defs/CommodityDemandResult"
+          },
+          "title": "X",
+          "type": "array"
+        }
+      },
+      "required": [
+        "e",
+        "x"
+      ],
+      "title": "DemandResult",
+      "type": "object"
+    },
+    "ElectricityDemand": {
+      "additionalProperties": false,
+      "description": "Final demand for electricity (always active).",
+      "properties": {
+        "iden": {
+          "description": "Identifier, conventionally 'electricity'.",
+          "examples": [
+            "electricity"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Shape of hourly demand. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "examples": [
+            "dmnd.csv"
+          ],
+          "title": "Profile"
+        },
+        "total": {
+          "description": "Annual demand (MWh). The hourly series is the profile scaled so that it sums to this total.",
+          "examples": [
+            5690000.0
+          ],
+          "minimum": 0.0,
+          "title": "Annual total",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "Unused for electricity, which is always met by the generators; kept for symmetry with commodity demands.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supply sources",
+          "type": "array"
+        },
+        "var_cost_ns": {
+          "description": "Penalty per unit of unmet demand (USD/MWh). Zero makes a shortfall free (the hourly bound still applies).",
+          "examples": [
+            20000
+          ],
+          "minimum": 0.0,
+          "title": "Shortfall penalty",
+          "type": "number"
+        },
+        "l_ns": {
+          "description": "[low, high] bounds on unmet demand in EACH hour (MWh), not on the annual total. The effective upper bound is min(high, demand of the hour); low may not exceed the demand of any hour.",
+          "examples": [
+            [
+              0,
+              1000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Shortfall bounds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "iden",
+        "total",
+        "var_cost_ns",
+        "l_ns"
+      ],
+      "title": "ElectricityDemand",
+      "type": "object"
+    },
+    "ElectricityDemandResult": {
+      "additionalProperties": false,
+      "properties": {
+        "iden": {
+          "description": "Identifier, conventionally 'electricity'.",
+          "examples": [
+            "electricity"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Shape of hourly demand. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "examples": [
+            "dmnd.csv"
+          ],
+          "title": "Profile"
+        },
+        "total": {
+          "description": "Annual demand (MWh). The hourly series is the profile scaled so that it sums to this total.",
+          "examples": [
+            5690000.0
+          ],
+          "minimum": 0.0,
+          "title": "Annual total",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "Unused for electricity, which is always met by the generators; kept for symmetry with commodity demands.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Supply sources",
+          "type": "array"
+        },
+        "var_cost_ns": {
+          "description": "Penalty per unit of unmet demand (USD/MWh). Zero makes a shortfall free (the hourly bound still applies).",
+          "examples": [
+            20000
+          ],
+          "minimum": 0.0,
+          "title": "Shortfall penalty",
+          "type": "number"
+        },
+        "l_ns": {
+          "description": "[low, high] bounds on unmet demand in EACH hour (MWh), not on the annual total. The effective upper bound is min(high, demand of the hour); low may not exceed the demand of any hour.",
+          "examples": [
+            [
+              0,
+              1000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Shortfall bounds",
+          "type": "array"
+        },
+        "output_ns": {
+          "description": "Hourly unmet demand (MWh).",
+          "items": {
+            "type": "number"
+          },
+          "title": "Output ns",
+          "type": "array"
+        },
+        "surplus": {
+          "description": "Hourly residual of the electricity balance (MWh): supply beyond served demand and process use. Not curtailment.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Surplus",
+          "type": "array"
+        },
+        "shadow_prices": {
+          "$ref": "#/$defs/ElectricityPrices",
+          "title": "Shadow prices"
+        },
+        "kpis": {
+          "$ref": "#/$defs/Kpis"
+        },
+        "accounts": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Accounts"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Absent when annual demand is zero.",
+          "title": "Accounts"
+        }
+      },
+      "required": [
+        "iden",
+        "total",
+        "var_cost_ns",
+        "l_ns",
+        "output_ns",
+        "surplus",
+        "shadow_prices",
+        "kpis"
+      ],
+      "title": "ElectricityDemandResult",
+      "type": "object"
+    },
+    "ElectricityPrices": {
+      "additionalProperties": false,
+      "description": "Dual values on the electricity balance and caps.",
+      "properties": {
+        "demand_match": {
+          "description": "Hourly dual of the demand-balance row (USD/MWh), with every variable bound held fixed.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Demand match",
+          "type": "array"
+        },
+        "demand_marginal": {
+          "description": "Hourly dual-based marginal value of demand (USD/MWh): a subgradient, exact except at breakpoints.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Demand marginal",
+          "type": "array"
+        },
+        "carbon_cap": {
+          "description": "Marginal value of relaxing the carbon cap (USD per kg); 0 when not binding; -1 when no carbon-constraint was given.",
+          "title": "Carbon cap",
+          "type": "number"
+        },
+        "reliability_cap": {
+          "description": "Marginal value of relaxing the unmet-electricity cap (USD/MWh); 0 when not binding; -1 when no non-served-power-constraint was given.",
+          "title": "Reliability cap",
+          "type": "number"
+        },
+        "carbon_cap_detail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapDetail"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present with carbon-constraint.",
+          "title": "Carbon cap detail"
+        },
+        "reliability_cap_detail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapDetail"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present with non-served-power-constraint.",
+          "title": "Reliability cap detail"
+        }
+      },
+      "required": [
+        "demand_match",
+        "demand_marginal",
+        "carbon_cap",
+        "reliability_cap"
+      ],
+      "title": "ElectricityPrices",
+      "type": "object"
+    },
+    "EnclosingGit": {
+      "additionalProperties": false,
+      "properties": {
+        "toplevel": {
+          "title": "Toplevel",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revision"
+        },
+        "dirty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dirty"
+        }
+      },
+      "required": [
+        "toplevel",
+        "revision",
+        "dirty"
+      ],
+      "title": "EnclosingGit",
+      "type": "object"
+    },
+    "Generator": {
+      "additionalProperties": false,
+      "description": "A power generator; a cogeneration unit can also supply heat to one process.",
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among generators.",
+          "examples": [
+            "wind"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "type": {
+          "description": "'elec', or 'elec + ther' for a unit that can supply heat in cogeneration mode.",
+          "enum": [
+            "elec",
+            "elec + ther"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Availability shape. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero. A profile supplies shape only: it is divided by its maximum and rescaled so that its mean equals capacity_factor.",
+          "examples": [
+            "wind.csv"
+          ],
+          "title": "Profile"
+        },
+        "capacity_factor": {
+          "description": "Fraction in [0, 1]: the target mean of the rescaled profile, or a flat hourly ceiling when there is no profile.",
+          "examples": [
+            0.25
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Capacity factor",
+          "type": "number"
+        },
+        "fix_cost_prod": {
+          "description": "Fixed cost (USD per MW per year). Negative values are accepted (a subsidy).",
+          "examples": [
+            133553
+          ],
+          "title": "Fixed cost",
+          "type": "number"
+        },
+        "var_cost_prod": {
+          "description": "Variable cost excluding energy (USD/MWh).",
+          "examples": [
+            6e-06
+          ],
+          "title": "Variable cost",
+          "type": "number"
+        },
+        "var_emis_prod": {
+          "description": "Emissions (kg CO2eq/MWh). Negative values represent removal.",
+          "examples": [
+            0
+          ],
+          "title": "Emission factor",
+          "type": "number"
+        },
+        "l_prod": {
+          "description": "[low, high] bounds on the installed capacity (MW), not on hourly output.",
+          "examples": [
+            [
+              0,
+              100000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Capacity bounds",
+          "type": "array"
+        },
+        "c_prod": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Installed capacity (MW); -1 lets the optimiser choose it within capacity_bounds.",
+          "examples": [
+            -1
+          ],
+          "title": "Capacity",
+          "type": "number"
+        },
+        "turbine_t_p": {
+          "default": [],
+          "description": "Cogeneration only: turbine inlet [temperature (degC), pressure (bar)].",
+          "examples": [
+            [
+              564,
+              152
+            ]
+          ],
+          "items": {
+            "type": "number"
+          },
+          "title": "Turbine inlet",
+          "type": "array"
+        },
+        "condenser_p": {
+          "default": 0.0,
+          "description": "Cogeneration only: condenser pressure (bar).",
+          "examples": [
+            0.05
+          ],
+          "title": "Condenser pressure",
+          "type": "number"
+        }
+      },
+      "required": [
+        "iden",
+        "type",
+        "capacity_factor",
+        "fix_cost_prod",
+        "var_cost_prod",
+        "var_emis_prod",
+        "l_prod",
+        "c_prod"
+      ],
+      "title": "Generator",
+      "type": "object"
+    },
+    "GeneratorResult": {
+      "additionalProperties": false,
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among generators.",
+          "examples": [
+            "wind"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "type": {
+          "description": "'elec', or 'elec + ther' for a unit that can supply heat in cogeneration mode.",
+          "enum": [
+            "elec",
+            "elec + ther"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Availability shape. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero. A profile supplies shape only: it is divided by its maximum and rescaled so that its mean equals capacity_factor.",
+          "examples": [
+            "wind.csv"
+          ],
+          "title": "Profile"
+        },
+        "capacity_factor": {
+          "description": "Fraction in [0, 1]: the target mean of the rescaled profile, or a flat hourly ceiling when there is no profile.",
+          "examples": [
+            0.25
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Capacity factor",
+          "type": "number"
+        },
+        "fix_cost_prod": {
+          "description": "Fixed cost (USD per MW per year). Negative values are accepted (a subsidy).",
+          "examples": [
+            133553
+          ],
+          "title": "Fixed cost",
+          "type": "number"
+        },
+        "var_cost_prod": {
+          "description": "Variable cost excluding energy (USD/MWh).",
+          "examples": [
+            6e-06
+          ],
+          "title": "Variable cost",
+          "type": "number"
+        },
+        "var_emis_prod": {
+          "description": "Emissions (kg CO2eq/MWh). Negative values represent removal.",
+          "examples": [
+            0
+          ],
+          "title": "Emission factor",
+          "type": "number"
+        },
+        "l_prod": {
+          "description": "[low, high] bounds on the installed capacity (MW), not on hourly output.",
+          "examples": [
+            [
+              0,
+              100000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Capacity bounds",
+          "type": "array"
+        },
+        "c_prod": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Installed capacity (MW); -1 lets the optimiser choose it within capacity_bounds.",
+          "examples": [
+            -1
+          ],
+          "title": "Capacity",
+          "type": "number"
+        },
+        "turbine_t_p": {
+          "default": [],
+          "description": "Cogeneration only: turbine inlet [temperature (degC), pressure (bar)].",
+          "examples": [
+            [
+              564,
+              152
+            ]
+          ],
+          "items": {
+            "type": "number"
+          },
+          "title": "Turbine inlet",
+          "type": "array"
+        },
+        "condenser_p": {
+          "default": 0.0,
+          "description": "Cogeneration only: condenser pressure (bar).",
+          "examples": [
+            0.05
+          ],
+          "title": "Condenser pressure",
+          "type": "number"
+        },
+        "e_prod": {
+          "description": "Hourly electricity output (MWh).",
+          "items": {
+            "type": "number"
+          },
+          "title": "E prod",
+          "type": "array"
+        },
+        "h_prod": {
+          "description": "Hourly heat output (MWh); empty unless the unit supplies heat.",
+          "items": {
+            "type": "number"
+          },
+          "title": "H prod",
+          "type": "array"
+        },
+        "a": {
+          "description": "Electricity forgone per unit of heat extracted; 0 unless the unit supplies heat.",
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "description": "Heat available per unit of electrical capacity; 0 unless the unit supplies heat.",
+          "title": "B",
+          "type": "number"
+        },
+        "availability": {
+          "$ref": "#/$defs/Availability"
+        }
+      },
+      "required": [
+        "iden",
+        "type",
+        "capacity_factor",
+        "fix_cost_prod",
+        "var_cost_prod",
+        "var_emis_prod",
+        "l_prod",
+        "c_prod",
+        "e_prod",
+        "h_prod",
+        "a",
+        "b",
+        "availability"
+      ],
+      "title": "GeneratorResult",
+      "type": "object"
+    },
+    "Installation": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "description": "wheel: an installed distribution; editable: an editable install of a checkout; source: a checkout on the path, not installed.",
+          "enum": [
+            "wheel",
+            "editable",
+            "source",
+            "unknown"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "package_dir": {
+          "description": "The directory of the ieso package that ran.",
+          "title": "Package dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "package_dir"
+      ],
+      "title": "Installation",
+      "type": "object"
+    },
+    "Kpis": {
+      "additionalProperties": false,
+      "description": "Compatibility KPIs; -1 where not applicable.",
+      "properties": {
+        "cost": {
+          "description": "(allocated resource cost + shortage penalty) / annual demand (USD/unit); an allocation, not a production cost. -1 if not applicable.",
+          "title": "Cost",
+          "type": "number"
+        },
+        "emis": {
+          "description": "Allocated emissions / annual demand (kg CO2eq/unit); -1 if not applicable.",
+          "title": "Emis",
+          "type": "number"
+        },
+        "reli": {
+          "description": "1 - unmet / demand: an annual energy ratio; -1 if not applicable.",
+          "title": "Reli",
+          "type": "number"
+        }
+      },
+      "required": [
+        "cost",
+        "emis",
+        "reli"
+      ],
+      "title": "Kpis",
+      "type": "object"
+    },
+    "OptimalResult": {
+      "additionalProperties": false,
+      "description": "An optimal solve: inputs and results (check system.accounting_ok).",
+      "properties": {
+        "demand": {
+          "$ref": "#/$defs/DemandResult",
+          "title": "Demand"
+        },
+        "p2x": {
+          "items": {
+            "$ref": "#/$defs/ProcessResult"
+          },
+          "title": "P2x",
+          "type": "array"
+        },
+        "generator": {
+          "items": {
+            "$ref": "#/$defs/GeneratorResult"
+          },
+          "title": "Generator",
+          "type": "array"
+        },
+        "flex": {
+          "items": {
+            "$ref": "#/$defs/StorageResult"
+          },
+          "title": "Flex",
+          "type": "array"
+        },
+        "solver": {
+          "$ref": "#/$defs/OptimalSolver",
+          "title": "Solver"
+        },
+        "system": {
+          "$ref": "#/$defs/System"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "demand",
+        "p2x",
+        "generator",
+        "flex",
+        "solver",
+        "system",
+        "provenance"
+      ],
+      "title": "OptimalResult",
+      "type": "object"
+    },
+    "OptimalSolver": {
+      "additionalProperties": false,
+      "properties": {
+        "stat_succ": {
+          "const": 1,
+          "title": "Stat succ",
+          "type": "integer"
+        },
+        "stat_status": {
+          "const": "optimal",
+          "title": "Stat status",
+          "type": "string"
+        },
+        "stat_time": {
+          "description": "Elapsed time (s).",
+          "title": "Stat time",
+          "type": "number"
+        },
+        "stat_capa": {
+          "title": "Stat capa",
+          "type": "integer"
+        },
+        "stat_outp": {
+          "title": "Stat outp",
+          "type": "integer"
+        },
+        "stat_cons": {
+          "title": "Stat cons",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "stat_succ",
+        "stat_status",
+        "stat_time",
+        "stat_capa",
+        "stat_outp",
+        "stat_cons"
+      ],
+      "title": "OptimalSolver",
+      "type": "object"
+    },
+    "Process": {
+      "additionalProperties": false,
+      "description": "A Power-to-X process: a production unit and a product store (serialised in ``p2x``).\n\nQuantities are in the product's unit Q (m3 of water, kg of hydrogen, MWh of heat).",
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among processes.",
+          "examples": [
+            "p2x-ro"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "type": {
+          "description": "'elec' (electricity only) or 'elec + ther' (electricity and heat from cogeneration units).",
+          "enum": [
+            "elec",
+            "elec + ther"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "temperature": {
+          "default": 0,
+          "description": "Steam extraction temperature (degC). Required for 'elec + ther'; unused otherwise.",
+          "examples": [
+            80
+          ],
+          "title": "Extraction temperature",
+          "type": "number"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Availability shape, as for generators. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Profile"
+        },
+        "capacity_factor": {
+          "description": "Fraction in [0, 1], as for generators.",
+          "examples": [
+            0.85
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Capacity factor",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "'elec + ther' only: identifiers of the cogeneration generators supplying heat. A generator may supply one process.",
+          "examples": [
+            [
+              "nucl",
+              "ccgt"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Heat sources",
+          "type": "array"
+        },
+        "fix_cost_prod": {
+          "description": "Fixed cost (USD per Q/h per year).",
+          "examples": [
+            4271
+          ],
+          "title": "Production fixed cost",
+          "type": "number"
+        },
+        "var_cost_prod": {
+          "description": "Variable cost excluding energy (USD/Q).",
+          "examples": [
+            0.092
+          ],
+          "title": "Production variable cost",
+          "type": "number"
+        },
+        "pow_use_elec_prod": {
+          "description": "Electricity use (MWh/Q).",
+          "examples": [
+            0.0035
+          ],
+          "minimum": 0.0,
+          "title": "Electricity use",
+          "type": "number"
+        },
+        "pow_use_ther_prod": {
+          "description": "Heat use (MWh/Q); must be 0 for 'elec'.",
+          "examples": [
+            0
+          ],
+          "minimum": 0.0,
+          "title": "Heat use",
+          "type": "number"
+        },
+        "l_prod": {
+          "description": "[low, high] bounds on the installed production capacity (Q/h).",
+          "examples": [
+            [
+              0,
+              1000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Production capacity bounds",
+          "type": "array"
+        },
+        "c_prod": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Production capacity (Q/h); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Production capacity",
+          "type": "number"
+        },
+        "fix_cost_strg": {
+          "description": "Fixed cost of product storage (USD per Q per year).",
+          "examples": [
+            0.24
+          ],
+          "title": "Storage fixed cost",
+          "type": "number"
+        },
+        "l_strg": {
+          "description": "[low, high] bounds on the installed storage capacity (Q).",
+          "examples": [
+            [
+              0,
+              50000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Storage capacity bounds",
+          "type": "array"
+        },
+        "c_strg": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Storage capacity (Q); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Storage capacity",
+          "type": "number"
+        },
+        "soc_ini": {
+          "description": "Store level at the start of the year, as a fraction of capacity; the year closes on the same level.",
+          "examples": [
+            0.5
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Initial state of charge",
+          "type": "number"
+        }
+      },
+      "required": [
+        "iden",
+        "type",
+        "capacity_factor",
+        "fix_cost_prod",
+        "var_cost_prod",
+        "pow_use_elec_prod",
+        "pow_use_ther_prod",
+        "l_prod",
+        "c_prod",
+        "fix_cost_strg",
+        "l_strg",
+        "c_strg",
+        "soc_ini"
+      ],
+      "title": "Process",
+      "type": "object"
+    },
+    "ProcessPrices": {
+      "additionalProperties": false,
+      "properties": {
+        "demand_match": {
+          "description": "Hourly dual of the process heat balance (USD/MWh of heat); empty for an electric process.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Demand match",
+          "type": "array"
+        }
+      },
+      "required": [
+        "demand_match"
+      ],
+      "title": "ProcessPrices",
+      "type": "object"
+    },
+    "ProcessResult": {
+      "additionalProperties": false,
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among processes.",
+          "examples": [
+            "p2x-ro"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "type": {
+          "description": "'elec' (electricity only) or 'elec + ther' (electricity and heat from cogeneration units).",
+          "enum": [
+            "elec",
+            "elec + ther"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "temperature": {
+          "default": 0,
+          "description": "Steam extraction temperature (degC). Required for 'elec + ther'; unused otherwise.",
+          "examples": [
+            80
+          ],
+          "title": "Extraction temperature",
+          "type": "number"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "",
+          "description": "Availability shape, as for generators. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Profile"
+        },
+        "capacity_factor": {
+          "description": "Fraction in [0, 1], as for generators.",
+          "examples": [
+            0.85
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Capacity factor",
+          "type": "number"
+        },
+        "supply_sources": {
+          "default": [],
+          "description": "'elec + ther' only: identifiers of the cogeneration generators supplying heat. A generator may supply one process.",
+          "examples": [
+            [
+              "nucl",
+              "ccgt"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Heat sources",
+          "type": "array"
+        },
+        "fix_cost_prod": {
+          "description": "Fixed cost (USD per Q/h per year).",
+          "examples": [
+            4271
+          ],
+          "title": "Production fixed cost",
+          "type": "number"
+        },
+        "var_cost_prod": {
+          "description": "Variable cost excluding energy (USD/Q).",
+          "examples": [
+            0.092
+          ],
+          "title": "Production variable cost",
+          "type": "number"
+        },
+        "pow_use_elec_prod": {
+          "description": "Electricity use (MWh/Q).",
+          "examples": [
+            0.0035
+          ],
+          "minimum": 0.0,
+          "title": "Electricity use",
+          "type": "number"
+        },
+        "pow_use_ther_prod": {
+          "description": "Heat use (MWh/Q); must be 0 for 'elec'.",
+          "examples": [
+            0
+          ],
+          "minimum": 0.0,
+          "title": "Heat use",
+          "type": "number"
+        },
+        "l_prod": {
+          "description": "[low, high] bounds on the installed production capacity (Q/h).",
+          "examples": [
+            [
+              0,
+              1000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Production capacity bounds",
+          "type": "array"
+        },
+        "c_prod": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Production capacity (Q/h); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Production capacity",
+          "type": "number"
+        },
+        "fix_cost_strg": {
+          "description": "Fixed cost of product storage (USD per Q per year).",
+          "examples": [
+            0.24
+          ],
+          "title": "Storage fixed cost",
+          "type": "number"
+        },
+        "l_strg": {
+          "description": "[low, high] bounds on the installed storage capacity (Q).",
+          "examples": [
+            [
+              0,
+              50000000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Storage capacity bounds",
+          "type": "array"
+        },
+        "c_strg": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Storage capacity (Q); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Storage capacity",
+          "type": "number"
+        },
+        "soc_ini": {
+          "description": "Store level at the start of the year, as a fraction of capacity; the year closes on the same level.",
+          "examples": [
+            0.5
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Initial state of charge",
+          "type": "number"
+        },
+        "x_prod": {
+          "description": "Hourly production (Q/h).",
+          "items": {
+            "type": "number"
+          },
+          "title": "X prod",
+          "type": "array"
+        },
+        "x_strg": {
+          "description": "Hourly store level (Q).",
+          "items": {
+            "type": "number"
+          },
+          "title": "X strg",
+          "type": "array"
+        },
+        "x_supp": {
+          "description": "Hourly delivery (Q/h).",
+          "items": {
+            "type": "number"
+          },
+          "title": "X supp",
+          "type": "array"
+        },
+        "heat_surplus": {
+          "description": "Hourly heat supplied beyond the requirement (MWh); empty for an electric process.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Heat surplus",
+          "type": "array"
+        },
+        "availability": {
+          "$ref": "#/$defs/Availability"
+        },
+        "shadow_prices": {
+          "$ref": "#/$defs/ProcessPrices",
+          "title": "Shadow prices"
+        }
+      },
+      "required": [
+        "iden",
+        "type",
+        "capacity_factor",
+        "fix_cost_prod",
+        "var_cost_prod",
+        "pow_use_elec_prod",
+        "pow_use_ther_prod",
+        "l_prod",
+        "c_prod",
+        "fix_cost_strg",
+        "l_strg",
+        "c_strg",
+        "soc_ini",
+        "x_prod",
+        "x_strg",
+        "x_supp",
+        "heat_surplus",
+        "availability",
+        "shadow_prices"
+      ],
+      "title": "ProcessResult",
+      "type": "object"
+    },
+    "ProfileFile": {
+      "additionalProperties": false,
+      "properties": {
+        "resolved": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sha256"
+        }
+      },
+      "required": [
+        "resolved",
+        "sha256"
+      ],
+      "title": "ProfileFile",
+      "type": "object"
+    },
+    "ProfileResolution": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "input-directory",
+            "explicit",
+            "none"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "base": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Base"
+        }
+      },
+      "required": [
+        "mode",
+        "base"
+      ],
+      "title": "ProfileResolution",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "What produced the result: code, inputs, options, environment.",
+      "properties": {
+        "ieso_version": {
+          "title": "Ieso version",
+          "type": "string"
+        },
+        "result_format_version": {
+          "const": 1,
+          "title": "Result format version",
+          "type": "integer"
+        },
+        "input_format": {
+          "enum": [
+            "canonical",
+            "legacy"
+          ],
+          "title": "Input format",
+          "type": "string"
+        },
+        "input": {
+          "description": "The input path as given, or '<in-memory>'.",
+          "title": "Input",
+          "type": "string"
+        },
+        "input_resolved": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Input resolved"
+        },
+        "input_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "SHA-256 of the input file named as the source, or of the in-memory document as given.",
+          "title": "Input sha256"
+        },
+        "case_sha256": {
+          "description": "SHA-256 of the canonical JSON of the case actually solved (inputs only, defaults explicit, keys sorted).",
+          "title": "Case sha256",
+          "type": "string"
+        },
+        "source_matches_case": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Whether the source file, read the same way, is the case solved; null without a source file.",
+          "title": "Source matches case"
+        },
+        "profiles_sha256": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Profiles sha256",
+          "type": "object"
+        },
+        "profile_files": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ProfileFile"
+          },
+          "title": "Profile files",
+          "type": "object"
+        },
+        "profile_resolution": {
+          "$ref": "#/$defs/ProfileResolution",
+          "title": "Profile resolution"
+        },
+        "options": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Options",
+          "type": "object"
+        },
+        "hours": {
+          "title": "Hours",
+          "type": "integer"
+        },
+        "storage_closes_the_year": {
+          "title": "Storage closes the year",
+          "type": "boolean"
+        },
+        "solver": {
+          "title": "Solver",
+          "type": "string"
+        },
+        "ortools": {
+          "title": "Ortools",
+          "type": "string"
+        },
+        "numpy": {
+          "title": "Numpy",
+          "type": "string"
+        },
+        "python": {
+          "title": "Python",
+          "type": "string"
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string"
+        },
+        "run_utc": {
+          "title": "Run utc",
+          "type": "string"
+        },
+        "git_scope": {
+          "anyOf": [
+            {
+              "enum": [
+                "ieso",
+                "enclosing"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git scope"
+        },
+        "git_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git revision"
+        },
+        "git_dirty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Git dirty"
+        },
+        "enclosing_git": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnclosingGit"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Enclosing git"
+        },
+        "source_sha256": {
+          "title": "Source sha256",
+          "type": "string"
+        },
+        "installation": {
+          "$ref": "#/$defs/Installation"
+        },
+        "source_files_sha256": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Source files sha256",
+          "type": "object"
+        },
+        "thermo_binary": {
+          "title": "Thermo binary",
+          "type": "string"
+        },
+        "thermo_binary_origin": {
+          "description": "packaged: the executable installed with IESO; override: RunConfig.thermo_bin.",
+          "enum": [
+            "packaged",
+            "override"
+          ],
+          "title": "Thermo binary origin",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ieso_version",
+        "result_format_version",
+        "input_format",
+        "input",
+        "input_resolved",
+        "input_sha256",
+        "case_sha256",
+        "source_matches_case",
+        "profiles_sha256",
+        "profile_files",
+        "profile_resolution",
+        "options",
+        "hours",
+        "storage_closes_the_year",
+        "solver",
+        "ortools",
+        "numpy",
+        "python",
+        "platform",
+        "run_utc",
+        "git_scope",
+        "git_revision",
+        "git_dirty",
+        "enclosing_git",
+        "source_sha256",
+        "installation",
+        "source_files_sha256",
+        "thermo_binary",
+        "thermo_binary_origin"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Storage": {
+      "additionalProperties": false,
+      "description": "An electricity store (battery, pumped hydro), optionally fed by natural inflow (serialised in ``flex``).",
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among stores.",
+          "examples": [
+            "bstr"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "fix_cost_strg": {
+          "description": "Fixed cost (USD per MWh of capacity per year).",
+          "examples": [
+            27248
+          ],
+          "title": "Fixed cost",
+          "type": "number"
+        },
+        "hours_of_storage": {
+          "description": "Hours at full discharge: charge and discharge power are limited to capacity / duration_hours (h, > 0).",
+          "examples": [
+            4
+          ],
+          "exclusiveMinimum": 0.0,
+          "title": "Duration hours",
+          "type": "number"
+        },
+        "round_trip_efficiency": {
+          "description": "Round-trip efficiency, in (0, 1].",
+          "examples": [
+            0.85
+          ],
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Round trip efficiency",
+          "type": "number"
+        },
+        "l_strg": {
+          "description": "[low, high] bounds on the installed energy capacity (MWh).",
+          "examples": [
+            [
+              0,
+              400000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Capacity bounds",
+          "type": "array"
+        },
+        "c_strg": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Energy capacity (MWh); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Capacity",
+          "type": "number"
+        },
+        "soc_ini": {
+          "description": "Level at the start of the year, as a fraction of capacity; the year closes on the same level.",
+          "examples": [
+            0.5
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Initial state of charge",
+          "type": "number"
+        },
+        "soc_min": {
+          "default": 0.0,
+          "description": "Lowest level, as a fraction of capacity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min state of charge",
+          "type": "number"
+        },
+        "soc_max": {
+          "default": 1.0,
+          "description": "Highest level, as a fraction of capacity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Max state of charge",
+          "type": "number"
+        },
+        "inflow_total": {
+          "default": 0.0,
+          "description": "Natural inflow per year (MWh); 0 means none.",
+          "minimum": 0.0,
+          "title": "Annual inflow",
+          "type": "number"
+        },
+        "inflow_profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "Shape of the inflow, scaled to annual_inflow. Absent or '' means flat. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Inflow profile"
+        },
+        "charge_allowed": {
+          "default": true,
+          "description": "false forbids charging from the grid (a dam fed only by its catchment).",
+          "title": "Charge allowed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "iden",
+        "fix_cost_strg",
+        "hours_of_storage",
+        "round_trip_efficiency",
+        "l_strg",
+        "c_strg",
+        "soc_ini"
+      ],
+      "title": "Storage",
+      "type": "object"
+    },
+    "StorageResult": {
+      "additionalProperties": false,
+      "properties": {
+        "iden": {
+          "description": "Identifier, unique among stores.",
+          "examples": [
+            "bstr"
+          ],
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "fix_cost_strg": {
+          "description": "Fixed cost (USD per MWh of capacity per year).",
+          "examples": [
+            27248
+          ],
+          "title": "Fixed cost",
+          "type": "number"
+        },
+        "hours_of_storage": {
+          "description": "Hours at full discharge: charge and discharge power are limited to capacity / duration_hours (h, > 0).",
+          "examples": [
+            4
+          ],
+          "exclusiveMinimum": 0.0,
+          "title": "Duration hours",
+          "type": "number"
+        },
+        "round_trip_efficiency": {
+          "description": "Round-trip efficiency, in (0, 1].",
+          "examples": [
+            0.85
+          ],
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Round trip efficiency",
+          "type": "number"
+        },
+        "l_strg": {
+          "description": "[low, high] bounds on the installed energy capacity (MWh).",
+          "examples": [
+            [
+              0,
+              400000.0
+            ]
+          ],
+          "items": false,
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Capacity bounds",
+          "type": "array"
+        },
+        "c_strg": {
+          "anyOf": [
+            {
+              "const": -1
+            },
+            {
+              "minimum": 0
+            }
+          ],
+          "description": "Energy capacity (MWh); -1 lets the optimiser choose it.",
+          "examples": [
+            -1
+          ],
+          "title": "Capacity",
+          "type": "number"
+        },
+        "soc_ini": {
+          "description": "Level at the start of the year, as a fraction of capacity; the year closes on the same level.",
+          "examples": [
+            0.5
+          ],
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Initial state of charge",
+          "type": "number"
+        },
+        "soc_min": {
+          "default": 0.0,
+          "description": "Lowest level, as a fraction of capacity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Min state of charge",
+          "type": "number"
+        },
+        "soc_max": {
+          "default": 1.0,
+          "description": "Highest level, as a fraction of capacity.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Max state of charge",
+          "type": "number"
+        },
+        "inflow_total": {
+          "default": 0.0,
+          "description": "Natural inflow per year (MWh); 0 means none.",
+          "minimum": 0.0,
+          "title": "Annual inflow",
+          "type": "number"
+        },
+        "inflow_profile": {
+          "anyOf": [
+            {
+              "description": "a CSV file path (one value per line, no header), or '' for a flat profile",
+              "type": "string"
+            },
+            {
+              "description": "one value per hour",
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "Shape of the inflow, scaled to annual_inflow. Absent or '' means flat. Hourly shape: '' for a flat profile, a CSV file path (resolved against the input file's directory, or an explicit profile base; never the working directory), or a list with one value per hour (8760). Values must be finite, non-negative and not all zero.",
+          "title": "Inflow profile"
+        },
+        "charge_allowed": {
+          "default": true,
+          "description": "false forbids charging from the grid (a dam fed only by its catchment).",
+          "title": "Charge allowed",
+          "type": "boolean"
+        },
+        "e_strg": {
+          "description": "Hourly energy stored (MWh).",
+          "items": {
+            "type": "number"
+          },
+          "title": "E strg",
+          "type": "array"
+        },
+        "e_char": {
+          "description": "Hourly charge (MW).",
+          "items": {
+            "type": "number"
+          },
+          "title": "E char",
+          "type": "array"
+        },
+        "e_disc": {
+          "description": "Hourly discharge (MW).",
+          "items": {
+            "type": "number"
+          },
+          "title": "E disc",
+          "type": "array"
+        },
+        "e_spil": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Hourly spilled inflow (MWh); present with inflow.",
+          "title": "E spil"
+        }
+      },
+      "required": [
+        "iden",
+        "fix_cost_strg",
+        "hours_of_storage",
+        "round_trip_efficiency",
+        "l_strg",
+        "c_strg",
+        "soc_ini",
+        "e_strg",
+        "e_char",
+        "e_disc"
+      ],
+      "title": "StorageResult",
+      "type": "object"
+    },
+    "System": {
+      "additionalProperties": false,
+      "description": "System totals, allocation and machine-readable accounting checks.",
+      "properties": {
+        "cost": {
+          "description": "Total system cost (USD), excluding shortage penalties.",
+          "title": "Cost",
+          "type": "number"
+        },
+        "output": {
+          "description": "Total electricity-equivalent output (MWh).",
+          "title": "Output",
+          "type": "number"
+        },
+        "emis": {
+          "description": "Total emissions (kg CO2eq).",
+          "title": "Emis",
+          "type": "number"
+        },
+        "allocation_defined": {
+          "title": "Allocation defined",
+          "type": "boolean"
+        },
+        "allocated_share_total": {
+          "title": "Allocated share total",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "allocated": {
+          "$ref": "#/$defs/Allocated"
+        },
+        "unallocated": {
+          "$ref": "#/$defs/Unallocated"
+        },
+        "surplus": {
+          "$ref": "#/$defs/SystemSurplus",
+          "title": "Surplus"
+        },
+        "checks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Check"
+          },
+          "description": "Name -> {residual, tolerance, ok}; only applicable checks.",
+          "title": "Checks",
+          "type": "object"
+        },
+        "accounting_ok": {
+          "description": "false: an accounting check failed (exit status 3).",
+          "title": "Accounting ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cost",
+        "output",
+        "emis",
+        "allocation_defined",
+        "allocated_share_total",
+        "allocated",
+        "unallocated",
+        "surplus",
+        "checks",
+        "accounting_ok"
+      ],
+      "title": "System",
+      "type": "object"
+    },
+    "SystemSurplus": {
+      "additionalProperties": false,
+      "properties": {
+        "electricity": {
+          "description": "Annual electricity surplus (MWh).",
+          "title": "Electricity",
+          "type": "number"
+        },
+        "heat": {
+          "description": "Annual heat surplus (MWh of heat).",
+          "title": "Heat",
+          "type": "number"
+        },
+        "spill": {
+          "description": "Annual reservoir spill (MWh).",
+          "title": "Spill",
+          "type": "number"
+        },
+        "products": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Annual product surplus per active demand.",
+          "title": "Products",
+          "type": "object"
+        },
+        "unassigned_product_supply": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Annual delivery of processes that no active demand names.",
+          "title": "Unassigned product supply",
+          "type": "object"
+        }
+      },
+      "required": [
+        "electricity",
+        "heat",
+        "spill",
+        "products",
+        "unassigned_product_supply"
+      ],
+      "title": "SystemSurplus",
+      "type": "object"
+    },
+    "Unallocated": {
+      "additionalProperties": false,
+      "properties": {
+        "output": {
+          "description": "Electricity-equivalent output (MWh).",
+          "title": "Output",
+          "type": "number"
+        },
+        "share": {
+          "description": "Share of total output; null when there is no output.",
+          "title": "Share",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "cost": {
+          "description": "USD.",
+          "title": "Cost",
+          "type": "number"
+        },
+        "emis": {
+          "description": "kg CO2eq.",
+          "title": "Emis",
+          "type": "number"
+        },
+        "electricity_surplus": {
+          "title": "Electricity surplus",
+          "type": "number"
+        },
+        "unused_heat": {
+          "title": "Unused heat",
+          "type": "number"
+        },
+        "unassigned_process_use": {
+          "title": "Unassigned process use",
+          "type": "number"
+        }
+      },
+      "required": [
+        "output",
+        "share",
+        "cost",
+        "emis",
+        "electricity_surplus",
+        "unused_heat",
+        "unassigned_process_use"
+      ],
+      "title": "Unallocated",
+      "type": "object"
+    },
+    "UnsuccessfulResult": {
+      "additionalProperties": false,
+      "description": "A solve that did not reach an optimal solution: inputs and status only.",
+      "properties": {
+        "demand": {
+          "$ref": "#/$defs/Demand"
+        },
+        "p2x": {
+          "items": {
+            "$ref": "#/$defs/Process"
+          },
+          "title": "P2x",
+          "type": "array"
+        },
+        "generator": {
+          "items": {
+            "$ref": "#/$defs/Generator"
+          },
+          "title": "Generator",
+          "type": "array"
+        },
+        "flex": {
+          "items": {
+            "$ref": "#/$defs/Storage"
+          },
+          "title": "Flex",
+          "type": "array"
+        },
+        "solver": {
+          "$ref": "#/$defs/UnsuccessfulSolver",
+          "title": "Solver"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "demand",
+        "p2x",
+        "generator",
+        "flex",
+        "solver",
+        "provenance"
+      ],
+      "title": "UnsuccessfulResult",
+      "type": "object"
+    },
+    "UnsuccessfulSolver": {
+      "additionalProperties": false,
+      "properties": {
+        "stat_succ": {
+          "const": 0,
+          "title": "Stat succ",
+          "type": "integer"
+        },
+        "stat_status": {
+          "description": "Why: infeasible, unbounded, abnormal (numerical trouble), feasible but not proven optimal, or not solved.",
+          "title": "Stat status",
+          "type": "string"
+        },
+        "stat_time": {
+          "title": "Stat time",
+          "type": "number"
+        },
+        "stat_capa": {
+          "title": "Stat capa",
+          "type": "integer"
+        },
+        "stat_outp": {
+          "title": "Stat outp",
+          "type": "integer"
+        },
+        "stat_cons": {
+          "title": "Stat cons",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "stat_succ",
+        "stat_status",
+        "stat_time",
+        "stat_capa",
+        "stat_outp",
+        "stat_cons"
+      ],
+      "title": "UnsuccessfulSolver",
+      "type": "object"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/OptimalResult"
+    },
+    {
+      "$ref": "#/$defs/UnsuccessfulResult"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "version": "1",
+  "pip_version": "26.2.1",
+  "install": [
+    {
+      "download_info": {
+        "url": "file:///private/tmp/ieso-local-index/simple/ieso/ieso-2026.9.0rc1-py3-none-macosx_11_0_arm64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "0767785e49617d417741827b6ff418937261645e1eaff8e78b80c3916342d1c7"
+          },
+          "hash": "sha256=0767785e49617d417741827b6ff418937261645e1eaff8e78b80c3916342d1c7"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": true,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "ieso",
+        "version": "2026.9.0rc1",
+        "summary": "IESO: a linear optimiser-based integrated energy system modelling environment",
+        "description": "# IESO\n\nIESO (*Integrated Energy Systems Optimiser*) is a linear optimiser-based energy system modelling environment designed to support initial investigations such as options evaluation and trend analysis. It sizes and dispatches generators, storage and Power-to-X processes (electrolysis, desalination, cogeneration heat) over a year of hourly steps, with OR-Tools' GLOP solver.\n\n- [Modelling Approach](https://github.com/greoux-research/ieso/blob/main/docs/ieso-modelling-approach.md)\n- [Setup Guide](https://github.com/greoux-research/ieso/blob/main/docs/ieso-setup-guide.md)\n- [IO File Structure](https://github.com/greoux-research/ieso/blob/main/docs/ieso-io-file-structure.md)\n- [Inputs, Validation and the Python API](https://github.com/greoux-research/ieso/blob/main/docs/ieso-api.md)\n- [Supported Platforms](https://github.com/greoux-research/ieso/blob/main/docs/support-matrix.md)\n- [Changelog](https://github.com/greoux-research/ieso/blob/main/CHANGELOG.md)\n- [Baseline Verification](https://github.com/greoux-research/ieso/blob/main/docs/baseline-verification.md)\n\n## Installation\n\nIESO needs Python 3.11 or later, on Linux x86_64 (glibc 2.28+), macOS (Apple Silicon 11+, Intel 10.15+) or Windows x86_64. Wheels include the compiled thermodynamics executable; no compiler is needed.\n\nIESO is **not yet published on PyPI**. When it is, it will install into a fresh virtual environment with:\n\n```bash\npython3 -m venv ieso-env\nsource ieso-env/bin/activate          # Windows: ieso-env\\Scripts\\activate\npython -m pip install ieso\n```\n\nUntil then, install a wheel built by the repository's CI, or from a checkout; see the [Setup Guide](https://github.com/greoux-research/ieso/blob/main/docs/ieso-setup-guide.md).\n\n## Use\n\nA synthetic demonstration case (a solar, gas and battery system; MIT-licensed, like the code) is in the repository's [`examples/`](https://github.com/greoux-research/ieso/tree/main/examples) folder, with a thermally coupled Power-to-X case beside it; `python tools/build_examples.py` regenerates both in a checkout. From a directory holding a copy of `examples/`:\n\n<!-- tested -->\n```bash\nieso validate examples/electricity-storage/case.json      # check without solving\nieso examples/electricity-storage/case.json carbon-constraint=150\n# -> examples/electricity-storage/case.ieso.carbon-constraint_150.0.json\n```\n\n<!-- tested -->\n```python\nimport ieso\n\nresult = ieso.solve('examples/power-to-x-thermal/case.json')\nif result.optimal and result.accounting_ok:\n    print(result.document['system']['cost'])               # USD per year\n```\n\n`ieso --help` lists the commands; `ieso schema input` prints the JSON Schema of an input.\n\n## Licence and data\n\nThe code, the thermodynamics sources and the synthetic examples are under the MIT licence. The illustrative datasets in [`datasets/`](https://github.com/greoux-research/ieso/tree/main/datasets) are not part of the installed package: their hourly profiles are derived from Renewables.ninja and licensed CC BY-NC 4.0.\n\nReport problems at https://github.com/greoux-research/ieso/issues.\n\n## Repository\n\n- **src/ieso** — the package: the API, the input and result models, their JSON Schemas, the command line, and the model; **thermo** — the C++ thermodynamics sources, built into the package by CMake; **ieso.py** — a launcher kept for the historical `python ieso.py ...` in a checkout.\n- **examples** — the synthetic cases; **datasets** — four illustrative island cases (`tools/build_datasets.py`); **results** — the current verified results for them, with provenance.\n- **tests** — the development suite; **tests_installed** — the tests CI runs against each built wheel, outside the checkout; **tools** — builders, the result comparator, distribution and native-executable checks, the scenario runner (writing to the ignored **runs** folder) and `product_costs.py` (IESO's product cost KPI is an allocation, not a production cost).\n\nEvery result carries a `provenance` block recording the code, the digests of the input and of each profile it references, the options applied, and the solver and environment that produced it, and a `system.checks` block recording whether its balances and accounts reconcile. Results are reproducible only against a recorded environment: a different solver build may settle on a different vertex of the same optimal face, so hourly dispatch and surplus can differ between equally optimal results.\n\n## How to cite IESO\n\nGréoux Research (2024). IESO: a linear optimiser-based integrated energy system modelling environment. https://github.com/greoux-research/ieso\n",
+        "description_content_type": "text/markdown",
+        "keywords": [
+          "energy system",
+          "optimisation",
+          "linear programming",
+          "power-to-x",
+          "cogeneration"
+        ],
+        "author": "Gréoux Research",
+        "license_expression": "MIT",
+        "license_file": [
+          "LICENSE"
+        ],
+        "classifier": [
+          "Development Status :: 4 - Beta",
+          "Intended Audience :: Science/Research",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: C++",
+          "Operating System :: MacOS",
+          "Operating System :: POSIX :: Linux",
+          "Operating System :: Microsoft :: Windows",
+          "Topic :: Scientific/Engineering",
+          "Typing :: Typed"
+        ],
+        "requires_dist": [
+          "numpy<3,>=2.0",
+          "ortools<10,>=9.15",
+          "pydantic<3,>=2.11",
+          "pytest>=8; extra == \"dev\"",
+          "jsonschema>=4.18; extra == \"dev\"",
+          "mypy>=1.10; extra == \"dev\"",
+          "build>=1.2; extra == \"dev\""
+        ],
+        "requires_python": ">=3.11",
+        "project_url": [
+          "Homepage, https://github.com/greoux-research/ieso",
+          "Documentation, https://github.com/greoux-research/ieso/tree/main/docs",
+          "Source, https://github.com/greoux-research/ieso",
+          "Issues, https://github.com/greoux-research/ieso/issues",
+          "Changelog, https://github.com/greoux-research/ieso/blob/main/CHANGELOG.md"
+        ],
+        "provides_extra": [
+          "dev"
+        ]
+      }
+    }
+  ],
+  "environment": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.12.14",
+    "os_name": "posix",
+    "platform_machine": "arm64",
+    "platform_release": "25.5.0",
+    "platform_system": "Darwin",
+    "platform_version": "Darwin Kernel Version 25.5.0: Tue Jun  9 22:26:22 PDT 2026; root:xnu-12377.121.10~1/RELEASE_ARM64_T8132",
+    "python_full_version": "3.12.14",
+    "platform_python_implementation": "CPython",
+    "python_version": "3.12",
+    "sys_platform": "darwin"
+  }
+}

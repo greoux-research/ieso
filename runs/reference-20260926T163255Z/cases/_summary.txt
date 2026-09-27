@@ -1,0 +1,9 @@
+eg-base    rc=0 optimal accounts=ok      25s opts=[]
+eg-cn      rc=0 optimal accounts=ok      33s opts=[carbon-constraint=50 non-served-power-constraint=0.05]
+h2-base    rc=0 optimal accounts=ok      55s opts=[]
+h2-cn      rc=0 optimal accounts=ok      39s opts=[carbon-constraint=50 non-served-power-constraint=0.05]
+ro-base    rc=0 optimal accounts=ok      38s opts=[]
+ro-cn      rc=0 optimal accounts=ok      43s opts=[carbon-constraint=50 non-served-power-constraint=0.05]
+med-base   rc=0 optimal accounts=ok     123s opts=[]
+med-cn     rc=0 optimal accounts=ok     133s opts=[carbon-constraint=50 non-served-power-constraint=0.05]
+DONE

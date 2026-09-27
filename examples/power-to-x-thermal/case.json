@@ -1,0 +1,106 @@
+{
+    "format_version": 1,
+    "demand": {
+        "e": {
+            "iden": "electricity",
+            "profile": "demand.csv",
+            "total": 500000.0,
+            "var_cost_ns": 10000,
+            "l_ns": [
+                0,
+                1000000.0
+            ]
+        },
+        "x": [
+            {
+                "iden": "water",
+                "total": 10000000.0,
+                "supply_sources": [
+                    "med"
+                ],
+                "var_cost_ns": 50,
+                "l_ns": [
+                    0,
+                    1000000.0
+                ]
+            }
+        ]
+    },
+    "generator": [
+        {
+            "iden": "nuclear",
+            "type": "elec + ther",
+            "profile": "",
+            "capacity_factor": 0.9,
+            "fix_cost_prod": 400000,
+            "var_cost_prod": 12,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1,
+            "turbine_t_p": [
+                290,
+                70
+            ],
+            "condenser_p": 0.05
+        },
+        {
+            "iden": "ccgt",
+            "type": "elec",
+            "profile": "",
+            "capacity_factor": 0.9,
+            "fix_cost_prod": 100000,
+            "var_cost_prod": 60,
+            "var_emis_prod": 370,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1
+        },
+        {
+            "iden": "solar",
+            "type": "elec",
+            "profile": "solar.csv",
+            "capacity_factor": 0.22,
+            "fix_cost_prod": 60000,
+            "var_cost_prod": 0,
+            "var_emis_prod": 0,
+            "l_prod": [
+                0,
+                10000.0
+            ],
+            "c_prod": -1
+        }
+    ],
+    "flex": [],
+    "p2x": [
+        {
+            "iden": "med",
+            "type": "elec + ther",
+            "temperature": 80,
+            "supply_sources": [
+                "nuclear"
+            ],
+            "capacity_factor": 0.9,
+            "fix_cost_prod": 5000,
+            "var_cost_prod": 0.1,
+            "pow_use_elec_prod": 0.0015,
+            "pow_use_ther_prod": 0.05,
+            "l_prod": [
+                0,
+                100000.0
+            ],
+            "c_prod": -1,
+            "fix_cost_strg": 0.5,
+            "l_strg": [
+                0,
+                10000000.0
+            ],
+            "c_strg": -1,
+            "soc_ini": 0.5
+        }
+    ]
+}
